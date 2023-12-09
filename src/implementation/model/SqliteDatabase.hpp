@@ -2,7 +2,6 @@
 
 #include "model/Database.hpp"
 #include "model/Migration.hpp"
-#include "utils/Format.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -11,30 +10,38 @@
 #include <optional>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include <SQLiteCpp/SQLiteCpp.h>
 
 #include <fmt/format.h>
 
-using MigracaoModel = DataClass<"migracao", PrimaryKeys<"id">,
-  Field<"id", FieldType::Int, false>,
-  Field<"version", FieldType::Int>>;
+/* UTC TIME
+  [&](std::chrono::seconds arg) {
+    std::time_t time = arg.count();
+    char timeString[std::size("yyyy-mm-dd hh:mm:ss.000")];
+    std::strftime(std::data(timeString), std::size(timeString),
+                  "%F %T.000", std::gmtime(&time));
+
+    query.bind(i + 1, timeString);
+*/
+
+using MigracaoModel =
+    DataClass<"migracao", PrimaryKeys<"id">, Field<"id", FieldType::Int, false>,
+              Field<"version", FieldType::Int>>;
 
 template <typename... Tables> struct SqliteDatabase : public Database {
   SqliteDatabase(std::string dbName)
       : mDb(dbName, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
 
     // Initialize MigracaoModel locally
-    query_string(this->template create_ddl(MigracaoModel{}), [](auto...) {
-      return false;
-    });
+    query_string(this->template create_ddl(MigracaoModel{}),
+                 [](auto...) { return false; });
 
     for_each<Tables...>([&]<typename Table>() {
-      query_string(this->template create_ddl(Table{}), [](auto...) {
-        return false;
-      }); // TODO:: passarp por parametro, em vez de passar como objeto
+      query_string(this->template create_ddl(Table{}),
+                   [](auto...) { return false; });
     });
   }
 
@@ -70,7 +77,7 @@ template <typename... Tables> struct SqliteDatabase : public Database {
           } else if (col.isText()) {
             values.emplace_back(col.getString());
           } else if (col.isBlob()) {
-            throw std::runtime_error("unable to accept blob values");
+            throw std::runtime_error("Type not implemented");
           } else {
             values.emplace_back(nullptr);
           }
@@ -152,7 +159,8 @@ template <typename... Tables> struct SqliteDatabase : public Database {
 
         update(migracaoModel);
       } catch (std::exception &e) {
-        std::cout << "unable to proceed with migration [version: " << migracaoModel["version"].get_int().value()
+        std::cout << "unable to proceed with migration [version: "
+                  << migracaoModel["version"].get_int().value()
                   << "]: " << e.what() << std::endl;
 
         break;
@@ -168,21 +176,12 @@ private:
     for (int i = 0; i < values.size(); i++) {
       auto const &value = values[i];
 
-      value.get_value(overloaded{
-          [&](nullptr_t arg) { query.bind(i + 1, nullptr); },
-          [&](bool arg) { query.bind(i + 1, arg); },
-          [&](int64_t arg) { query.bind(i + 1, arg); },
-          [&](double arg) { query.bind(i + 1, arg); },
-          [&](std::string arg) { query.bind(i + 1, arg); },
-          [&](std::chrono::year_month_day arg) {
-            std::ostringstream o;
-
-            o << fmt::format("{:02}", static_cast<unsigned>(arg.day())) << "/"
-              << fmt::format("{:02}", static_cast<unsigned>(arg.month())) << "/"
-              << fmt::format("{:04}", static_cast<int>(arg.year()));
-
-            query.bind(i + 1, o.str());
-          }});
+      value.get_value(
+          overloaded{[&](nullptr_t arg) { query.bind(i + 1, nullptr); },
+                     [&](bool arg) { query.bind(i + 1, arg); },
+                     [&](int64_t arg) { query.bind(i + 1, arg); },
+                     [&](double arg) { query.bind(i + 1, arg); },
+                     [&](std::string arg) { query.bind(i + 1, arg); }});
     }
   }
 
@@ -219,15 +218,13 @@ private:
 
         ddl << " INTEGER PRIMARY KEY AUTOINCREMENT";
       } else if (Field::get_type() == FieldType::Bool) {
-        ddl << " INTEGER";
+        ddl << " BOOLEAN";
       } else if (Field::get_type() == FieldType::Int) {
         ddl << " INTEGER";
       } else if (Field::get_type() == FieldType::Decimal) {
         ddl << " DECIMAL";
       } else if (Field::get_type() == FieldType::Text) {
         ddl << " TEXT";
-      } else if (Field::get_type() == FieldType::Date) {
-        ddl << " TIMESTAMP";
       }
 
       if (Field::is_nullable()) {

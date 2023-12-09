@@ -15,7 +15,13 @@
 
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 
-enum class FieldType { Serial, Bool, Int, Decimal, Text, Date };
+enum class FieldType {
+  Serial,  // primary key auto incremented
+  Bool,    // bool
+  Int,     // integer
+  Decimal, // double
+  Text     // string
+};
 
 template <StringLiteral Name, FieldType Type, bool Nullable = true>
 struct Field {
@@ -44,9 +50,6 @@ using DecimalField = Field<Name, FieldType::Decimal, Nullable>;
 
 template <StringLiteral Name, bool Nullable = true>
 using TextField = Field<Name, FieldType::Text, Nullable>;
-
-template <StringLiteral Name, bool Nullable = true>
-using DateField = Field<Name, FieldType::Date, Nullable>;
 
 template <StringLiteral... Fields> struct PrimaryKeys;
 
@@ -89,20 +92,11 @@ private:
 template <StringLiteral... Fields> struct ForeignKeys {};
 
 struct Data {
-  using MyData = std::variant<nullptr_t, bool, int64_t, double, std::string,
-                              std::chrono::year_month_day>;
+  using MyData = std::variant<nullptr_t, bool, int64_t, double, std::string>;
 
   Data() = default;
 
   template <typename T> Data(T &&data) : mData{std::forward<T>(data)} {}
-
-  /*
-  template <typename T> Data &operator=(T &&data) {
-    mData = std::forward<T>(data);
-
-    return *this;
-  }
-  */
 
   template <typename F> constexpr void get_value(F &&callback) const {
     std::visit(std::forward<F>(callback), mData);
@@ -139,21 +133,14 @@ struct Data {
     return {};
   }
 
-  std::optional<std::chrono::year_month_day> get_date() const {
-    if (auto *value = std::get_if<std::chrono::year_month_day>(&mData);
-        value != nullptr) {
-      return {*value};
-    }
-
-    return {};
-  }
-
 private:
   MyData mData;
 };
 
 template <StringLiteral Name, typename PrimaryKeys, typename... Fields>
 struct DataClass {
+  using Keys = PrimaryKeys;
+
   constexpr DataClass() {
     std::array<std::string_view, sizeof...(Fields)> fields;
     int i = 0;
@@ -196,7 +183,8 @@ struct DataClass {
     int index = index_of<0, Fields...>(name);
 
     if (index < 0) {
-      throw std::runtime_error(fmt::format("Field '{}' not available in '{}'", name, get_name()));
+      throw std::runtime_error(
+          fmt::format("Field '{}' not available in '{}'", name, get_name()));
     }
 
     return mFields[index];
@@ -206,7 +194,8 @@ struct DataClass {
     int index = index_of<0, Fields...>(name);
 
     if (index < 0) {
-      throw std::runtime_error(fmt::format("Field '{}' not available in '{}'", name, get_name()));
+      throw std::runtime_error(
+          fmt::format("Field '{}' not available in '{}'", name, get_name()));
     }
 
     return mFields[index];
@@ -232,17 +221,7 @@ struct DataClass {
               [&](nullptr_t arg) { o << "null"; },
               [&](bool arg) { o << (arg ? "true" : "false"); },
               [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
-              [&](std::string arg) { o << std::quoted(arg); },
-              [&](std::chrono::year_month_day arg) {
-                std::ostringstream o;
-
-                o << fmt::format("{:02}", static_cast<unsigned>(arg.day()))
-                  << "/"
-                  << fmt::format("{:02}", static_cast<unsigned>(arg.month()))
-                  << "/" << fmt::format("{:04}", static_cast<int>(arg.year()));
-
-                o << std::quoted(o.str());
-              }});
+              [&](std::string arg) { o << std::quoted(arg); }});
     });
 
     o << "}";

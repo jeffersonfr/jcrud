@@ -9,7 +9,7 @@
 #include "jinject/jinject.h"
 
 #define _M(ARG, ...)                                                           \
-  db.query_string(fmt::format(ARG, ##__VA_ARGS__), [](...) { return false; })
+  db.query_string(fmt:::format(ARG, ##__VA_ARGS__), [](...) { return false; })
 
 using namespace jinject;
 
@@ -37,7 +37,7 @@ private:
       return db;
     };
 
-    UNIQUE(LogRepository) { return new LogRepository{}; };
+    UNIQUE(LogRepository) { return new LogRepository{jinject::get{}}; };
   }
 
   static void load_sistema() {
@@ -51,16 +51,16 @@ private:
       db->add_migration(
             Migration{1,
                       [](Database &db) {
-                        CategoriaProdutoModel categoriProdutoModel;
+                        CategoriaProdutoModel categoriaProdutoModel;
 
-                        categoriProdutoModel["description"] = "higiene";
-                        db.insert(categoriProdutoModel);
+                        categoriaProdutoModel["description"] = "higiene";
+                        db.insert(categoriaProdutoModel);
 
-                        categoriProdutoModel["description"] = "limpeza";
-                        db.insert(categoriProdutoModel);
+                        categoriaProdutoModel["description"] = "limpeza";
+                        db.insert(categoriaProdutoModel);
 
-                        categoriProdutoModel["description"] = "medicamentos";
-                        db.insert(categoriProdutoModel);
+                        categoriaProdutoModel["description"] = "medicamentos";
+                        db.insert(categoriaProdutoModel);
 
                         ProdutoModel produtoModel;
 

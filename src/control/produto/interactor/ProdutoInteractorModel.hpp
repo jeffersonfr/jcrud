@@ -10,3 +10,5 @@ struct ProdutoInteractorModel {
   CategoriaProdutoModel categoria;
   ProdutoModel produto;
 };
+
+// using ProdutoInteractorModel = InteractorModel<CategoriaProdutoModel, ProdutoModel>;

@@ -64,6 +64,11 @@ struct Input {
     return number;
   }
 
+  // TODO::
+  std::chrono::seconds get_unixepoch(std::string key) {
+    return std::chrono::seconds{};
+  }
+
 private:
   std::map<std::string, std::string> &mValues;
 };

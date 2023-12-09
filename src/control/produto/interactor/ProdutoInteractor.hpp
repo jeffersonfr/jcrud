@@ -3,7 +3,6 @@
 #include "control/produto/interactor/ProdutoInteractorModel.hpp"
 #include "model/categoria_produto/CategoriaProdutoRepository.hpp"
 #include "model/produto/ProdutoRepository.hpp"
-#include "utils/Format.hpp"
 
 #include <optional>
 #include <ranges>

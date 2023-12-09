@@ -1,7 +1,6 @@
 #pragma once
 
 #include "model/Database.hpp"
-#include "utils/Format.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -42,7 +41,7 @@ template <typename T> struct Repository {
   }
 
   template <StringLiteral... Fields>
-  std::vector<Model> load_by(auto ...values) const {
+  std::vector<Model> load_by(auto... values) const {
     std::vector<Model> items;
     std::ostringstream o;
 
@@ -66,6 +65,25 @@ template <typename T> struct Repository {
     });
 
     return items;
+  }
+
+  /*
+    Find a unique registry using the primary key's ids. Is there is more than
+    one registry, the method returns the first result of the list;
+  */
+  std::optional<Model> find(auto... values) {
+    auto result = find_expanded(typename Model::Keys{}, values...);
+
+    if (!result.empty()) {
+      return {result[0]};
+    }
+
+    return {};
+  }
+
+  template <StringLiteral ...Keys>
+  auto find_expanded(PrimaryKeys<Keys...> primaryKeys, auto... values) {
+    return load_by<Keys...>(values...);
   }
 
   void save(Model const &item) const { mDb->insert(item); }
@@ -102,7 +120,7 @@ private:
   std::shared_ptr<Database> mDb = jinject::get{};
 
   template <std::size_t Index, StringLiteral Field, StringLiteral... Fields>
-  void for_each(std::ostream &out, Data value, auto ...values) const {
+  void for_each(std::ostream &out, Data value, auto... values) const {
     if (Index != 0) {
       out << " AND ";
     }
@@ -121,17 +139,6 @@ private:
         },
         [&](std::string arg) {
           out << "(" << Field.to_string() << " LIKE '%" << arg << "%')";
-        },
-        [&](std::chrono::year_month_day arg) {
-          /* TODO:: see this type
-          std::ostringstream o;
-
-          o << fmt::format("{:02}", static_cast<unsigned>(arg.day())) << "/"
-            << fmt::format("{:02}", static_cast<unsigned>(arg.month())) << "/"
-            << fmt::format("{:04}", static_cast<int>(arg.year()));
-
-          query.bind(i + 1, o.str());
-          */
         }});
 
     if constexpr (sizeof...(Fields) > 0) {

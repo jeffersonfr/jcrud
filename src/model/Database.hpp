@@ -53,18 +53,7 @@ struct Database {
           [&](nullptr_t arg) { o << "null"; },
           [&](bool arg) { o << (arg ? "true" : "false"); },
           [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
-          [&](std::string arg) { o << std::quoted(arg); },
-          [&](std::chrono::year_month_day arg) {
-            /*
-            std::ostringstream o;
-
-            o << fmt::format("{:02}", static_cast<unsigned>(arg.day())) << "/"
-              << fmt::format("{:02}", static_cast<unsigned>(arg.month())) << "/"
-              << fmt::format("{:04}", static_cast<int>(arg.year()));
-
-            query.bind(i + 1, o.str());
-            */
-          }});
+          [&](std::string arg) { o << std::quoted(arg); }});
     });
 
     o << ");";
@@ -95,18 +84,7 @@ struct Database {
           [&](nullptr_t arg) { o << "null"; },
           [&](bool arg) { o << (arg ? "true" : "false"); },
           [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
-          [&](std::string arg) { o << std::quoted(arg); },
-          [&](std::chrono::year_month_day arg) {
-            /*
-            std::ostringstream o;
-
-            o << fmt::format("{:02}", static_cast<unsigned>(arg.day())) << "/"
-              << fmt::format("{:02}", static_cast<unsigned>(arg.month())) << "/"
-              << fmt::format("{:04}", static_cast<int>(arg.year()));
-
-            query.bind(i + 1, o.str());
-            */
-          }});
+          [&](std::string arg) { o << std::quoted(arg); }});
     });
 
     get_where_from_primary_keys<Model>(o, model);
@@ -159,25 +137,13 @@ private:
                 << ")";
           },
           [&](int64_t arg) {
-            out << "(" << Field::get_name() << " = " << (arg ? "1" : "0")
-                << ")";
+            out << "(" << Field::get_name() << " = " << arg << ")";
           },
           [&](double arg) {
             out << "(" << Field::get_name() << " = " << arg << ")";
           },
           [&](std::string arg) {
             out << "(" << Field::get_name() << " LIKE '%" << arg << "%')";
-          },
-          [&](std::chrono::year_month_day arg) {
-            /*
-            std::ostringstream o;
-
-            o << fmt::format("{:02}", static_cast<unsigned>(arg.day())) << "/"
-              << fmt::format("{:02}", static_cast<unsigned>(arg.month())) << "/"
-              << fmt::format("{:04}", static_cast<int>(arg.year()));
-
-            query.bind(i + 1, o.str());
-            */
           }});
     });
   }

@@ -1,20 +1,15 @@
 #pragma once
 
-#include "model/DataClass.hpp"
-#include "model/Database.hpp"
-#include "ui/widgets/Core.hpp"
+#include "ui/Core.hpp"
 
 #include <algorithm>
-#include <charconv>
 #include <functional>
 #include <iostream>
-#include <string>
 #include <sstream>
+#include <string>
 #include <unordered_map>
 
 #include <fmt/format.h>
-
-#include "jmixin/jstring.h"
 
 namespace jui {
 
@@ -40,20 +35,12 @@ private:
 
     value.get_value(overloaded{
         [&](nullptr_t arg) { o << "null"; },
-        [&](bool arg) { o << ((arg) ? "true" : "false"); },
+        [&](bool arg) { o << (arg ? "true" : "false"); },
         [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
-        [&](std::string arg) { o << arg; },
-        [&](std::chrono::year_month_day arg) {
-          std::ostringstream o;
-
-          o << fmt::format("{:02}", static_cast<unsigned>(arg.day())) << "/"
-            << fmt::format("{:02}", static_cast<unsigned>(arg.month())) << "/"
-            << fmt::format("{:04}", static_cast<int>(arg.year()));
-        }});
+        [&](std::string arg) { o << std::quoted(arg); }});
 
     return o.str();
   }
-
 };
 
 template <std::ranges::range T> struct Table {

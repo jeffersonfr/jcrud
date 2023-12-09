@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui/widgets/Core.hpp"
+#include "ui/Core.hpp"
 
 #include <algorithm>
 #include <charconv>
@@ -61,7 +61,6 @@ template <typename... Items> struct Form {
     } catch (std::runtime_error &e) {
       fmt::print("[error]: {}\n", e.what());
 
-      throw;
       mOnFailed();
     }
 

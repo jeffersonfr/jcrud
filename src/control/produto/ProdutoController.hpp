@@ -1,11 +1,10 @@
 #pragma once
 
 #include "control/produto/interactor/ProdutoInteractor.hpp"
-#include "model/categoria_produto/ICategoriaProdutoRepository.hpp"
+#include "model/categoria_produto/CategoriaProdutoRepository.hpp"
 #include "model/produto/ProdutoRepository.hpp"
 #include "ui/widgets/Form.hpp"
 #include "ui/widgets/Table.hpp"
-#include "utils/Format.hpp"
 
 #include <cstdlib>
 #include <fstream>
@@ -47,8 +46,7 @@ struct ProdutoController {
           item["category"] = input.get_int("categoria");
           item["name"] = input.get_text("nome");
           item["description"] = input.get_text("descricao");
-          item["validate"] = Format::to_year_month_day(
-              input.get_text("validade")); // get date ??
+          item["validate"] = input.get_text("validade");
           item["price"] = input.get_decimal("preco");
 
           mProdutoInteractor->save_produto(item);
