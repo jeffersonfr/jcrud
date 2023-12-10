@@ -40,14 +40,14 @@ struct ProdutoController {
         .on_success([&](Input input) {
           DataClass<"categoria_produto", PrimaryKeys<"id">,
                     Field<"id", FieldType::Int, false>,
-                    Field<"description", FieldType::Text>>{};
+                    Field<"descricao", FieldType::Text>>{};
           ProdutoModel item;
 
-          item["category"] = input.get_int("categoria");
-          item["name"] = input.get_text("nome");
-          item["description"] = input.get_text("descricao");
-          item["validate"] = input.get_text("validade");
-          item["price"] = input.get_decimal("preco");
+          item["categoria"] = input.get_int("categoria");
+          item["nome"] = input.get_text("nome");
+          item["descricao"] = input.get_text("descricao");
+          item["validade"] = input.get_text("validade");
+          item["preco_id"] = input.get_decimal("preco");
 
           mProdutoInteractor->save_produto(item);
         })
@@ -62,7 +62,7 @@ struct ProdutoController {
           return std::vector<Col>{Col{"id", 15}, Col{"nome", 32}};
         })
         .data([&](auto const &item) {
-          return Row{item["id"], item["description"]};
+          return Row{item["id"], item["descricao"]};
         })
         .show();
 
@@ -79,9 +79,9 @@ struct ProdutoController {
           auto categoriaProduto = item.template get<CategoriaProdutoModel>();
           auto produto = item.template get<ProdutoModel>();
 
-          return Row{categoriaProduto["description"], produto["name"],
-                     produto["description"], produto["validate"],
-                     produto["price"]};
+          return Row{categoriaProduto["descricao"], produto["nome"],
+                     produto["descricao"], produto["validade"],
+                     produto["preco_id"]};
         })
         .show();
   }

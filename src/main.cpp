@@ -1,7 +1,11 @@
 #include "Sistema.hpp"
 
 int main() {
-  Sistema sistema;
+  try {
+    Sistema sistema;
 
-  sistema.execute();
+    sistema.execute();
+  } catch (std::runtime_error &e) {
+    fmt::print("{}\n", e.what());
+  }
 }

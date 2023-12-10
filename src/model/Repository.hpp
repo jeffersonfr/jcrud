@@ -18,6 +18,8 @@ template <typename T> struct Repository {
 
   using Model = T;
 
+  Repository(std::shared_ptr<Database> db) : mDb{db} {}
+
   std::vector<Model> load_all() const {
     std::vector<Model> items;
 
@@ -117,7 +119,7 @@ template <typename T> struct Repository {
   }
 
 private:
-  std::shared_ptr<Database> mDb = jinject::get{};
+  std::shared_ptr<Database> mDb;
 
   template <std::size_t Index, StringLiteral Field, StringLiteral... Fields>
   void for_each(std::ostream &out, Data value, auto... values) const {

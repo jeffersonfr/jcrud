@@ -50,10 +50,51 @@ struct Database {
       auto const &value = model[Field::get_name()];
 
       value.get_value(overloaded{
-          [&](nullptr_t arg) { o << "null"; },
-          [&](bool arg) { o << (arg ? "true" : "false"); },
-          [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
-          [&](std::string arg) { o << std::quoted(arg); }});
+          [&](nullptr_t arg) {
+            if (!Field::is_nullable() and
+                Field::get_type() != FieldType::Serial) {
+              throw std::runtime_error(
+                  fmt::format("unable to insert '{}', field '{}' is not null",
+                              Model::get_name(), Field::get_name()));
+            }
+            o << "null";
+          },
+          [&](bool arg) {
+            if (Field::get_type() != FieldType::Bool and
+                Field::get_type() != FieldType::Int) {
+              throw std::runtime_error(
+                  fmt::format("unable to insert '{}', field '{}' is not "
+                              "convertible to boolean",
+                              Model::get_name(), Field::get_name()));
+            }
+            o << (arg ? "true" : "false");
+          },
+          [&](int64_t arg) {
+            if (Field::get_type() != FieldType::Int) {
+              throw std::runtime_error(
+                  fmt::format("unable to insert '{}', field '{}' is not "
+                              "convertible to integer",
+                              Model::get_name(), Field::get_name()));
+            }
+            o << arg;
+          },
+          [&](double arg) {
+            if (Field::get_type() != FieldType::Decimal) {
+              throw std::runtime_error(
+                  fmt::format("unable to insert '{}', field '{}' is not "
+                              "convertible to double",
+                              Model::get_name(), Field::get_name()));
+            }
+            o << arg;
+          },
+          [&](std::string arg) {
+            if (Field::get_type() != FieldType::Text) {
+              throw std::runtime_error(fmt::format(
+                  "unable to insert '{}', field '{}' is not a text value",
+                  Model::get_name(), Field::get_name()));
+            }
+            o << std::quoted(arg);
+          }});
     });
 
     o << ");";
@@ -81,70 +122,110 @@ struct Database {
       auto const &value = model[Field::get_name()];
 
       value.get_value(overloaded{
-          [&](nullptr_t arg) { o << "null"; },
-          [&](bool arg) { o << (arg ? "true" : "false"); },
-          [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
-          [&](std::string arg) { o << std::quoted(arg); }});
-    });
-
-    get_where_from_primary_keys<Model>(o, model);
-
-    o << ";";
-
-    query_string(o.str(), [](auto...) { return false; });
-
-    return true;
-  }
-
-  template <typename Model> bool remove(Model const &model) {
-    std::ostringstream o;
-    bool first = true;
-
-    o << "DELETE FROM " << Model::get_name();
-
-    get_where_from_primary_keys<Model>(o, model);
-
-    o << ";";
-
-    query_string(o.str(), [](auto...) { return false; });
-
-    return true;
-  }
-
-  virtual Database &add_migration(Migration migration) = 0;
-
-private:
-  template <typename Model>
-  void get_where_from_primary_keys(std::ostream &out, Model const &model) {
-    std::ostringstream o;
-    bool first = true;
-
-    out << " WHERE ";
-
-    model.get_keys([&]<typename Field>() {
-      if (!first) {
-        out << " AND ";
-      }
-
-      auto const &value = model[Field::get_name()];
-
-      value.get_value(overloaded{
           [&](nullptr_t arg) {
-            out << "(" << Field::get_name() << " IS NULL)";
+            if (!Field::is_nullable() and
+                Field::get_type() != FieldType::Serial) {
+              throw std::runtime_error(
+                  fmt::format("unable to insert '{}', field '{}' is not null",
+                              Model::get_name(), Field::get_name()));
+            }
+            o << "null";
           },
           [&](bool arg) {
-            out << "(" << Field::get_name() << " = " << (arg ? "1" : "0")
-                << ")";
+            if (Field::get_type() != FieldType::Bool and
+                Field::get_type() != FieldType::Int) {
+              throw std::runtime_error(
+                  fmt::format("unable to insert '{}', field '{}' is not "
+                              "convertible to boolean",
+                              Model::get_name(), Field::get_name()));
+            }
+            o << (arg ? "true" : "false");
           },
           [&](int64_t arg) {
-            out << "(" << Field::get_name() << " = " << arg << ")";
+            if (Field::get_type() != FieldType::Int) {
+              throw std::runtime_error(
+                  fmt::format("unable to insert '{}', field '{}' is not "
+                              "convertible to integer",
+                              Model::get_name(), Field::get_name()));
+            }
+            o << arg;
           },
           [&](double arg) {
-            out << "(" << Field::get_name() << " = " << arg << ")";
+            if (Field::get_type() != FieldType::Decimal) {
+              throw std::runtime_error(
+                  fmt::format("unable to insert '{}', field '{}' is not "
+                              "convertible to double",
+                              Model::get_name(), Field::get_name()));
+            }
+            o << arg;
           },
           [&](std::string arg) {
-            out << "(" << Field::get_name() << " LIKE '%" << arg << "%')";
+            if (Field::get_type() != FieldType::Text) {
+              throw std::runtime_error(fmt::format(
+                  "unable to insert '{}', field '{}' is not a text value",
+                  Model::get_name(), Field::get_name()));
+            }
+            o << std::quoted(arg);
           }});
     });
-  }
-};
+
+  get_where_from_primary_keys<Model>(o, model);
+
+  o << ";";
+
+  query_string(o.str(), [](auto...) { return false; });
+
+  return true;
+}
+
+template <typename Model>
+bool remove(Model const &model) {
+  std::ostringstream o;
+  bool first = true;
+
+  o << "DELETE FROM " << Model::get_name();
+
+  get_where_from_primary_keys<Model>(o, model);
+
+  o << ";";
+
+  query_string(o.str(), [](auto...) { return false; });
+
+  return true;
+}
+
+virtual Database &add_migration(Migration migration) = 0;
+
+private:
+template <typename Model>
+void get_where_from_primary_keys(std::ostream &out, Model const &model) {
+  std::ostringstream o;
+  bool first = true;
+
+  out << " WHERE ";
+
+  model.get_keys([&]<typename Field>() {
+    if (!first) {
+      out << " AND ";
+    }
+
+    auto const &value = model[Field::get_name()];
+
+    value.get_value(overloaded{
+        [&](nullptr_t arg) { out << "(" << Field::get_name() << " IS NULL)"; },
+        [&](bool arg) {
+          out << "(" << Field::get_name() << " = " << (arg ? "1" : "0") << ")";
+        },
+        [&](int64_t arg) {
+          out << "(" << Field::get_name() << " = " << arg << ")";
+        },
+        [&](double arg) {
+          out << "(" << Field::get_name() << " = " << arg << ")";
+        },
+        [&](std::string arg) {
+          out << "(" << Field::get_name() << " LIKE '%" << arg << "%')";
+        }});
+  });
+}
+}
+;

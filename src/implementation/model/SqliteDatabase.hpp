@@ -159,11 +159,7 @@ template <typename... Tables> struct SqliteDatabase : public Database {
 
         update(migracaoModel);
       } catch (std::exception &e) {
-        std::cout << "unable to proceed with migration [version: "
-                  << migracaoModel["version"].get_int().value()
-                  << "]: " << e.what() << std::endl;
-
-        break;
+        throw std::runtime_error(fmt::format("Unable to proceed with migration [version: {}]: {}", migracaoModel["version"].get_int().value(), e.what()));
       }
     }
   }

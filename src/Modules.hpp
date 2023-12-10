@@ -4,12 +4,10 @@
 #include "implementation/model/SqliteDatabase.hpp"
 #include "model/categoria_produto/CategoriaProdutoRepository.hpp"
 #include "model/log/LogRepository.hpp"
+#include "model/preco/PrecoRepository.hpp"
 #include "model/produto/ProdutoRepository.hpp"
 
 #include "jinject/jinject.h"
-
-#define _M(ARG, ...)                                                           \
-  db.query_string(fmt:::format(ARG, ##__VA_ARGS__), [](...) { return false; })
 
 using namespace jinject;
 
@@ -42,7 +40,7 @@ private:
 
   static void load_sistema() {
     using MyDatabase =
-        SqliteDatabase<CategoriaProdutoModel, ProdutoModel>;
+        SqliteDatabase<CategoriaProdutoModel, PrecoModel, ProdutoModel>;
 
     // Database/sistema_crud
     SINGLE(std::shared_ptr<Database>) {
@@ -52,24 +50,25 @@ private:
             Migration{1,
                       [](Database &db) {
                         CategoriaProdutoModel categoriaProdutoModel;
-
-                        categoriaProdutoModel["description"] = "higiene";
+                        categoriaProdutoModel["descricao"] = "higiene";
                         db.insert(categoriaProdutoModel);
-
-                        categoriaProdutoModel["description"] = "limpeza";
+                        categoriaProdutoModel["descricao"] = "limpeza";
                         db.insert(categoriaProdutoModel);
-
-                        categoriaProdutoModel["description"] = "medicamentos";
+                        categoriaProdutoModel["descricao"] = "medicamentos";
                         db.insert(categoriaProdutoModel);
 
                         ProdutoModel produtoModel;
-
-                        produtoModel["category"] = 1;
-                        produtoModel["name"] = "papel higienico";
-                        produtoModel["description"] = "utensilio";
-                        produtoModel["validate"] = "09092017";
-                        produtoModel["price"] = 15.42;
+                        produtoModel["categoria_id"] = 1;
+                        produtoModel["nome"] = "papel higienico";
+                        produtoModel["descricao"] = "utensilio";
+                        produtoModel["validade"] = "09092017";
+                        produtoModel["preco_id"] = 1;
                         db.insert(produtoModel);
+
+                        PrecoModel precoModel;
+                        precoModel["produto_id"] = 1;
+                        precoModel["valor"] = 12.05;
+                        db.insert(precoModel);
                       }})
           .build();
 
@@ -77,16 +76,23 @@ private:
     };
 
     UNIQUE(CategoriaProdutoRepository) {
-      return new CategoriaProdutoRepository{};
+      return new CategoriaProdutoRepository{
+          inject<std::shared_ptr<Database>>()};
     };
 
-    UNIQUE(ProdutoRepository) { return new ProdutoRepository{}; };
+    UNIQUE(ProdutoRepository) {
+      return new ProdutoRepository{inject<std::shared_ptr<Database>>()};
+    };
+
+    UNIQUE(PrecoRepository) {
+      return new PrecoRepository{inject<std::shared_ptr<Database>>()};
+    };
   }
 
   static void load_interactors() {
     // ProdutoInteractor
     UNIQUE(ProdutoInteractor) {
-      return new ProdutoInteractor{get{}, get{}};
+      return new ProdutoInteractor{get{}, get{}, get{}};
     };
   }
 };

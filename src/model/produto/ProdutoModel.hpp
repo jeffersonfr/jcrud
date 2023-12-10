@@ -4,8 +4,8 @@
 
 using ProdutoModel = DataClass<"produto", PrimaryKeys<"id">,
   Field<"id", FieldType::Serial, false>,
-  Field<"category", FieldType::Int>,
-  Field<"name", FieldType::Text>,
-  Field<"description", FieldType::Text>,
-  Field<"validate", FieldType::Text>,
-  Field<"price", FieldType::Decimal>>;
+  Field<"categoria_id", FieldType::Int>,
+  Field<"nome", FieldType::Text>,
+  Field<"descricao", FieldType::Text>,
+  Field<"validade", FieldType::Text>,
+  Field<"preco_id", FieldType::Int>>;
