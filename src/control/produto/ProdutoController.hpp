@@ -76,9 +76,12 @@ struct ProdutoController {
                                   {"preco", 15}};
         })
         .data([&](auto const &item) {
-          return Row{item.categoria["description"], item.produto["name"],
-                     item.produto["description"], item.produto["validate"],
-                     item.produto["price"]};
+          auto categoriaProduto = item.template get<CategoriaProdutoModel>();
+          auto produto = item.template get<ProdutoModel>();
+
+          return Row{categoriaProduto["description"], produto["name"],
+                     produto["description"], produto["validate"],
+                     produto["price"]};
         })
         .show();
   }

@@ -26,17 +26,17 @@ struct ProdutoInteractor {
     auto items =
         mProdutoRepository->load_all() |
         std::views::transform([&](auto const &item) {
-          auto categoriaProdutoList =
-              mCategoriaProdutoRepository->load_by<"id">(item["category"].get_int().value());
-          CategoriaProdutoModel categoriaProdutoModel;
-          
-          categoriaProdutoModel["description"] = "<invalid>";
+          auto categoriaProduto =
+              mCategoriaProdutoRepository->find(item["category"].get_int().value()).or_else([]() {
+                CategoriaProdutoModel model;
+                
+                model["id"] = -1;
+                model["description"] = "<invalid>";
 
-          if (!categoriaProdutoList.empty()) {
-            categoriaProdutoModel["description"] = categoriaProdutoList[0]["description"];
-          }
+                return std::optional{model};
+              }).value();
 
-          return ProdutoInteractorModel{categoriaProdutoModel, item};
+          return ProdutoInteractorModel{categoriaProduto, item};
         });
 
     return {items.begin(), items.end()};

@@ -19,7 +19,7 @@ struct Col {
 };
 
 struct Row {
-  Row(auto... Items) {
+  Row(auto &&...Items) {
     using namespace std;
 
     (mItems.push_back(to_string(Items)), ...);
@@ -37,7 +37,7 @@ private:
         [&](nullptr_t arg) { o << "null"; },
         [&](bool arg) { o << (arg ? "true" : "false"); },
         [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
-        [&](std::string arg) { o << std::quoted(arg); }});
+        [&](std::string arg) { o << arg; }});
 
     return o.str();
   }

@@ -37,7 +37,7 @@ private:
       return db;
     };
 
-    UNIQUE(LogRepository) { return new LogRepository{jinject::get{}}; };
+    UNIQUE(LogRepository) { return new LogRepository{get{}}; };
   }
 
   static void load_sistema() {
@@ -86,7 +86,7 @@ private:
   static void load_interactors() {
     // ProdutoInteractor
     UNIQUE(ProdutoInteractor) {
-      return new ProdutoInteractor{jinject::get{}, jinject::get{}};
+      return new ProdutoInteractor{get{}, get{}};
     };
   }
 };

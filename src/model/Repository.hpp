@@ -81,7 +81,7 @@ template <typename T> struct Repository {
     return {};
   }
 
-  template <StringLiteral ...Keys>
+  template <StringLiteral... Keys>
   auto find_expanded(PrimaryKeys<Keys...> primaryKeys, auto... values) {
     return load_by<Keys...>(values...);
   }
