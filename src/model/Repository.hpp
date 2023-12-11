@@ -49,7 +49,7 @@ template <typename T> struct Repository {
 
     o << "SELECT * from " << Model::get_name() << " WHERE ";
 
-    for_each<0, Fields...>(o, values...);
+    for_each_where<0, Fields...>(o, values...);
 
     mDb->query_string(o.str(), [&](std::vector<std::string> const &columns,
                                    std::vector<Data> const &values) {
@@ -69,6 +69,72 @@ template <typename T> struct Repository {
     return items;
   }
 
+  template <StringLiteral... Fields>
+  std::vector<Model> first_by(auto... values) const {
+    std::vector<Model> items;
+    std::ostringstream o;
+
+    o << "SELECT * from " << Model::get_name() << " ORDER BY ";
+
+    for_each_order<0, Fields...>(o);
+
+    o << " ASC LIMIT 1";
+
+    mDb->query_string(o.str(), [&](std::vector<std::string> const &columns,
+                                   std::vector<Data> const &values) {
+      Model item;
+
+      for (int i = 0; i < columns.size(); i++) {
+        std::string const &column = columns[i];
+
+        item[column] = values[i];
+      }
+
+      items.emplace_back(item);
+
+      return true;
+    });
+
+    if (items.empty()) {
+      return {};
+    }
+
+    return {items[0]};
+  }
+
+  template <StringLiteral... Fields>
+  std::vector<Model> last_by(auto... values) const {
+    std::vector<Model> items;
+    std::ostringstream o;
+
+    o << "SELECT * from " << Model::get_name() << " ORDER BY ";
+
+    for_each_order<0, Fields...>(o);
+
+    o << " DESC LIMIT 1";
+
+    mDb->query_string(o.str(), [&](std::vector<std::string> const &columns,
+                                   std::vector<Data> const &values) {
+      Model item;
+
+      for (int i = 0; i < columns.size(); i++) {
+        std::string const &column = columns[i];
+
+        item[column] = values[i];
+      }
+
+      items.emplace_back(item);
+
+      return true;
+    });
+
+    if (items.empty()) {
+      return {};
+    }
+
+    return {items[0]};
+  }
+
   /*
     Find a unique registry using the primary key's ids. Is there is more than
     one registry, the method returns the first result of the list;
@@ -81,11 +147,6 @@ template <typename T> struct Repository {
     }
 
     return {};
-  }
-
-  template <StringLiteral... Keys>
-  auto find_expanded(PrimaryKeys<Keys...> primaryKeys, auto... values) {
-    return load_by<Keys...>(values...);
   }
 
   void save(Model const &item) const { mDb->insert(item); }
@@ -121,8 +182,13 @@ template <typename T> struct Repository {
 private:
   std::shared_ptr<Database> mDb;
 
+  template <StringLiteral... Keys>
+  auto find_expanded(PrimaryKeys<Keys...> primaryKeys, auto... values) {
+    return load_by<Keys...>(values...);
+  }
+
   template <std::size_t Index, StringLiteral Field, StringLiteral... Fields>
-  void for_each(std::ostream &out, Data value, auto... values) const {
+  void for_each_where(std::ostream &out, Data value, auto... values) const {
     if (Index != 0) {
       out << " AND ";
     }
@@ -144,7 +210,20 @@ private:
         }});
 
     if constexpr (sizeof...(Fields) > 0) {
-      for_each<Index + 1, Fields...>(values...);
+      for_each_where<Index + 1, Fields...>(values...);
+    }
+  }
+
+  template <std::size_t Index, StringLiteral Field, StringLiteral... Fields>
+  void for_each_order(std::ostream &out) const {
+    if (Index != 0) {
+      out << ", ";
+    }
+
+    out << Field.to_string();
+
+    if constexpr (sizeof...(Fields) > 0) {
+      for_each_order<Index + 1, Fields...>();
     }
   }
 };
