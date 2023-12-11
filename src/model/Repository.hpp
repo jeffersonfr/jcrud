@@ -43,6 +43,25 @@ template <typename T> struct Repository {
   }
 
   template <StringLiteral... Fields>
+  int64_t count_by(auto... values) const {
+    std::ostringstream o;
+    int64_t result = 0L;
+
+    o << "SELECT COUNT (*) from " << Model::get_name() << " WHERE ";
+
+    for_each_where<0, Fields...>(o, values...);
+
+    mDb->query_string(o.str(), [&](std::vector<std::string> const &columns,
+                                   std::vector<Data> const &values) {
+                                    result = values[0].get_int().value();
+
+      return false;
+    });
+
+    return result;
+  }
+
+  template <StringLiteral... Fields>
   std::vector<Model> load_by(auto... values) const {
     std::vector<Model> items;
     std::ostringstream o;
@@ -70,7 +89,7 @@ template <typename T> struct Repository {
   }
 
   template <StringLiteral... Fields>
-  std::vector<Model> first_by(auto... values) const {
+  std::vector<Model> first_by() const {
     std::vector<Model> items;
     std::ostringstream o;
 
@@ -92,7 +111,7 @@ template <typename T> struct Repository {
 
       items.emplace_back(item);
 
-      return true;
+      return false;
     });
 
     if (items.empty()) {
@@ -103,7 +122,7 @@ template <typename T> struct Repository {
   }
 
   template <StringLiteral... Fields>
-  std::vector<Model> last_by(auto... values) const {
+  std::vector<Model> last_by() const {
     std::vector<Model> items;
     std::ostringstream o;
 
@@ -125,7 +144,7 @@ template <typename T> struct Repository {
 
       items.emplace_back(item);
 
-      return true;
+      return false;
     });
 
     if (items.empty()) {
