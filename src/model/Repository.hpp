@@ -23,27 +23,27 @@ template <typename T> struct Repository {
   std::vector<Model> load_all() const {
     std::vector<Model> items;
 
-    mDb->query_string(fmt::format("SELECT * from {}", Model::get_name()),
-                      [&](std::vector<std::string> const &columns,
-                          std::vector<Data> const &values) {
-                        Model item;
+    mDb->query_string(
+        fmt::format("SELECT * from {} ORDER BY ROWID", Model::get_name()),
+        [&](std::vector<std::string> const &columns,
+            std::vector<Data> const &values) {
+          Model item;
 
-                        for (int i = 0; i < columns.size(); i++) {
-                          std::string const &column = columns[i];
+          for (int i = 0; i < columns.size(); i++) {
+            std::string const &column = columns[i];
 
-                          item[column] = values[i];
-                        }
+            item[column] = values[i];
+          }
 
-                        items.emplace_back(item);
+          items.emplace_back(item);
 
-                        return true;
-                      });
+          return true;
+        });
 
     return items;
   }
 
-  template <StringLiteral... Fields>
-  int64_t count_by(auto... values) const {
+  template <StringLiteral... Fields> int64_t count_by(auto... values) const {
     std::ostringstream o;
     int64_t result = 0L;
 
@@ -53,7 +53,7 @@ template <typename T> struct Repository {
 
     mDb->query_string(o.str(), [&](std::vector<std::string> const &columns,
                                    std::vector<Data> const &values) {
-                                    result = values[0].get_int().value();
+      result = values[0].get_int().value();
 
       return false;
     });
@@ -69,6 +69,8 @@ template <typename T> struct Repository {
     o << "SELECT * from " << Model::get_name() << " WHERE ";
 
     for_each_where<0, Fields...>(o, values...);
+
+    o << " ORDER BY ROWID";
 
     mDb->query_string(o.str(), [&](std::vector<std::string> const &columns,
                                    std::vector<Data> const &values) {
@@ -89,11 +91,19 @@ template <typename T> struct Repository {
   }
 
   template <StringLiteral... Fields>
-  std::vector<Model> first_by() const {
+  std::optional<Model> first_by(auto... values) const {
     std::vector<Model> items;
     std::ostringstream o;
 
-    o << "SELECT * from " << Model::get_name() << " ORDER BY ";
+    if constexpr (sizeof...(values) == 0) {
+      o << "SELECT * from " << Model::get_name() << " ORDER BY ";
+    } else {
+      o << "SELECT * from " << Model::get_name() << " WHERE ";
+
+      for_each_where<0, Fields...>(o, values...);
+
+      o << " ORDER BY ROWID, ";
+    }
 
     for_each_order<0, Fields...>(o);
 
@@ -122,11 +132,19 @@ template <typename T> struct Repository {
   }
 
   template <StringLiteral... Fields>
-  std::vector<Model> last_by() const {
+  std::optional<Model> last_by(auto... values) const {
     std::vector<Model> items;
     std::ostringstream o;
 
-    o << "SELECT * from " << Model::get_name() << " ORDER BY ";
+    if constexpr (sizeof...(values) == 0) {
+      o << "SELECT * from " << Model::get_name() << " ORDER BY ";
+    } else {
+      o << "SELECT * from " << Model::get_name() << " WHERE ";
+
+      for_each_where<0, Fields...>(o, values...);
+
+      o << " ORDER BY ROWID, ";
+    }
 
     for_each_order<0, Fields...>(o);
 
@@ -168,7 +186,13 @@ template <typename T> struct Repository {
     return {};
   }
 
-  void save(Model const &item) const { mDb->insert(item); }
+  std::expected<Model, std::exception> save(Model const &item) const {
+    try {
+      return mDb->insert(item);
+    } catch (std::runtime_error &e) {
+      return std::unexpected{e};
+    }
+  }
 
   void save_all(std::vector<Model> const &items) const {
     for (auto const &item : items) {
@@ -176,13 +200,11 @@ template <typename T> struct Repository {
     }
   }
 
-  /*
-  void update(Model const &item) const override {
+  void update(Model const &item) const {
     mDb->update(item);
   }
-  */
 
-  void remove(ProdutoModel const &model) const { mDb->remove(model); }
+  void remove(Model const &model) const { mDb->remove(model); }
 
   void remove_all(std::vector<Model> const &items) const {
     for (auto const &item : items) {

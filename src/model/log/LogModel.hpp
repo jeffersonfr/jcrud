@@ -4,4 +4,4 @@
 
 using LogModel = DataClass<"log", PrimaryKeys<"id">,
   Field<"id", FieldType::Int, false>,
-  Field<"description", FieldType::Text, false>>;
+  Field<"descricao", FieldType::Text, false>>;

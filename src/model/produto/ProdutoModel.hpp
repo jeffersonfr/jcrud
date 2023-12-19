@@ -7,5 +7,4 @@ using ProdutoModel = DataClass<"produto", PrimaryKeys<"id">,
   Field<"categoria_id", FieldType::Int>,
   Field<"nome", FieldType::Text>,
   Field<"descricao", FieldType::Text>,
-  Field<"validade", FieldType::Text>,
-  Field<"preco_id", FieldType::Int>>;
+  Field<"validade", FieldType::Text>>;

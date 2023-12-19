@@ -15,12 +15,40 @@
 struct Database {
   virtual ~Database() = default;
 
-  virtual int query_string(std::string const &sql,
-                           std::function<bool(std::vector<std::string> const &,
-                                              std::vector<Data> const &)>
-                               callback) = 0;
+  virtual int64_t
+  query_string(std::string const &sql,
+               std::function<bool(std::vector<std::string> const &,
+                                  std::vector<Data> const &)>
+                   callback) = 0;
 
-  template <typename Model> bool insert(Model const &model) {
+  virtual int64_t get_last_rowid() = 0;
+
+  template <typename Model, StringLiteral... Fields>
+  std::optional<Model> find_by_rowid(int64_t rowId) {
+    std::optional<Model> item;
+    std::ostringstream o;
+
+    o << "SELECT * from " << Model::get_name() << " WHERE ROWID = " << rowId;
+
+    query_string(o.str(), [&](std::vector<std::string> const &columns,
+                              std::vector<Data> const &values) {
+      Model model;
+
+      for (int i = 0; i < columns.size(); i++) {
+        std::string const &column = columns[i];
+
+        model[column] = values[i];
+      }
+
+      item = model;
+
+      return false;
+    });
+
+    return item;
+  }
+
+  template <typename Model> Model insert(Model const &model) {
     std::ostringstream o;
     bool first = true;
 
@@ -70,7 +98,8 @@ struct Database {
             o << (arg ? "true" : "false");
           },
           [&](int64_t arg) {
-            if (Field::get_type() != FieldType::Int) {
+            if (Field::get_type() != FieldType::Int and
+                Field::get_type() != FieldType::Serial) {
               throw std::runtime_error(
                   fmt::format("unable to insert '{}', field '{}' is not "
                               "convertible to integer",
@@ -101,10 +130,16 @@ struct Database {
 
     query_string(o.str(), [](auto...) { return false; });
 
-    return true;
+    int64_t lastRowId = get_last_rowid();
+    auto result = find_by_rowid<Model>(lastRowId);
+
+    if (!result) {
+      throw std::runtime_error("unable to recover model sequence");
+    }
+    return result.value();
   }
 
-  template <typename Model> bool update(Model const &model) {
+  template <typename Model> void update(Model const &model) {
     std::ostringstream o;
     bool first = true;
 
@@ -142,7 +177,8 @@ struct Database {
             o << (arg ? "true" : "false");
           },
           [&](int64_t arg) {
-            if (Field::get_type() != FieldType::Int) {
+            if (Field::get_type() != FieldType::Int and
+                Field::get_type() != FieldType::Serial) {
               throw std::runtime_error(
                   fmt::format("unable to insert '{}', field '{}' is not "
                               "convertible to integer",
@@ -169,63 +205,61 @@ struct Database {
           }});
     });
 
-  get_where_from_primary_keys<Model>(o, model);
+    get_where_from_primary_keys<Model>(o, model);
 
-  o << ";";
+    o << ";";
+    query_string(o.str(), [](auto...) { return false; });
+  }
 
-  query_string(o.str(), [](auto...) { return false; });
+  template <typename Model> bool remove(Model const &model) {
+    std::ostringstream o;
+    bool first = true;
 
-  return true;
-}
+    o << "DELETE FROM " << Model::get_name();
 
-template <typename Model>
-bool remove(Model const &model) {
-  std::ostringstream o;
-  bool first = true;
+    get_where_from_primary_keys<Model>(o, model);
 
-  o << "DELETE FROM " << Model::get_name();
+    o << ";";
 
-  get_where_from_primary_keys<Model>(o, model);
+    query_string(o.str(), [](auto...) { return false; });
 
-  o << ";";
+    return true;
+  }
 
-  query_string(o.str(), [](auto...) { return false; });
-
-  return true;
-}
-
-virtual Database &add_migration(Migration migration) = 0;
+  virtual Database &add_migration(Migration migration) = 0;
 
 private:
-template <typename Model>
-void get_where_from_primary_keys(std::ostream &out, Model const &model) {
-  std::ostringstream o;
-  bool first = true;
+  template <typename Model>
+  void get_where_from_primary_keys(std::ostream &out, Model const &model) {
+    std::ostringstream o;
+    bool first = true;
 
-  out << " WHERE ";
+    out << " WHERE ";
 
-  model.get_keys([&]<typename Field>() {
-    if (!first) {
-      out << " AND ";
-    }
+    model.get_keys([&]<typename Field>() {
+      if (!first) {
+        out << " AND ";
+      }
 
-    auto const &value = model[Field::get_name()];
+      auto const &value = model[Field::get_name()];
 
-    value.get_value(overloaded{
-        [&](nullptr_t arg) { out << "(" << Field::get_name() << " IS NULL)"; },
-        [&](bool arg) {
-          out << "(" << Field::get_name() << " = " << (arg ? "1" : "0") << ")";
-        },
-        [&](int64_t arg) {
-          out << "(" << Field::get_name() << " = " << arg << ")";
-        },
-        [&](double arg) {
-          out << "(" << Field::get_name() << " = " << arg << ")";
-        },
-        [&](std::string arg) {
-          out << "(" << Field::get_name() << " LIKE '%" << arg << "%')";
-        }});
-  });
-}
-}
-;
+      value.get_value(overloaded{
+          [&](nullptr_t arg) {
+            out << "(" << Field::get_name() << " IS NULL)";
+          },
+          [&](bool arg) {
+            out << "(" << Field::get_name() << " = " << (arg ? "1" : "0")
+                << ")";
+          },
+          [&](int64_t arg) {
+            out << "(" << Field::get_name() << " = " << arg << ")";
+          },
+          [&](double arg) {
+            out << "(" << Field::get_name() << " = " << arg << ")";
+          },
+          [&](std::string arg) {
+            out << "(" << Field::get_name() << " LIKE '%" << arg << "%')";
+          }});
+    });
+  }
+};

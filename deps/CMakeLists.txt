@@ -29,3 +29,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SQLiteCpp)
 
+# expected
+FetchContent_Declare(
+  expected
+  GIT_REPOSITORY https://github.com/TartanLlama/expected.git
+)
+FetchContent_MakeAvailable(expected)
+
+FetchContent_GetProperties(expected)
+if(expected_POPULATED)
+  message(INFO "SOURCE_DIR: ${expected_SOURCE_DIR}")
+  message(INFO "BINARY_DIR: ${expected_BINARY_DIR}")
+endif()

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui/Core.hpp"
+#include "ui/Input.hpp"
 
 #include <algorithm>
 #include <charconv>
@@ -9,9 +9,14 @@
 #include <map>
 #include <string>
 
+#include <unistd.h>
+#include <signal.h>
+
 #include <fmt/format.h>
 
 #include "jmixin/jstring.h"
+
+static bool cancelled = false;
 
 namespace jui {
 
@@ -24,7 +29,7 @@ struct Item {
 
 template <typename... Items> struct Form {
   Form() {
-    // verify duplicates
+    // TODO:: verify duplicates
   }
 
   Form &before(std::function<void()> callback) {
@@ -51,8 +56,28 @@ template <typename... Items> struct Form {
     return *this;
   }
 
+  template <typename T>
+  Form &set(std::string const &key, T const &value) {
+    using namespace std;
+
+    // TODO:: validar key
+    mValues[key] = to_string(value);
+
+    return *this;
+  }
+
   void show() {
+    struct sigaction new_action, old_action;
+
     mBefore();
+
+    new_action.sa_handler = [](int) {
+      cancelled = true;
+    };
+    sigemptyset(&new_action.sa_mask);
+    new_action.sa_flags = 0;
+
+    sigaction(SIGINT, &new_action, &old_action);
 
     try {
       (execute(Items{}), ...);
@@ -63,6 +88,14 @@ template <typename... Items> struct Form {
 
       mOnFailed();
     }
+
+    if (cancelled) {
+      std::cin.clear();
+    }
+
+    cancelled = false;
+
+    sigaction(SIGINT, &old_action, NULL);
 
     mAfter();
   }
@@ -77,13 +110,22 @@ private:
 
   template <StringLiteral Name, StringLiteral Description, TypeItem Type>
   void execute(Item<Name, Description, Type> item) {
+    auto defaultValue = mValues.find(Name.to_string());
     std::string line;
 
-    fmt::print("{}\n: ", Description.to_string());
+    if (defaultValue == mValues.end()) {
+      fmt::print("{}\n: ", Description.to_string());
+    } else {
+      fmt::print("{} [default: {}]\n: ", Description.to_string(), defaultValue->second);
+    }
 
     std::getline(std::cin, line);
 
     line = jmixin::String(line).trim();
+
+    if (line.empty() and defaultValue != mValues.end()) {
+      line = defaultValue->second;
+    }
 
     if (Type == TypeItem::Text) {
       mValues[Name.to_string()] = line;

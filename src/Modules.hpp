@@ -1,6 +1,6 @@
 #pragma once
 
-#include "control/produto/interactor/ProdutoInteractor.hpp"
+#include "control/produto/ProdutoInteractor.hpp"
 #include "implementation/model/SqliteDatabase.hpp"
 #include "model/categoria_produto/CategoriaProdutoRepository.hpp"
 #include "model/log/LogRepository.hpp"
@@ -62,12 +62,28 @@ private:
                         produtoModel["nome"] = "papel higienico";
                         produtoModel["descricao"] = "utensilio";
                         produtoModel["validade"] = "09092017";
-                        produtoModel["preco_id"] = 1;
+                        db.insert(produtoModel);
+
+                        produtoModel["categoria_id"] = 3;
+                        produtoModel["nome"] = "antialergico";
+                        produtoModel["descricao"] = "medicamento utilizado para evitar alergias";
+                        produtoModel["validade"] = "09152020";
                         db.insert(produtoModel);
 
                         PrecoModel precoModel;
                         precoModel["produto_id"] = 1;
                         precoModel["valor"] = 12.05;
+                        precoModel["timestamp"] = "01012020";
+                        db.insert(precoModel);
+
+                        precoModel["produto_id"] = 1;
+                        precoModel["valor"] = 11.16;
+                        precoModel["timestamp"] = "02022022";
+                        db.insert(precoModel);
+
+                        precoModel["produto_id"] = 2;
+                        precoModel["valor"] = 8.10;
+                        precoModel["timestamp"] = "03032023";
                         db.insert(precoModel);
                       }})
           .build();

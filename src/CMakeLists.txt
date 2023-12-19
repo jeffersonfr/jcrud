@@ -10,4 +10,5 @@ target_link_libraries(${PROJECT_NAME}
     fmt
     SQLiteCpp
     sqlite3
+    expected
 )

@@ -3,10 +3,10 @@
 #include "model/DataClass.hpp"
 
 template <typename ...Models>
-struct InteractorModel : public Models... {
-  InteractorModel() = default;
+struct CompoundModel : public Models... {
+  CompoundModel() = default;
 
-  InteractorModel(Models const &...models) {
+  CompoundModel(Models const &...models) {
     ((set<Models>(models)), ...);
   }
 

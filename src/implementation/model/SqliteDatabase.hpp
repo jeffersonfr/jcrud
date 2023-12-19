@@ -47,12 +47,10 @@ template <typename... Tables> struct SqliteDatabase : public Database {
 
   virtual ~SqliteDatabase() = default;
 
-  int query_string(std::string const &sql,
+  int64_t query_string(std::string const &sql,
                    std::function<bool(std::vector<std::string> const &,
                                       std::vector<Data> const &)>
                        callback) override {
-    int counter = 0;
-
     try {
       SQLite::Transaction transaction(mDb);
       SQLite::Statement query(mDb, sql);
@@ -88,20 +86,20 @@ template <typename... Tables> struct SqliteDatabase : public Database {
         }
 
         values.clear();
-
-        counter++;
       }
 
       query.reset();
 
       transaction.commit();
+
+      return query.getChanges();
     } catch (std::exception &e) {
-      std::cout << e.what() << "\n" << sql << "\n" << std::endl;
-
-      throw;
+      throw std::runtime_error(fmt::format("{}: {}", e.what(), sql));
     }
+  }
 
-    return counter;
+  int64_t get_last_rowid() override {
+    return mDb.getLastInsertRowid();
   }
 
   SqliteDatabase &add_migration(Migration migration) override {

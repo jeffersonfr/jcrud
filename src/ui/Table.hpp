@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui/Core.hpp"
+#include "ui/Input.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -80,7 +80,7 @@ template <std::ranges::range T> struct Table {
 
     for (auto &item : headItems) {
       line += jmixin::String().center(item.size + 1, '-');
-      head += jmixin::String(item.name).center(item.size) + '|';
+      head += jmixin::String(item.name).upper_case().center(item.size) + '|';
     }
 
     line[line.size() - 1] = '+';
@@ -98,7 +98,7 @@ template <std::ranges::range T> struct Table {
       std::string row = "|";
 
       for (int i = 0; i < cols.size(); i++) {
-        row += jmixin::String(cols[i]).center(headItems[i].size) + '|';
+        row += jmixin::String(cols[i]).upper_case().ellipses(headItems[i].size).center(headItems[i].size) + '|';
       }
 
       fmt::print("{}\n", row);
