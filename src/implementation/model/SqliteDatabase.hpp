@@ -27,9 +27,9 @@
     query.bind(i + 1, timeString);
 */
 
-using MigracaoModel =
-    DataClass<"migracao", PrimaryKeys<"id">, Field<"id", FieldType::Int, false>,
-              Field<"version", FieldType::Int>>;
+using MigracaoModel = DataClass<"migracao", Primary<"id">, NoForeign,
+                                Field<"id", FieldType::Int, false>,
+                                Field<"version", FieldType::Int>>;
 
 template <typename... Tables> struct SqliteDatabase : public Database {
   SqliteDatabase(std::string dbName)
@@ -40,17 +40,24 @@ template <typename... Tables> struct SqliteDatabase : public Database {
                  [](auto...) { return false; });
 
     for_each<Tables...>([&]<typename Table>() {
-      query_string(this->template create_ddl(Table{}),
-                   [](auto...) { return false; });
+      try {
+        typename Table::Keys{};
+        typename Table::Refers{};
+
+        query_string(this->template create_ddl(Table{}),
+                     [](auto...) { return false; });
+      } catch (std::runtime_error &e) {
+        throw std::runtime_error(fmt::format("Error on '{}': {}", Table::get_name(), e.what()));
+      }
     });
   }
 
   virtual ~SqliteDatabase() = default;
 
   int64_t query_string(std::string const &sql,
-                   std::function<bool(std::vector<std::string> const &,
-                                      std::vector<Data> const &)>
-                       callback) override {
+                       std::function<bool(std::vector<std::string> const &,
+                                          std::vector<Data> const &)>
+                           callback) override {
     try {
       SQLite::Transaction transaction(mDb);
       SQLite::Statement query(mDb, sql);
@@ -98,9 +105,7 @@ template <typename... Tables> struct SqliteDatabase : public Database {
     }
   }
 
-  int64_t get_last_rowid() override {
-    return mDb.getLastInsertRowid();
-  }
+  int64_t get_last_rowid() override { return mDb.getLastInsertRowid(); }
 
   SqliteDatabase &add_migration(Migration migration) override {
     if (std::find_if(mMigrations.begin(), mMigrations.end(),
@@ -157,7 +162,9 @@ template <typename... Tables> struct SqliteDatabase : public Database {
 
         update(migracaoModel);
       } catch (std::exception &e) {
-        throw std::runtime_error(fmt::format("Unable to proceed with migration [version: {}]: {}", migracaoModel["version"].get_int().value(), e.what()));
+        throw std::runtime_error(
+            fmt::format("Unable to proceed with migration [version: {}]: {}",
+                        migracaoModel["version"].get_int().value(), e.what()));
       }
     }
   }
@@ -190,9 +197,10 @@ private:
 
   template <typename F> static constexpr void for_each(F callback) {}
 
-  template <StringLiteral Name, typename PrimaryKeys, typename... Fields>
+  template <StringLiteral Name, typename PrimaryKeys, typename ForeignKeys,
+            typename... Fields>
   static constexpr std::string
-  create_ddl(DataClass<Name, PrimaryKeys, Fields...> &&model) {
+  create_ddl(DataClass<Name, PrimaryKeys, ForeignKeys, Fields...> &&model) {
     std::ostringstream ddl;
     bool hasSerial = false;
 
@@ -267,12 +275,26 @@ private:
       }
     }
 
+    if (ForeignKeys::get_size() > 0) {
+      ddl << ", ";
+
+      // INFO:: foreign key references just one primary key
+      model.get_refers([&]<typename FKey>() {
+        ddl << "FOREIGN KEY(" << FKey::get_name() << ") REFERENCES "
+            << FKey::Model::get_name();
+
+        FKey::Model::get_keys(
+            [&]<typename Field>() { ddl << "(" << Field::get_name() << ")"; });
+      });
+    }
+
     ddl << ");";
 
     return ddl.str();
   }
 
-  template <StringLiteral Name, typename PrimaryKeys, typename... Fields>
+  template <StringLiteral Name, typename PrimaryKeys, typename ForeignKeys,
+            typename... Fields>
   static constexpr std::string
   drop_ddl(DataClass<Name, PrimaryKeys, Fields...> const &dataClass) {
     std::ostringstream ddl;

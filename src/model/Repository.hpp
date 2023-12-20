@@ -224,7 +224,7 @@ private:
   std::shared_ptr<Database> mDb;
 
   template <StringLiteral... Keys>
-  auto find_expanded(PrimaryKeys<Keys...> primaryKeys, auto... values) {
+  auto find_expanded(Primary<Keys...> primaryKeys, auto... values) {
     return load_by<Keys...>(values...);
   }
 

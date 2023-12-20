@@ -51,10 +51,8 @@ using DecimalField = Field<Name, FieldType::Decimal, Nullable>;
 template <StringLiteral Name, bool Nullable = true>
 using TextField = Field<Name, FieldType::Text, Nullable>;
 
-template <StringLiteral... Fields> struct PrimaryKeys;
-
-template <StringLiteral... Keys> struct PrimaryKeys {
-  constexpr PrimaryKeys() {
+template <StringLiteral... Keys> struct Primary {
+  constexpr Primary() {
     std::array<std::string_view, sizeof...(Keys)> primaryKeys;
     int i = 0;
 
@@ -64,7 +62,7 @@ template <StringLiteral... Keys> struct PrimaryKeys {
 
     if (auto it = std::unique(primaryKeys.begin(), primaryKeys.end());
         primaryKeys.size() != 0 and it != primaryKeys.end()) {
-      throw std::runtime_error("Duplicated primary keys");
+      throw std::runtime_error("Duplicated primary key");
     }
   }
 
@@ -89,7 +87,51 @@ private:
   }
 };
 
-template <StringLiteral... Fields> struct ForeignKeys {};
+using NoPrimary = Primary<>;
+
+template <typename T, StringLiteral Field> struct Refer {
+  using Model = T;
+
+  constexpr static std::string get_name() { return Field.to_string(); }
+};
+
+template <typename ...Refers> struct Foreign {
+  constexpr Foreign() {
+    std::array<std::string_view, sizeof...(Refers)> refers;
+    int i = 0;
+
+    (static_cast<void>(refers[i++] = Refers::get_name()), ...);
+
+    std::sort(refers.begin(), refers.end());
+
+    if (auto it = std::unique(refers.begin(), refers.end());
+        refers.size() != 0 and it != refers.end()) {
+      throw std::runtime_error("Duplicated foreign key");
+    }
+  }
+
+  static constexpr std::size_t get_size() { return sizeof...(Refers); }
+
+  template <typename F> static constexpr void get_refers(F callback) {
+    for_each<F, Refers...>(callback);
+  }
+
+private:
+  template <typename F, typename Arg, typename... Args>
+  static constexpr void for_each(F callback) {
+    callback.template operator()<Arg>();
+
+    if constexpr (sizeof...(Args) > 0) {
+      return for_each<F, Args...>(callback);
+    }
+  }
+
+  template <typename F> static constexpr void for_each(F callback) {
+    // no primary keys
+  }
+};
+
+using NoForeign = Foreign<>;
 
 struct Data {
   using MyData = std::variant<nullptr_t, bool, int64_t, double, std::string>;
@@ -139,9 +181,10 @@ private:
   MyData mData;
 };
 
-template <StringLiteral Name, typename PrimaryKeys, typename... Fields>
+template <StringLiteral Name, typename PrimaryKeys, typename ForeignKeys, typename... Fields>
 struct DataClass {
   using Keys = PrimaryKeys;
+  using Refers = ForeignKeys;
 
   constexpr DataClass() {
     std::array<std::string_view, sizeof...(Fields)> fields;
@@ -178,6 +221,12 @@ struct DataClass {
           callback.template operator()<Field>();
         }
       });
+    });
+  }
+
+  template <typename F> static constexpr void get_refers(F callback) {
+    ForeignKeys::template get_refers([&]<typename FKey>() {
+      callback.template operator()<FKey>();
     });
   }
 
@@ -288,4 +337,3 @@ std::string format_currency(Data const &value) {
 
   return fmt::format("{:>10.2F}", value.get_decimal().value());
 }
-

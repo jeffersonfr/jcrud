@@ -44,7 +44,7 @@ struct ProdutoController {
          Item<"validade", "Data no formato 'ddmmaaaa'", TypeItem::Text>,
          Item<"preco", "Preco do produto", TypeItem::Decimal>>{}
         .on_success([&](Input input) {
-          DataClass<"categoria_produto", PrimaryKeys<"id">,
+          DataClass<"categoria_produto", Primary<"id">,
                     Field<"id", FieldType::Int, false>,
                     Field<"descricao", FieldType::Text>>{};
           ProdutoInteractorModel item;
