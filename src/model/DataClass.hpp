@@ -23,6 +23,13 @@ enum class FieldType {
   Text     // string
 };
 
+template <typename T>
+concept FieldConcept = requires(T t) {
+  { T::get_name() } -> std::same_as<std::string>;
+  { T::get_type() } -> std::same_as<FieldType>;
+  { T::is_nullable() } -> std::same_as<bool>;
+};
+
 template <StringLiteral Name, FieldType Type, bool Nullable = true>
 struct Field {
   constexpr static std::string get_name() { return Name.to_string(); }
@@ -50,6 +57,12 @@ using DecimalField = Field<Name, FieldType::Decimal, Nullable>;
 
 template <StringLiteral Name, bool Nullable = true>
 using TextField = Field<Name, FieldType::Text, Nullable>;
+
+template <typename T>
+concept PrimaryConcept = requires(T t) {
+  { T::get_size() } -> std::same_as<std::size_t>;
+  { T::get_keys([]<Field F>() {}) };
+};
 
 template <StringLiteral... Keys> struct Primary {
   constexpr Primary() {
@@ -89,13 +102,25 @@ private:
 
 using NoPrimary = Primary<>;
 
+template <typename T>
+concept ReferConcept = requires(T t) {
+  { typename T::Model{} } -> std::same_as<typename T::Model>;
+  { T::get_name() } -> std::same_as<std::string>;
+};
+
 template <typename T, StringLiteral Field> struct Refer {
   using Model = T;
 
   constexpr static std::string get_name() { return Field.to_string(); }
 };
 
-template <typename ...Refers> struct Foreign {
+template <typename T>
+concept ForeignConcept = requires(T t) {
+  { T::get_size() } -> std::same_as<std::size_t>;
+  { T::get_refers([]<Refer R>() {}) };
+};
+
+template <ReferConcept ...Refers> struct Foreign {
   constexpr Foreign() {
     std::array<std::string_view, sizeof...(Refers)> refers;
     int i = 0;
@@ -181,7 +206,7 @@ private:
   MyData mData;
 };
 
-template <StringLiteral Name, typename PrimaryKeys, typename ForeignKeys, typename... Fields>
+template <StringLiteral Name, PrimaryConcept PrimaryKeys, ForeignConcept ForeignKeys, FieldConcept... Fields>
 struct DataClass {
   using Keys = PrimaryKeys;
   using Refers = ForeignKeys;
