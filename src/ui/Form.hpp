@@ -50,6 +50,12 @@ template <typename... Items> struct Form {
     return *this;
   }
 
+  Form &on_cancelled(std::function<void()> callback) {
+    mOnCancelled = callback;
+
+    return *this;
+  }
+
   Form &after(std::function<void()> callback) {
     mAfter = callback;
 
@@ -60,7 +66,6 @@ template <typename... Items> struct Form {
   Form &set(std::string const &key, T const &value) {
     using namespace std;
 
-    // TODO:: validar key
     mValues[key] = to_string(value);
 
     return *this;
@@ -82,7 +87,9 @@ template <typename... Items> struct Form {
     try {
       (execute(Items{}), ...);
 
-      mOnSuccess(Input(mValues));
+      if (!cancelled) {
+        mOnSuccess(Input(mValues));
+      }
     } catch (std::runtime_error &e) {
       fmt::print("[error]: {}\n", e.what());
 
@@ -91,6 +98,8 @@ template <typename... Items> struct Form {
 
     if (cancelled) {
       std::cin.clear();
+      
+      mOnCancelled();
     }
 
     cancelled = false;
@@ -107,16 +116,31 @@ private:
   std::function<void()> mAfter = []() { /* system("clear"); */ };
   std::function<void(Input)> mOnSuccess = [](Input) {};
   std::function<void()> mOnFailed = []() {};
+  std::function<void()> mOnCancelled = []() {};
 
   template <StringLiteral Name, StringLiteral Description, TypeItem Type>
   void execute(Item<Name, Description, Type> item) {
+    if (cancelled) {
+      return;
+    }
+
     auto defaultValue = mValues.find(Name.to_string());
-    std::string line;
+    std::string line, help;
+
+    if (Type == TypeItem::Text) {
+      help = "[ texto livre ]";
+    } else if (Type == TypeItem::Int) {
+      help = "[ valor inteiro ]";
+    } else if (Type == TypeItem::Decimal) {
+      help = "[ valor decimal ]";
+    } else if (Type == TypeItem::Date) {
+      help = "[ data no formato: ddmmaaaa ]";
+    }
 
     if (defaultValue == mValues.end()) {
-      fmt::print("{}\n: ", Description.to_string());
+      fmt::print("{} {}\n: ", Description.to_string(), help);
     } else {
-      fmt::print("{} [default: {}]\n: ", Description.to_string(), defaultValue->second);
+      fmt::print("{} <default: {}> {}\n: ", Description.to_string(), defaultValue->second, help);
     }
 
     std::getline(std::cin, line);
@@ -127,33 +151,7 @@ private:
       line = defaultValue->second;
     }
 
-    if (Type == TypeItem::Text) {
-      mValues[Name.to_string()] = line;
-    } else if (Type == TypeItem::Decimal) {
-      double number;
-
-      auto [ptr, ec] =
-          std::from_chars(line.data(), line.data() + line.size(), number);
-
-      if (ec != std::errc{}) {
-        throw std::runtime_error(
-            fmt::format("Invalid conversion: '{}' to decimal", line));
-      }
-
-      mValues[Name.to_string()] = std::to_string(number);
-    } else if (Type == TypeItem::Int) {
-      long number;
-
-      auto [ptr, ec] =
-          std::from_chars(line.data(), line.data() + line.size(), number);
-
-      if (ec != std::errc{}) {
-        throw std::runtime_error(
-            fmt::format("Invalid conversion: '{}' to integer", line));
-      }
-
-      mValues[Name.to_string()] = std::to_string(number);
-    }
+    mValues[Name.to_string()] = line;
   }
 };
 } // namespace jui

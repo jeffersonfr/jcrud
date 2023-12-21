@@ -5,6 +5,7 @@
 #include "model/produto/ProdutoRepository.hpp"
 #include "ui/Form.hpp"
 #include "ui/Table.hpp"
+#include "Format.hpp"
 
 #include <cstdlib>
 #include <fstream>

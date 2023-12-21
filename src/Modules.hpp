@@ -22,13 +22,11 @@ private:
   static void load_log() {
     using MyDatabase = SqliteDatabase<LogModel>;
 
-    // Database/log
     SINGLE(std::shared_ptr<Database>, LogModel) {
       auto db = std::make_shared<MyDatabase>("log.db");
 
       db->add_migration(Migration{1,
                                   [](Database &db) {
-                                    // do nothing
                                   }})
           .build();
 
@@ -42,7 +40,6 @@ private:
     using MyDatabase =
         SqliteDatabase<CategoriaProdutoModel, PrecoModel, ProdutoModel>;
 
-    // Database/sistema_crud
     SINGLE(std::shared_ptr<Database>) {
       auto db = std::make_shared<MyDatabase>("sistema.db");
 
@@ -106,7 +103,6 @@ private:
   }
 
   static void load_interactors() {
-    // ProdutoInteractor
     UNIQUE(ProdutoInteractor) {
       return new ProdutoInteractor{get{}, get{}, get{}};
     };

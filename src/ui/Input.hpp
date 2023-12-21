@@ -15,7 +15,7 @@
 
 namespace jui {
 
-enum class TypeItem { Int, Decimal, Text };
+enum class TypeItem { Int, Decimal, Text, Date };
 
 struct Input {
   Input(std::map<std::string, std::string> &values) : mValues{values} {}
@@ -70,6 +70,27 @@ struct Input {
     }
 
     return number;
+  }
+
+  std::optional<std::chrono::year_month_day> get_date(std::string key) {
+    auto text = get_text(key);
+
+    if (!text) {
+      return {};
+    }
+
+    const std::regex date_regex("[\\d]{8}");
+    auto value = *text;
+ 
+    if (!std::regex_match(value, date_regex)) {
+      return {};      
+    }
+
+    auto d = std::chrono::year{std::stoi(value.substr(0, 2))};
+    auto m = std::chrono::month{static_cast<unsigned>(std::stoi(value.substr(2, 2)))};
+    auto y = std::chrono::day{static_cast<unsigned>(std::stoi(value.substr(4, 4)))};
+
+    return std::chrono::year_month_day{d, m, y};
   }
 
 private:

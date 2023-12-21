@@ -17,16 +17,6 @@
 
 #include <fmt/format.h>
 
-/* UTC TIME
-  [&](std::chrono::seconds arg) {
-    std::time_t time = arg.count();
-    char timeString[std::size("yyyy-mm-dd hh:mm:ss.000")];
-    std::strftime(std::data(timeString), std::size(timeString),
-                  "%F %T.000", std::gmtime(&time));
-
-    query.bind(i + 1, timeString);
-*/
-
 using MigracaoModel = DataClass<"migracao", Primary<"id">, NoForeign,
                                 Field<"id", FieldType::Int, false>,
                                 Field<"version", FieldType::Int>>;
