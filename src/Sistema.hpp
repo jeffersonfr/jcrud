@@ -29,6 +29,10 @@ struct Sistema
   {
     using namespace jui;
 
+  ProdutoInteractorModel m;
+  Repository<ProdutoInteractorModel> r{inject<std::shared_ptr<Database>>()};
+  r.load_all();
+
     do
     {
       Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
@@ -61,20 +65,20 @@ struct Sistema
               return;
             }
 
-            ProdutoController produtoController;
+            std::unique_ptr<ProdutoController> produtoController = get{};
 
             if (*opcao == SelecaoProduto::Inserir) {
-              produtoController.inserir();
+              produtoController->inserir();
             } else if (*opcao == SelecaoProduto::Listar) {
-              produtoController.listar();
+              produtoController->listar();
             } else if (*opcao == SelecaoProduto::Exibir) {
-              produtoController.exibir();
+              produtoController->exibir();
             } else if (*opcao == SelecaoProduto::Alterar) {
-              produtoController.alterar();
+              produtoController->alterar();
             } else if (*opcao == SelecaoProduto::Remover) {
-              produtoController.remover();
+              produtoController->remover();
             } else if (*opcao == SelecaoProduto::Relatorio) {
-              produtoController.relatorio();
+              produtoController->relatorio();
             } else if (*opcao == SelecaoProduto::Sair) {
               std::exit(0);
             }

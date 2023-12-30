@@ -15,7 +15,8 @@ struct Modules {
   static void load_modules() {
     load_log();
     load_sistema();
-    load_interactors();
+    load_repositories();
+    load_controls();
   }
 
 private:
@@ -87,7 +88,9 @@ private:
 
       return db;
     };
+  }
 
+  static void load_repositories() {
     UNIQUE(CategoriaProdutoRepository) {
       return new CategoriaProdutoRepository{
           inject<std::shared_ptr<Database>>()};
@@ -102,9 +105,13 @@ private:
     };
   }
 
-  static void load_interactors() {
+  static void load_controls() {
     UNIQUE(ProdutoInteractor) {
       return new ProdutoInteractor{get{}, get{}, get{}};
+    };
+
+    UNIQUE(ProdutoController) {
+      return new ProdutoController{inject<std::unique_ptr<ProdutoInteractor>>()};
     };
   }
 };

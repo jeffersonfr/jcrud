@@ -21,6 +21,8 @@ struct Database {
                                   std::vector<Data> const &)>
                    callback) = 0;
 
+  virtual void transaction(std::function<void(Database &)> callback) = 0;
+
   virtual int64_t get_last_rowid() = 0;
 
   template <typename Model, StringLiteral... Fields>

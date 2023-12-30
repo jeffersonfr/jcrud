@@ -1,11 +1,11 @@
 #pragma once
 
+#include "Format.hpp"
 #include "control/produto/ProdutoInteractor.hpp"
 #include "model/categoria_produto/CategoriaProdutoRepository.hpp"
 #include "model/produto/ProdutoRepository.hpp"
 #include "ui/Form.hpp"
 #include "ui/Table.hpp"
-#include "Format.hpp"
 
 #include <cstdlib>
 #include <fstream>
@@ -28,6 +28,9 @@ using namespace jui;
 void opcao_invalida() { fmt::print("Opcao Invalida !\n"); }
 
 struct ProdutoController {
+  ProdutoController(std::unique_ptr<ProdutoInteractor> produtoInteractor)
+      : mProdutoInteractor{std::move(produtoInteractor)} {}
+
   void inserir() {
     Table{mProdutoInteractor->load_all_categorias()}
         .title("Listagem de categorias")
@@ -53,7 +56,9 @@ struct ProdutoController {
           produto["nome"] = input.get_text("nome");
           produto["descricao"] = input.get_text("descricao");
           produto["validade"] = input.get_text("validade");
+          
           preco["valor"] = input.get_decimal("preco");
+          preco["timestamp"] = format_timestamp(std::chrono::system_clock::now());
 
           mProdutoInteractor->save_produto(item);
         })
@@ -85,18 +90,15 @@ struct ProdutoController {
                 Table{historicoPrecos}
                     .title("Historico de precos")
                     .head([]() {
-                      return std::vector<Col>{Col{"id", 15}, Col{"valor", 32}, Col{"data", 32}};
+                      return std::vector<Col>{Col{"id", 15}, Col{"valor", 32},
+                                              Col{"data", 32}};
                     })
                     .data([&](auto const &item) {
-                      return Row{item["id"], item["valor"], format_date(item["timestamp"])};
+                      return Row{item["id"], item["valor"],
+                                 format_date(item["timestamp"])};
                     })
                     .show();
-                return std::optional<bool>{};
-              })
-              .or_else([]() {
-                fmt::print("Produto inexsistente !\n\n");
-
-                return std::optional<bool>{};
+                return std::optional<bool>{true};
               });
         })
         .on_failed(opcao_invalida)
@@ -120,7 +122,8 @@ struct ProdutoController {
                      Item<"descricao", "Descricao do produto", TypeItem::Text>,
                      Item<"preco", "Preco do produto", TypeItem::Decimal>>{}
                     .set("nome", item.template get<ProdutoModel>("nome"))
-                    .set("descricao", item.template get<ProdutoModel>("descricao"))
+                    .set("descricao",
+                         item.template get<ProdutoModel>("descricao"))
                     .set("preco", item.template get<PrecoModel>("valor"))
                     .on_success([&](Input input) {
                       item.template get<ProdutoModel>("nome") =
@@ -130,8 +133,7 @@ struct ProdutoController {
                       item.template get<PrecoModel>("valor") =
                           input.get_decimal("preco");
 
-                      mProdutoInteractor->save_produto(
-                          item);
+                      mProdutoInteractor->save_produto(item);
                     })
                     .on_failed(opcao_invalida)
                     .show();
@@ -194,9 +196,12 @@ private:
           auto produto = item.template get<ProdutoModel>();
           auto preco = item.template get<PrecoModel>();
 
-          return Row{produto["id"],       categoriaProduto["descricao"],
-                     produto["nome"],     produto["descricao"],
-                     format_date(produto["validade"]), format_currency(preco["valor"])};
+          return Row{produto["id"],
+                     categoriaProduto["descricao"],
+                     produto["nome"],
+                     produto["descricao"],
+                     format_date(produto["validade"]),
+                     format_currency(preco["valor"])};
         })
         .show();
   }

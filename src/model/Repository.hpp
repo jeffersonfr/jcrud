@@ -20,6 +20,8 @@ template <typename T> struct Repository {
 
   Repository(std::shared_ptr<Database> db) : mDb{db} {}
 
+  std::shared_ptr<Database> get_database() { return mDb; }
+
   std::vector<Model> load_all() const {
     std::vector<Model> items;
 
@@ -195,21 +197,23 @@ template <typename T> struct Repository {
   }
 
   void save_all(std::vector<Model> const &items) const {
-    for (auto const &item : items) {
-      save(item);
-    }
+    mDb->transaction([&](Database &db) {
+      for (auto const &item : items) {
+        save(item);
+      }
+    });
   }
 
-  void update(Model const &item) const {
-    mDb->update(item);
-  }
+  void update(Model const &item) const { mDb->update(item); }
 
   void remove(Model const &model) const { mDb->remove(model); }
 
   void remove_all(std::vector<Model> const &items) const {
-    for (auto const &item : items) {
-      remove(item);
-    }
+    mDb->transaction([&](Database &db) {
+      for (auto const &item : items) {
+        remove(item);
+      }
+    });
   }
 
   template <StringLiteral... Fields> void remove_by(Data values...) const {
@@ -266,5 +270,142 @@ private:
     if constexpr (sizeof...(Fields) > 0) {
       for_each_order<Index + 1, Fields...>();
     }
+  }
+};
+
+template <typename... Models> struct Repository<CompoundModel<Models...>> {
+
+  using Model = CompoundModel<Models...>;
+
+  Repository(std::shared_ptr<Database> db = jinject::get{}) : mDb{db} {}
+
+  std::shared_ptr<Database> get_database() { return mDb; }
+
+  std::vector<Model> load_all() const {
+    std::vector<Model> items;
+    std::ostringstream o;
+
+    o << "SELECT ";
+
+    for_each_model<0, Models...>(o);
+
+    o << " FROM ";
+
+    for_each_join<0, Models...>(o);
+
+    std::ostringstream where;
+
+    for_each_where<0, Models...>(where);
+
+    if (!where.str().empty()) {
+      o << " WHERE " << where.str();
+    }
+
+    mDb->query_string(o.str(), [&](std::vector<std::string> const &columns,
+                                   std::vector<Data> const &values) {
+      Model item;
+
+      for_each_fill_model<0, Models...>(item, columns.begin(), values.begin());
+
+      items.emplace_back(item);
+
+      return true;
+    });
+
+    return items;
+  }
+
+  void update(Model const &item) {
+    mDb->transaction([&](Database &db) { update_internal(item); });
+  }
+
+  void update_all(std::vector<Model> const &items) const {
+    mDb->transaction([&](Database &db) {
+      for (auto const &item : items) {
+        update_internal(item);
+      }
+    });
+  }
+
+private:
+  std::shared_ptr<Database> mDb;
+
+  template <std::size_t Index, typename TModel, typename... TModels>
+  void for_each_fill_model(Model &item, auto itColumn, auto itValue) const {
+    int count{};
+
+    TModel::get_fields([&]<typename Field>() { count++; });
+
+    for (auto i = 0; i < count; i++) {
+      item.template get<TModel>(*itColumn++) = *itValue++;
+    }
+
+    if constexpr (sizeof...(TModels) > 0) {
+      for_each_fill_model<Index + 1, TModels...>(item, itColumn, itValue);
+    }
+  }
+
+  template <std::size_t Index, typename TModel, typename... TModels>
+  void for_each_model(std::ostream &out) const {
+    if (Index != 0) {
+      out << ", ";
+    }
+
+    out << TModel::get_name() << ".*";
+
+    if constexpr (sizeof...(TModels) > 0) {
+      for_each_model<Index + 1, TModels...>(out);
+    }
+  }
+
+  template <std::size_t Index, typename TModel, typename... TModels>
+  void for_each_join(std::ostream &out) const {
+    if (Index != 0) {
+      out << " INNER JOIN ";
+    }
+
+    out << TModel::get_name();
+
+    if constexpr (sizeof...(TModels) > 0) {
+      for_each_join<Index + 1, TModels...>(out);
+    }
+  }
+
+  template <std::size_t Index, typename TModel, typename... TModels>
+  void for_each_where(std::ostream &out) const {
+    TModel::get_refers([&]<typename FKey>() {
+      if (Index != 0) {
+        out << " AND ";
+      }
+
+      out << TModel::get_name() << "." << FKey::get_name() << " = "
+          << FKey::Model::get_name() << ".";
+
+      FKey::Model::get_keys(
+          [&]<typename Field>() { out << Field::get_name(); });
+    });
+
+    if constexpr (sizeof...(TModels) > 0) {
+      if (TModel::Refers::get_size() > 0) {
+        for_each_where<Index + 1, TModels...>(out);
+      } else {
+        for_each_where<Index, TModels...>(out);
+      }
+    }
+  }
+
+  template <std::size_t Index, typename TModel, typename... TModels>
+  void for_each_update(Model const &item) const {
+    Repository<TModel> repository = jinject::get{};
+
+    repository.update(item.template get<TModel>());
+
+    if constexpr (sizeof...(TModels) > 0) {
+      for_each_update<Index + 1, TModels...>(item);
+    }
+  }
+
+  void update_internal(Model const &model) {
+    for_each_update<0, Models...>(model);
   }
 };
