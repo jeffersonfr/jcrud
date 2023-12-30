@@ -50,37 +50,61 @@ struct Database {
     return item;
   }
 
+  template <typename Field>
+  bool default_with_null_value(auto const &value) {
+    bool hasValue = true;
+
+    value.get_value(overloaded{[&](nullptr_t arg) { hasValue = false; },
+                                [](auto arg) {}});
+
+    if (!Field::is_nullable() and !hasValue and
+        Field::get_default().has_value()) {
+      return true;
+    }
+
+    return false;
+  }
+
   template <typename Model> Model insert(Model const &model) {
     std::ostringstream o;
-    bool first = true;
+    int first = 0;
 
     o << "INSERT INTO " << Model::get_name() << " (";
 
     model.get_fields([&]<typename Field>() {
-      if (!first) {
-        o << ", ";
+      auto const &value = model[Field::get_name()];
+
+      if (default_with_null_value<Field>(value)) {
+        return;
       }
 
-      first = false;
+      if (first++) {
+        o << ", ";
+      }
 
       o << Field::get_name();
     });
 
     o << ") VALUES (";
 
-    first = true;
+    first = 0;
 
     model.get_fields([&]<typename Field>() {
-      if (!first) {
+      auto const &value = model[Field::get_name()];
+
+      if (default_with_null_value<Field>(value)) {
+        return;
+      }
+
+      if (first++) {
         o << ", ";
       }
 
-      first = false;
-
-      auto const &value = model[Field::get_name()];
-
       value.get_value(overloaded{
           [&](nullptr_t arg) {
+            if (!Field::is_nullable() and Field::get_default().has_value()) {
+              return;
+            }
             if (!Field::is_nullable() and
                 Field::get_type() != FieldType::Serial) {
               throw std::runtime_error(
@@ -119,7 +143,8 @@ struct Database {
             o << arg;
           },
           [&](std::string arg) {
-            if (Field::get_type() != FieldType::Text) {
+            if (Field::get_type() != FieldType::Text and
+                Field::get_type() != FieldType::Timestamp) {
               throw std::runtime_error(fmt::format(
                   "unable to insert '{}', field '{}' is not a text value",
                   Model::get_name(), Field::get_name()));
@@ -143,20 +168,22 @@ struct Database {
 
   template <typename Model> void update(Model const &model) {
     std::ostringstream o;
-    bool first = true;
+    int first = 0;
 
     o << "UPDATE " << Model::get_name() << " SET ";
 
     model.get_fields([&]<typename Field>() {
-      if (!first) {
+      auto const &value = model[Field::get_name()];
+
+      if (default_with_null_value<Field>(value)) {
+        return;
+      }
+
+      if (first++) {
         o << ", ";
       }
 
-      first = false;
-
       o << Field::get_name() << " = ";
-
-      auto const &value = model[Field::get_name()];
 
       value.get_value(overloaded{
           [&](nullptr_t arg) {
@@ -198,7 +225,8 @@ struct Database {
             o << arg;
           },
           [&](std::string arg) {
-            if (Field::get_type() != FieldType::Text) {
+            if (Field::get_type() != FieldType::Text and
+                Field::get_type() != FieldType::Timestamp) {
               throw std::runtime_error(fmt::format(
                   "unable to insert '{}', field '{}' is not a text value",
                   Model::get_name(), Field::get_name()));

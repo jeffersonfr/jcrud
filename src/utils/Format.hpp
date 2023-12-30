@@ -4,21 +4,6 @@
 
 #include <fmt/format.h>
 
-std::string format_date(Data const &value)
-{
-  if (value.is_null())
-  {
-    return "<null>";
-  }
-
-  std::ostringstream o;
-  std::string date = value.get_text().value();
-
-  o << date.substr(0, 2) << "/" << date.substr(2, 2) << "/" << date.substr(4);
-
-  return o.str();
-}
-
 std::string format_currency(Data const &value)
 {
   if (value.is_null())

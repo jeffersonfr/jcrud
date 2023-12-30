@@ -2,8 +2,8 @@
 
 #include "control/produto/ProdutoController.hpp"
 #include "ui/Form.hpp"
+#include "utils/Log.hpp"
 #include "Modules.hpp"
-#include "Format.hpp"
 
 #include <fmt/format.h>
 
@@ -29,9 +29,7 @@ struct Sistema
   {
     using namespace jui;
 
-  ProdutoInteractorModel m;
-  Repository<ProdutoInteractorModel> r{inject<std::shared_ptr<Database>>()};
-  r.load_all();
+    Log::d(LogType::System, "iniciando o sistema");
 
     do
     {
@@ -60,8 +58,6 @@ struct Sistema
             auto opcao = input.get_int("opcao");
 
             if (!opcao) {
-              fmt::print("Opcao invalida");
-
               return;
             }
 
@@ -80,6 +76,8 @@ struct Sistema
             } else if (*opcao == SelecaoProduto::Relatorio) {
               produtoController->relatorio();
             } else if (*opcao == SelecaoProduto::Sair) {
+              Log::d(LogType::System, "finalizando o sistema");
+
               std::exit(0);
             }
 

@@ -26,15 +26,14 @@ private:
     SINGLE(std::shared_ptr<Database>, LogModel) {
       auto db = std::make_shared<MyDatabase>("log.db");
 
-      db->add_migration(Migration{1,
-                                  [](Database &db) {
-                                  }})
-          .build();
+      db->add_migration(Migration{1, [](Database &db) {}}).build();
 
       return db;
     };
 
-    UNIQUE(LogRepository) { return new LogRepository{get{}}; };
+    UNIQUE(LogRepository) {
+      return new LogRepository{inject<std::shared_ptr<Database>, LogModel>()};
+    };
   }
 
   static void load_sistema() {
@@ -59,29 +58,25 @@ private:
                         produtoModel["categoria_id"] = 1;
                         produtoModel["nome"] = "papel higienico";
                         produtoModel["descricao"] = "utensilio";
-                        produtoModel["validade"] = "09092017";
                         db.insert(produtoModel);
 
                         produtoModel["categoria_id"] = 3;
                         produtoModel["nome"] = "antialergico";
-                        produtoModel["descricao"] = "medicamento utilizado para evitar alergias";
-                        produtoModel["validade"] = "09152020";
+                        produtoModel["descricao"] =
+                            "medicamento utilizado para evitar alergias";
                         db.insert(produtoModel);
 
                         PrecoModel precoModel;
                         precoModel["produto_id"] = 1;
                         precoModel["valor"] = 12.05;
-                        precoModel["timestamp"] = "01012020";
                         db.insert(precoModel);
 
                         precoModel["produto_id"] = 1;
-                        precoModel["valor"] = 11.16;
-                        precoModel["timestamp"] = "02022022";
+                        precoModel["valor"] = 11.10;
                         db.insert(precoModel);
 
                         precoModel["produto_id"] = 2;
                         precoModel["valor"] = 8.10;
-                        precoModel["timestamp"] = "03032023";
                         db.insert(precoModel);
                       }})
           .build();
@@ -111,7 +106,8 @@ private:
     };
 
     UNIQUE(ProdutoController) {
-      return new ProdutoController{inject<std::unique_ptr<ProdutoInteractor>>()};
+      return new ProdutoController{
+          inject<std::unique_ptr<ProdutoInteractor>>()};
     };
   }
 };

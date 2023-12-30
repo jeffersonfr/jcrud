@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Format.hpp"
 #include "control/produto/ProdutoInteractor.hpp"
 #include "model/categoria_produto/CategoriaProdutoRepository.hpp"
 #include "model/produto/ProdutoRepository.hpp"
 #include "ui/Form.hpp"
 #include "ui/Table.hpp"
+#include "utils/Format.hpp"
 
 #include <cstdlib>
 #include <fstream>
@@ -56,9 +56,8 @@ struct ProdutoController {
           produto["nome"] = input.get_text("nome");
           produto["descricao"] = input.get_text("descricao");
           produto["validade"] = input.get_text("validade");
-          
+
           preco["valor"] = input.get_decimal("preco");
-          preco["timestamp"] = format_timestamp(std::chrono::system_clock::now());
 
           mProdutoInteractor->save_produto(item);
         })
@@ -94,8 +93,8 @@ struct ProdutoController {
                                               Col{"data", 32}};
                     })
                     .data([&](auto const &item) {
-                      return Row{item["id"], item["valor"],
-                                 format_date(item["timestamp"])};
+                      return Row{item["id"], format_currency(item["valor"]),
+                                 item["last"]};
                     })
                     .show();
                 return std::optional<bool>{true};
@@ -200,7 +199,7 @@ private:
                      categoriaProduto["descricao"],
                      produto["nome"],
                      produto["descricao"],
-                     format_date(produto["validade"]),
+                     produto["validade"],
                      format_currency(preco["valor"])};
         })
         .show();

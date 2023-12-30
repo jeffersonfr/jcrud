@@ -22,14 +22,32 @@ namespace jui {
 
 template <StringLiteral Name, StringLiteral Description, TypeItem Type>
 struct Item {
-  static constexpr std::string name = Name.to_string();
-  static constexpr std::string description = Description.to_string();
-  static constexpr TypeItem type = Type;
+  static constexpr std::string get_name() {
+    return Name.to_string();
+  }
+
+  static constexpr std::string get_description() {
+    return Description.to_string();
+  }
+
+  static constexpr TypeItem get_type() {
+    return Type;
+  }
 };
 
 template <typename... Items> struct Form {
   Form() {
-    // TODO:: verify duplicates
+    std::array<std::string_view, sizeof...(Items)> items;
+    int i = 0;
+
+    (static_cast<void>(items[i++] = Items::get_name()), ...);
+
+    std::sort(items.begin(), items.end());
+
+    if (auto it = std::unique(items.begin(), items.end());
+        items.size() != 0 and it != items.end()) {
+      throw std::runtime_error("Duplicated itens in form");
+    }
   }
 
   Form &before(std::function<void()> callback) {

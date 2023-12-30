@@ -7,4 +7,4 @@ using ProdutoModel = DataClass<"produto", Primary<"id">, Foreign<Refer<Categoria
   Field<"categoria_id", FieldType::Int>,
   Field<"nome", FieldType::Text>,
   Field<"descricao", FieldType::Text>,
-  Field<"validade", FieldType::Text>>;
+  Field<"validade", FieldType::Timestamp>>;

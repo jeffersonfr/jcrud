@@ -37,7 +37,8 @@ template <typename... Tables> struct SqliteDatabase : public Database {
         query_string(this->template create_ddl(Table{}),
                      [](auto...) { return false; });
       } catch (std::runtime_error &e) {
-        throw std::runtime_error(fmt::format("Error on '{}': {}", Table::get_name(), e.what()));
+        throw std::runtime_error(
+            fmt::format("On '{}' -> {}", Table::get_name(), e.what()));
       }
     });
   }
@@ -226,12 +227,25 @@ private:
         ddl << " DECIMAL";
       } else if (Field::get_type() == FieldType::Text) {
         ddl << " TEXT";
+      } else if (Field::get_type() == FieldType::Timestamp) {
+        ddl << " TIMESTAMP";
       }
+
+      auto defaultValue = Field::get_default();
 
       if (Field::is_nullable()) {
         ddl << " NULL";
+
+        if (defaultValue.has_value()) {
+          throw std::runtime_error(fmt::format(
+              "Unable to use default value with nullable field '{}' in '{}'", Field::get_name(), model.get_name()));
+        }
       } else {
         ddl << " NOT NULL";
+
+        if (defaultValue.has_value()) {
+          ddl << " DEFAULT " << defaultValue.value();
+        }
       }
     });
 

@@ -6,4 +6,4 @@ using PrecoModel = DataClass<"preco", Primary<"id">, Foreign<Refer<ProdutoModel,
   Field<"id", FieldType::Serial, false>,
   Field<"produto_id", FieldType::Int>,
   Field<"valor", FieldType::Decimal>,
-  Field<"timestamp", FieldType::Text>>;
+  Field<"last", FieldType::Timestamp, false, TimestampValue>>;

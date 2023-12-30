@@ -16,12 +16,36 @@
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 
 enum class FieldType {
-  Serial,  // primary key auto incremented
-  Bool,    // bool
-  Int,     // integer
-  Decimal, // double
-  Text     // string
+  Serial,
+  Bool,
+  Int,
+  Decimal,
+  Text,
+  Timestamp
 };
+
+template <typename T>
+concept DefaultValueConcept = requires(T t) {
+  { T::get_value() } -> std::same_as<std::optional<std::string>>;
+};
+
+struct NoDefaultValue {
+  static std::optional<std::string> get_value() {
+    return {};
+  }
+};
+
+template <StringLiteral Value>
+struct DefaultValue {
+  static std::optional<std::string> get_value() {
+    return {Value.to_string()};
+  }
+};
+
+template <StringLiteral Value>
+using TextValue = DefaultValue<fmt::format("'{}'", Value.to_string())>;
+
+using TimestampValue = DefaultValue<"(datetime('now', 'localtime'))">;
 
 template <typename T>
 concept FieldConcept = requires(T t) {
@@ -30,13 +54,15 @@ concept FieldConcept = requires(T t) {
   { T::is_nullable() } -> std::same_as<bool>;
 };
 
-template <StringLiteral Name, FieldType Type, bool Nullable = true>
+template <StringLiteral Name, FieldType Type, bool Nullable = true, DefaultValueConcept Default = NoDefaultValue>
 struct Field {
   constexpr static std::string get_name() { return Name.to_string(); }
 
   constexpr static FieldType get_type() { return Type; }
 
   constexpr static bool is_nullable() { return Nullable; }
+
+  constexpr static std::optional<std::string> get_default() { return Default::get_value(); }
 };
 
 template <StringLiteral Name, FieldType Type, bool Nullable = true>
