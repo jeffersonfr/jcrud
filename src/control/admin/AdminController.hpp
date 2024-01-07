@@ -227,8 +227,8 @@ struct AdminController {
   }
 
 private:
-  std::unique_ptr<AdminInteractor> mAdminInteractor = jinject::get{};
-  std::unique_ptr<LoginInteractor> mLoginInteractor = jinject::get{};
+  std::unique_ptr<AdminInteractor> mAdminInteractor;
+  std::unique_ptr<LoginInteractor> mLoginInteractor;
 
   static void opcao_invalida() { fmt::print("Opcao Invalida !\n"); }
 };

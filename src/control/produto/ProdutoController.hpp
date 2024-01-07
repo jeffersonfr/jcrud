@@ -242,7 +242,7 @@ struct ProdutoController {
   }
 
 private:
-  std::unique_ptr<ProdutoInteractor> mProdutoInteractor = jinject::get{};
+  std::unique_ptr<ProdutoInteractor> mProdutoInteractor;
 
   static void opcao_invalida() { fmt::print("Opcao Invalida !\n"); }
 

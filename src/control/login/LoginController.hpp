@@ -60,5 +60,5 @@ struct LoginController {
   }
 
 private:
-  std::unique_ptr<LoginInteractor> mLoginInteractor = jinject::get{};
+  std::unique_ptr<LoginInteractor> mLoginInteractor;
 };
