@@ -24,7 +24,6 @@ struct Sistema {
     std::unique_ptr<LoginController> loginController = get{};
     std::unique_ptr<AdminController> adminController = get{};
     std::unique_ptr<ProdutoController> produtoController = get{};
-    bool result = true;
 
     Log::d(LogType::System, "iniciando o sistema");
 
@@ -73,18 +72,16 @@ struct Sistema {
           }
 
           if (*opcao == static_cast<int>(SelecaoSistema::Administracao)) {
-            result = adminController->execute();
+            adminController->execute();
           } else if (*opcao == static_cast<int>(SelecaoSistema::Produtos)) {
-            result = produtoController->execute();
+            produtoController->execute();
           }
         })
         .on_failed(opcao_invalida)
         .interruptable()
         .show();
       }
-    } while (result);
-
-    Log::d(LogType::System, "finalizando o sistema");
+    } while (true);
   }
 
   private:
