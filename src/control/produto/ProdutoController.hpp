@@ -23,13 +23,75 @@
 
 #include "jinject/jinject.h"
 
-using namespace jui;
+enum class SelecaoProduto {
+  Inserir = 1,
+  Listar,
+  Exibir,
+  Alterar,
+  Remover,
+  Relatorio
+};
 
-void opcao_invalida() { fmt::print("Opcao Invalida !\n"); }
+using namespace jui;
 
 struct ProdutoController {
   ProdutoController(std::unique_ptr<ProdutoInteractor> produtoInteractor)
       : mProdutoInteractor{std::move(produtoInteractor)} {}
+
+  bool execute() {
+    using namespace jui;
+
+    bool result = true;
+
+    Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
+        .before([&]() {
+          system("clear");
+
+          fmt::print("Produtos\n\n");
+          fmt::print("Escolha uma opção:\n");
+          fmt::print("\t{} - Inserir produto\n",
+                     static_cast<int>(SelecaoProduto::Inserir));
+          fmt::print("\t{} - Listar todos os produtos\n",
+                     static_cast<int>(SelecaoProduto::Listar));
+          fmt::print("\t{} - Exibir um produto (pesquisar por nome)\n",
+                     static_cast<int>(SelecaoProduto::Exibir));
+          fmt::print("\t{} - Alterar um produto (pesquisar por nome)\n",
+                     static_cast<int>(SelecaoProduto::Alterar));
+          fmt::print("\t{} - Remover um produto (pesquisar por nome)\n",
+                     static_cast<int>(SelecaoProduto::Remover));
+          fmt::print("\t{} - Exibir relatório\n",
+                     static_cast<int>(SelecaoProduto::Relatorio));
+        })
+        .on_success([&](Input input) {
+          auto opcao = input.get_int("opcao");
+
+          if (!opcao.has_value()) {
+            return;
+          }
+
+          if (*opcao == static_cast<int>(SelecaoProduto::Inserir)) {
+            inserir();
+          } else if (*opcao == static_cast<int>(SelecaoProduto::Listar)) {
+            listar();
+          } else if (*opcao == static_cast<int>(SelecaoProduto::Exibir)) {
+            exibir();
+          } else if (*opcao == static_cast<int>(SelecaoProduto::Alterar)) {
+            alterar();
+          } else if (*opcao == static_cast<int>(SelecaoProduto::Remover)) {
+            remover();
+          } else if (*opcao == static_cast<int>(SelecaoProduto::Relatorio)) {
+            relatorio();
+          }
+
+          fmt::print("Pressione qualquer tecla para continuar ...");
+
+          std::cin.ignore();
+        })
+        .on_failed(opcao_invalida)
+        .show();
+
+    return result;
+  }
 
   void inserir() {
     Table{mProdutoInteractor->load_all_categorias()}
@@ -72,7 +134,7 @@ struct ProdutoController {
         .on_success([&](Input input) {
           auto produtoId = input.get_int("id");
 
-          if (!produtoId) {
+          if (!produtoId.has_value()) {
             fmt::print("Identificador do produto invalido");
 
             return;
@@ -109,7 +171,7 @@ struct ProdutoController {
         .on_success([&](Input input) {
           auto produtoId = input.get_int("id");
 
-          if (!produtoId) {
+          if (!produtoId.has_value()) {
             fmt::print("Identificador do produto invalido");
 
             return;
@@ -149,7 +211,7 @@ struct ProdutoController {
         .on_success([&](Input input) {
           auto produtoId = input.get_int("id");
 
-          if (!produtoId) {
+          if (!produtoId.has_value()) {
             fmt::print("Identificador do produto invalido");
 
             return;
@@ -182,6 +244,8 @@ struct ProdutoController {
 private:
   std::unique_ptr<ProdutoInteractor> mProdutoInteractor = jinject::get{};
 
+  static void opcao_invalida() { fmt::print("Opcao Invalida !\n"); }
+
   void listar_produtos(std::vector<ProdutoInteractorModel> &&items) {
     Table{items}
         .title("Listagem de produtos")
@@ -195,12 +259,9 @@ private:
           auto produto = item.template get<ProdutoModel>();
           auto preco = item.template get<PrecoModel>();
 
-          return Row{produto["id"],
-                     categoriaProduto["descricao"],
-                     produto["nome"],
-                     produto["descricao"],
-                     produto["validade"],
-                     format_currency(preco["valor"])};
+          return Row{produto["id"],       categoriaProduto["descricao"],
+                     produto["nome"],     produto["descricao"],
+                     produto["validade"], format_currency(preco["valor"])};
         })
         .show();
   }

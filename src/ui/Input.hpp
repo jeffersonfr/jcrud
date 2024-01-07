@@ -35,7 +35,7 @@ struct Input {
   std::optional<long> get_int(std::string key) {
     auto text = get_text(key);
 
-    if (!text) {
+    if (!text.has_value()) {
       return {};
     }
 
@@ -55,7 +55,7 @@ struct Input {
   std::optional<double> get_decimal(std::string key) {
     auto text = get_text(key);
 
-    if (!text) {
+    if (!text.has_value()) {
       return {};
     }
 
@@ -75,7 +75,7 @@ struct Input {
   std::optional<std::chrono::year_month_day> get_date(std::string key) {
     auto text = get_text(key);
 
-    if (!text) {
+    if (!text.has_value()) {
       return {};
     }
 

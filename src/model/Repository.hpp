@@ -373,8 +373,10 @@ private:
 
   template <std::size_t Index, typename TModel, typename... TModels>
   void for_each_where(std::ostream &out) const {
+    int indexRefers = 0;
+
     TModel::get_refers([&]<typename FKey>() {
-      if (Index != 0) {
+      if (Index != 0 or indexRefers++ != 0) {
         out << " AND ";
       }
 

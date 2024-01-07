@@ -11,4 +11,5 @@ target_link_libraries(${PROJECT_NAME}
     SQLiteCpp
     sqlite3
     expected
+    crypt
 )

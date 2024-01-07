@@ -12,7 +12,8 @@
 
 #include <fmt/format.h>
 
-struct Database {
+struct Database
+{
   virtual ~Database() = default;
 
   virtual int64_t
@@ -26,14 +27,16 @@ struct Database {
   virtual int64_t get_last_rowid() = 0;
 
   template <typename Model, StringLiteral... Fields>
-  std::optional<Model> find_by_rowid(int64_t rowId) {
+  std::optional<Model> find_by_rowid(int64_t rowId)
+  {
     std::optional<Model> item;
     std::ostringstream o;
 
     o << "SELECT * from " << Model::get_name() << " WHERE ROWID = " << rowId;
 
     query_string(o.str(), [&](std::vector<std::string> const &columns,
-                              std::vector<Data> const &values) {
+                              std::vector<Data> const &values)
+                 {
       Model model;
 
       for (int i = 0; i < columns.size(); i++) {
@@ -44,34 +47,39 @@ struct Database {
 
       item = model;
 
-      return false;
-    });
+      return false; });
 
     return item;
   }
 
   template <typename Field>
-  bool default_with_null_value(auto const &value) {
+  bool default_with_null_value(auto const &value)
+  {
     bool hasValue = true;
 
-    value.get_value(overloaded{[&](nullptr_t arg) { hasValue = false; },
-                                [](auto arg) {}});
+    value.get_value(overloaded{[&](nullptr_t arg)
+                               { hasValue = false; },
+                               [](auto arg) {}});
 
     if (!Field::is_nullable() and !hasValue and
-        Field::get_default().has_value()) {
+        Field::get_default().has_value())
+    {
       return true;
     }
 
     return false;
   }
 
-  template <typename Model> Model insert(Model const &model) {
+  template <typename Model>
+  Model insert(Model const &model)
+  {
     std::ostringstream o;
     int first = 0;
 
     o << "INSERT INTO " << Model::get_name() << " (";
 
-    model.get_fields([&]<typename Field>() {
+    model.get_fields([&]<typename Field>()
+                     {
       auto const &value = model[Field::get_name()];
 
       if (default_with_null_value<Field>(value)) {
@@ -82,14 +90,14 @@ struct Database {
         o << ", ";
       }
 
-      o << Field::get_name();
-    });
+      o << Field::get_name(); });
 
     o << ") VALUES (";
 
     first = 0;
 
-    model.get_fields([&]<typename Field>() {
+    model.get_fields([&]<typename Field>()
+                     {
       auto const &value = model[Field::get_name()];
 
       if (default_with_null_value<Field>(value)) {
@@ -150,29 +158,33 @@ struct Database {
                   Model::get_name(), Field::get_name()));
             }
             o << std::quoted(arg);
-          }});
-    });
+          }}); });
 
     o << ");";
 
-    query_string(o.str(), [](auto...) { return false; });
+    query_string(o.str(), [](auto...)
+                 { return false; });
 
     int64_t lastRowId = get_last_rowid();
     auto result = find_by_rowid<Model>(lastRowId);
 
-    if (!result) {
+    if (!result.has_value())
+    {
       throw std::runtime_error("unable to recover model sequence");
     }
     return result.value();
   }
 
-  template <typename Model> void update(Model const &model) {
+  template <typename Model>
+  void update(Model const &model)
+  {
     std::ostringstream o;
     int first = 0;
 
     o << "UPDATE " << Model::get_name() << " SET ";
 
-    model.get_fields([&]<typename Field>() {
+    model.get_fields([&]<typename Field>()
+                     {
       auto const &value = model[Field::get_name()];
 
       if (default_with_null_value<Field>(value)) {
@@ -232,16 +244,18 @@ struct Database {
                   Model::get_name(), Field::get_name()));
             }
             o << std::quoted(arg);
-          }});
-    });
+          }}); });
 
     get_where_from_primary_keys<Model>(o, model);
 
     o << ";";
-    query_string(o.str(), [](auto...) { return false; });
+    query_string(o.str(), [](auto...)
+                 { return false; });
   }
 
-  template <typename Model> bool remove(Model const &model) {
+  template <typename Model>
+  bool remove(Model const &model)
+  {
     std::ostringstream o;
     bool first = true;
 
@@ -251,7 +265,8 @@ struct Database {
 
     o << ";";
 
-    query_string(o.str(), [](auto...) { return false; });
+    query_string(o.str(), [](auto...)
+                 { return false; });
 
     return true;
   }
@@ -260,7 +275,8 @@ struct Database {
 
 private:
   template <typename Model>
-  void get_where_from_primary_keys(std::ostream &out, Model const &model) {
+  void get_where_from_primary_keys(std::ostream &out, Model const &model)
+  {
     std::ostringstream o;
     bool first = true;
 
@@ -270,6 +286,8 @@ private:
       if (!first) {
         out << " AND ";
       }
+
+      first = false;
 
       auto const &value = model[Field::get_name()];
 
@@ -289,7 +307,55 @@ private:
           },
           [&](std::string arg) {
             out << "(" << Field::get_name() << " LIKE '%" << arg << "%')";
-          }});
-    });
+          }}); });
   }
 };
+
+template <typename Model, StringLiteral... Fields>
+struct InsertValue
+{
+  InsertValue(Database &db) : mDb{db} {}
+
+  ~InsertValue()
+  {
+    if (mWithoutTransaction) {
+      for (auto const &item : mInsertions) {
+        item();
+      }
+    } else {
+      mDb.transaction([&](Database &db) {
+        for (auto const &item : mInsertions) {
+          item();
+        }});
+    }
+  }
+
+  InsertValue &values(auto... params)
+  {
+    Model model;
+
+    ((model[Fields.to_string()] = params), ...);
+
+    mInsertions.emplace_back([=, this]()
+                             { mDb.insert(model); });
+
+    return *this;
+  }
+
+  InsertValue &without_transaction() {
+    mWithoutTransaction = true;
+
+    return *this;
+  }
+
+private:
+  Database &mDb;
+  std::vector<std::function<void()>> mInsertions;
+  bool mWithoutTransaction{};
+};
+
+template <typename Model, StringLiteral... Fields>
+auto insert(Database &db)
+{
+  return InsertValue<Model, Fields...>{db};
+}

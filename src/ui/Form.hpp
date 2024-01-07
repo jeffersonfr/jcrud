@@ -9,8 +9,8 @@
 #include <map>
 #include <string>
 
-#include <unistd.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include <fmt/format.h>
 
@@ -22,17 +22,13 @@ namespace jui {
 
 template <StringLiteral Name, StringLiteral Description, TypeItem Type>
 struct Item {
-  static constexpr std::string get_name() {
-    return Name.to_string();
-  }
+  static constexpr std::string get_name() { return Name.to_string(); }
 
   static constexpr std::string get_description() {
     return Description.to_string();
   }
 
-  static constexpr TypeItem get_type() {
-    return Type;
-  }
+  static constexpr TypeItem get_type() { return Type; }
 };
 
 template <typename... Items> struct Form {
@@ -80,12 +76,16 @@ template <typename... Items> struct Form {
     return *this;
   }
 
-  template <typename T>
-  Form &set(std::string const &key, T const &value) {
+  template <typename T> Form &set(std::string const &key, T const &value) {
     using namespace std;
 
     mValues[key] = to_string(value);
 
+    return *this;
+  }
+
+  Form &interruptable() {
+    mInterruptable = true;
     return *this;
   }
 
@@ -94,18 +94,18 @@ template <typename... Items> struct Form {
 
     mBefore();
 
-    new_action.sa_handler = [](int) {
-      cancelled = true;
-    };
-    sigemptyset(&new_action.sa_mask);
-    new_action.sa_flags = 0;
+    if (!mInterruptable) {
+      new_action.sa_handler = [](int) { cancelled = true; };
+      sigemptyset(&new_action.sa_mask);
+      new_action.sa_flags = 0;
 
-    sigaction(SIGINT, &new_action, &old_action);
+      sigaction(SIGINT, &new_action, &old_action);
+    }
 
     try {
       (execute(Items{}), ...);
 
-      if (!cancelled) {
+      if (mInterruptable or !cancelled) {
         mOnSuccess(Input(mValues));
       }
     } catch (std::runtime_error &e) {
@@ -114,15 +114,17 @@ template <typename... Items> struct Form {
       mOnFailed();
     }
 
-    if (cancelled) {
-      std::cin.clear();
-      
-      mOnCancelled();
+    if (!mInterruptable) {
+      if (cancelled) {
+        std::cin.clear();
+
+        mOnCancelled();
+      }
+
+      cancelled = false;
+
+      sigaction(SIGINT, &old_action, NULL);
     }
-
-    cancelled = false;
-
-    sigaction(SIGINT, &old_action, NULL);
 
     mAfter();
   }
@@ -131,15 +133,19 @@ private:
   std::map<std::string, std::string> mValues;
 
   std::function<void()> mBefore = []() {};
-  std::function<void()> mAfter = []() { /* system("clear"); */ };
+  std::function<void()> mAfter = []() {};
   std::function<void(Input)> mOnSuccess = [](Input) {};
   std::function<void()> mOnFailed = []() {};
   std::function<void()> mOnCancelled = []() {};
 
+  bool mInterruptable = false;
+
   template <StringLiteral Name, StringLiteral Description, TypeItem Type>
   void execute(Item<Name, Description, Type> item) {
-    if (cancelled) {
-      return;
+    if (!mInterruptable) {
+      if (cancelled) {
+        return;
+      }
     }
 
     auto defaultValue = mValues.find(Name.to_string());
@@ -158,7 +164,8 @@ private:
     if (defaultValue == mValues.end()) {
       fmt::print("{} {}\n: ", Description.to_string(), help);
     } else {
-      fmt::print("{} <default: {}> {}\n: ", Description.to_string(), defaultValue->second, help);
+      fmt::print("{} <default: {}> {}\n: ", Description.to_string(),
+                 defaultValue->second, help);
     }
 
     std::getline(std::cin, line);

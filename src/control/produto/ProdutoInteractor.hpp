@@ -46,8 +46,7 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
     auto produtos =
         load_all_produtos() |
         std::ranges::views::filter([&](auto const &produto) {
-          return produto.template get<ProdutoModel>("id").get_int().value() ==
-                 id;
+          return produto.template get<ProdutoModel>("id") == id;
         });
 
     for (auto const &produto : produtos) {
@@ -58,31 +57,49 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
   }
 
   void save_produto(ProdutoInteractorModel const &item) {
-    if (item.get<ProdutoModel>("id").is_null()) {
-      auto produto = mProdutoRepository->save(item.get<ProdutoModel>());
+    mProdutoRepository->get_database()->transaction([&](Database &db) {
+      if (item.get<ProdutoModel>("id").is_null()) {
+        auto produto = mProdutoRepository->save(item.get<ProdutoModel>());
 
-      if (produto) {
-        item.get<PrecoModel>("produto_id") = produto.value()["id"];
+        if (produto.has_value()) {
+          item.get<PrecoModel>("produto_id") = (*produto)["id"];
 
-        mPrecoRepository->save(item.get<PrecoModel>());
+          mPrecoRepository->save(item.get<PrecoModel>());
+        }
+      } else {
+        update(item);
       }
-    } else {
-      update(item);
-    }
+    });
   }
 
   void remove_produto(ProdutoInteractorModel const &item) {
-    mProdutoRepository->get_database()->transaction([&](Database &db) {
-      item.get<ProdutoModel>("id").get_int().and_then([&](auto const &id) {
-        std::ranges::for_each(
-            mPrecoRepository->load_by<"produto_id">(id),
-            [&](auto const &item) { mPrecoRepository->remove(item); });
+    auto produtoId = item.get<ProdutoModel>("id").get_int();
+    
+    if (!produtoId.has_value()) {
+      return;
+    }
 
-        return std::optional{true};
-      });
+    auto itemOther{std::move(item.get<ProdutoModel>())};
+    
+    itemOther["excluido"] = true;
+
+    mProdutoRepository->update(itemOther);
+
+    /*
+    mProdutoRepository->get_database()->transaction([&](Database &db) {
+      auto produtoId = item.get<ProdutoModel>("id").get_int();
+      
+      if (!produtoId.has_value()) {
+        return;
+      }
+
+      std::ranges::for_each(
+          mPrecoRepository->load_by<"produto_id">(id),
+          [&](auto const &item) { mPrecoRepository->remove(item); });
 
       mProdutoRepository->remove(item);
     });
+     */
   }
 
 private:

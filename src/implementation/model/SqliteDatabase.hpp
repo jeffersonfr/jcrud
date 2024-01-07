@@ -46,15 +46,11 @@ template <typename... Tables> struct SqliteDatabase : public Database {
   virtual ~SqliteDatabase() = default;
 
   void transaction(std::function<void(Database &)> callback) override {
-
-    try {
       SQLite::Transaction transaction(mDb);
 
       callback(*this);
 
       transaction.commit();
-    } catch (std::runtime_error &e) {
-    }
   }
 
   int64_t query_string(std::string const &sql,

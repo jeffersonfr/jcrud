@@ -230,7 +230,9 @@ struct Data {
     return {};
   }
 
-  bool operator==(auto const &other) { return mData == other.mData; }
+  bool operator==(Data const &other) const { return mData == other.mData; }
+
+  bool operator==(auto const &other) const { return mData == Data{other}.mData; }
 
 private:
   MyData mData;
