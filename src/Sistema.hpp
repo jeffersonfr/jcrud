@@ -25,15 +25,18 @@ struct Sistema {
     std::unique_ptr<AdminController> adminController = get{};
     std::unique_ptr<ProdutoController> produtoController = get{};
 
-    Log::d(LogType::System, "iniciando o sistema");
+    Log::d(TipoLog::System, "iniciando o sistema");
 
     std::set<int> selecaoSet;
 
     do {
-      if (!Ambiente::login.has_value()) {
-        loginController->execute([&](auto const &login, auto const &cargos) {
-          Ambiente::login = login;
-          Ambiente::cargos = cargos;
+      if (!Ambiente::usuario.has_value()) {
+        Ambiente::usuario = {};
+        Ambiente::cargos = {};
+
+        loginController->execute([&](UsuarioModel usuarioModel, std::vector<CargoModel> cargoModel) {
+            Ambiente::usuario = usuarioModel;
+            Ambiente::cargos = cargoModel;
 
           if (Ambiente::cargos.has_value()) {
             for (auto const &cargo : Ambiente::cargos.value()) {

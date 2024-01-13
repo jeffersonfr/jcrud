@@ -15,37 +15,35 @@
 #include "jinject/jinject.h"
 
 struct LoginInteractor : public Repository<LoginInteractorModel> {
-  LoginInteractor(std::unique_ptr<FilialRepository> filialRepository,
-                  std::unique_ptr<UsuarioRepository> usuarioRepository,
-                  std::unique_ptr<LoginRepository> loginRepository)
-      : mFilialRepository{std::move(filialRepository)},
-        mUsuarioRepository{std::move(usuarioRepository)},
-        mLoginRepository{std::move(loginRepository)} {}
+  std::optional<UsuarioModel> login(std::string const &nome,
+                                    std::string const &senha) {
+    auto items =
+        load_all() | std::ranges::views::filter([&](auto const &item) {
+          char senhaOriginal[128];
 
-  std::optional<LoginInteractorModel> login(std::string const &nome,
-                                            std::string const &senha) {
-    auto items = load_all() | std::ranges::views::filter([&](auto const &item) {
-                   char senhaOriginal[128];
-                   
-                   strncpy(senhaOriginal, senha.data(), senha.size());
+          strncpy(senhaOriginal, senha.data(), senha.size());
 
-                   senhaOriginal[senha.size()] = '\0';
+          senhaOriginal[senha.size()] = '\0';
 
-                   char *senhaEncriptada = crypt(senhaOriginal, "aa");
+          char *senhaEncriptada = crypt(senhaOriginal, "aa");
 
-                   return item.template get<UsuarioModel>("apelido") == nome and
-                          item.template get<UsuarioModel>("senha") == senhaEncriptada;
-                 });
+          return item.template get<UsuarioModel>("apelido") == nome and
+                 item.template get<UsuarioModel>("senha") == senhaEncriptada;
+        });
 
     for (auto const &item : items) {
-      return item;
+      return {item.template get<UsuarioModel>()};
     }
 
     return {};
   }
 
-private:
-  std::unique_ptr<FilialRepository> mFilialRepository;
-  std::unique_ptr<UsuarioRepository> mUsuarioRepository;
-  std::unique_ptr<LoginRepository> mLoginRepository;
+  std::vector<CargoModel> load_cargos(UsuarioModel usuario) {
+    auto items =
+        load_all() | std::ranges::views::filter([&](auto const &item) {
+          return item.template get<UsuarioModel>("id") == usuario["id"];
+        });
+
+    return {items.begin(), items.end()};
+  }
 };

@@ -66,7 +66,7 @@ struct AdminInteractor
     });
   }
 
-  std::vector<CargoModel> load_all_cargos()
+  std::vector<CargoModel> load_all_cargos() const
   {
     return mCargoRepository->load_all();
   }

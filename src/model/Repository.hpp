@@ -22,28 +22,33 @@ template <typename T> struct Repository {
 
   std::shared_ptr<Database> get_database() { return mDb; }
 
-  std::vector<Model> load_all() const {
+  template <StringLiteral Query>
+  std::vector<Model> select(auto... values) const {
     std::vector<Model> items;
+    std::ostringstream o;
 
-    mDb->query_string(
-        fmt::format("SELECT * from {} ORDER BY ROWID", Model::get_name()),
-        [&](std::vector<std::string> const &columns,
-            std::vector<Data> const &values) {
-          Model item;
+    o << "SELECT * from " << Model::get_name()
+      << fmt::vformat(Query.to_string(), fmt::make_format_args(values...));
 
-          for (int i = 0; i < columns.size(); i++) {
-            std::string const &column = columns[i];
+    mDb->query_string(o.str(), [&](std::vector<std::string> const &columns,
+                                   std::vector<Data> const &values) {
+      Model item;
 
-            item[column] = values[i];
-          }
+      for (int i = 0; i < columns.size(); i++) {
+        std::string const &column = columns[i];
 
-          items.emplace_back(item);
+        item[column] = values[i];
+      }
 
-          return true;
-        });
+      items.emplace_back(item);
+
+      return true;
+    });
 
     return items;
   }
+
+  std::vector<Model> load_all() const { return select<"ORDER BY ROWID">(); }
 
   template <StringLiteral... Fields> int64_t count_by(auto... values) const {
     std::ostringstream o;
