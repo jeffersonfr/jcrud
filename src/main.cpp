@@ -6,6 +6,8 @@ int main() {
 
     sistema.execute();
   } catch (std::runtime_error &e) {
+    loge(TipoLog::Sistema, Sistema::Tag, e.what());
+
     fmt::print("{}\n", e.what());
   }
 }

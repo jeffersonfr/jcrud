@@ -3,8 +3,8 @@
 #include "model/DataClass.hpp"
 
 enum class TipoLog {
-  System,
-  Model
+  Sistema = 1,
+  Modelo = 2
 };
 
 using TipoLogModel = DataClass<"tipo_log", Primary<"id">, NoForeign,

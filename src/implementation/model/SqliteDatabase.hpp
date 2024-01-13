@@ -2,6 +2,7 @@
 
 #include "model/Database.hpp"
 #include "model/Migration.hpp"
+#include "utils/Log.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -22,6 +23,8 @@ using MigracaoModel = DataClass<"migracao", Primary<"id">, NoForeign,
                                 Field<"version", FieldType::Int>>;
 
 template <typename... Tables> struct SqliteDatabase : public Database {
+  inline static std::string const Tag = "SqliteDatabase";
+
   SqliteDatabase(std::string dbName)
       : mDb(dbName, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
 
@@ -46,11 +49,11 @@ template <typename... Tables> struct SqliteDatabase : public Database {
   virtual ~SqliteDatabase() = default;
 
   void transaction(std::function<void(Database &)> callback) override {
-      SQLite::Transaction transaction(mDb);
+    SQLite::Transaction transaction(mDb);
 
-      callback(*this);
+    callback(*this);
 
-      transaction.commit();
+    transaction.commit();
   }
 
   int64_t query_string(std::string const &sql,
@@ -158,9 +161,9 @@ template <typename... Tables> struct SqliteDatabase : public Database {
 
         update(migracaoModel);
       } catch (std::exception &e) {
-        throw std::runtime_error(
-            fmt::format("Unable to proceed with migration [version: {}]: {}",
-                        migracaoModel["version"].get_int().value(), e.what()));
+        throw std::runtime_error(fmt::format(
+            "Unable to proceed with migration [{} v{}]: {}",
+            MigracaoModel::get_name(), migration.get_id(), e.what()));
       }
     }
   }
@@ -234,7 +237,8 @@ private:
 
         if (defaultValue.has_value()) {
           throw std::runtime_error(fmt::format(
-              "Unable to use default value with nullable field '{}' in '{}'", Field::get_name(), model.get_name()));
+              "Unable to use default value with nullable field '{}' in '{}'",
+              Field::get_name(), model.get_name()));
         }
       } else {
         ddl << " NOT NULL";

@@ -7,4 +7,4 @@
 #include "model/cargo_usuario/CargoUsuarioModel.hpp"
 #include "model/login/LoginModel.hpp"
 
-using LoginInteractorModel = CompoundModel<CargoModel, UsuarioModel, LoginModel>;
+using LoginInteractorModel = CompoundModel<FilialModel, CargoModel, UsuarioModel, LoginModel>;

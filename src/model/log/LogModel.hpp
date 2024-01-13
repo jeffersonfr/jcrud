@@ -9,5 +9,6 @@ using LogModel = DataClass<"log", Primary<"id">, Foreign<Refer<LevelLogModel, "l
   Field<"level_log_id", FieldType::Int, false>,
   Field<"tipo_log_id", FieldType::Int, false>,
   Field<"localizacao", FieldType::Text, false>,
+  Field<"tag", FieldType::Text, false>,
   Field<"descricao", FieldType::Text, false>,
   Field<"last", FieldType::Text, false, TimestampValue>>;
