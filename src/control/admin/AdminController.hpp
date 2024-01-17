@@ -4,6 +4,7 @@
 #include "ui/Form.hpp"
 #include "ui/Table.hpp"
 #include "utils/Format.hpp"
+#include "utils/Log.hpp"
 
 #include <cstdlib>
 #include <fstream>
@@ -33,6 +34,8 @@ enum class SelecaoAdmin {
 using namespace jui;
 
 struct AdminController {
+  inline static constexpr std::string Tag = "AdminController";
+
   AdminController(std::unique_ptr<AdminInteractor> adminInteractor, std::unique_ptr<LoginInteractor> loginInteractor)
       : mAdminInteractor{std::move(adminInteractor)}, mLoginInteractor{std::move(loginInteractor)} {}
 
@@ -66,7 +69,7 @@ struct AdminController {
           }
 
           if (*opcao == static_cast<int>(SelecaoAdmin::BuscarUsuario)) {
-            buscar_usuario();
+            listar_usuario();
           } else if (*opcao ==
                      static_cast<int>(SelecaoAdmin::AdicionarUsuario)) {
             adicionar_usuario();
@@ -93,7 +96,7 @@ struct AdminController {
     return result;
   }
 
-  void buscar_usuario() {
+  void listar_usuario() {
     Form<Item<"nome", "Nome do usuario", TypeItem::Text>>{}
         .on_success([&](Input input) {
           Table{mAdminInteractor->load_usuario_by<"nome">(
@@ -106,6 +109,8 @@ struct AdminController {
                 return Row{item["id"], item["nome"]};
               })
               .show();
+
+          logt(TipoLog::Sistema, Tag, "listando usuario por nome:[{}]", input.get_text("nome").value());
         })
         .on_failed(opcao_invalida)
         .show();
@@ -127,6 +132,8 @@ struct AdminController {
           item["apelido"] = input.get_text("apelido");
 
           mAdminInteractor->save_usuario(item);
+
+          logt(TipoLog::Sistema, Tag, "adicionando usuario:[{}]", item);
         })
         .on_failed(opcao_invalida)
         .show();
@@ -143,10 +150,10 @@ struct AdminController {
           for (auto const &item : items) {
             mAdminInteractor->remove_usuario(item);
 
+            logt(TipoLog::Sistema, Tag, "removendo usuario:[{}]", item);
+  
             return;
           }
-
-          fmt::print("Usuario inexistente");
         })
         .on_failed(opcao_invalida)
         .show();
@@ -178,10 +185,8 @@ struct AdminController {
 
             mAdminInteractor->save_usuario(usuario);
 
-            return;
+            logt(TipoLog::Sistema, Tag, "atualizando senha do usuario:[{}]", usuario);
           }
-
-          fmt::print("Usuario inexistente");
         })
         .on_failed(opcao_invalida)
         .show();
@@ -219,6 +224,8 @@ struct AdminController {
           for (auto const &usuario : usuarioList) {
             mAdminInteractor->update_cargos(usuario, std::vector<CargoModel>{items.begin(), items.end()});
 
+            logt(TipoLog::Sistema, Tag, "atualizando cargos do usuario:[{}]", usuario);
+
             return;
           }
         })
@@ -229,6 +236,4 @@ struct AdminController {
 private:
   std::unique_ptr<AdminInteractor> mAdminInteractor;
   std::unique_ptr<LoginInteractor> mLoginInteractor;
-
-  static void opcao_invalida() { fmt::print("Opcao Invalida !\n"); }
 };

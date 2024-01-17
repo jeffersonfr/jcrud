@@ -27,7 +27,7 @@ template <typename T> struct Repository {
     std::vector<Model> items;
     std::ostringstream o;
 
-    o << "SELECT * from " << Model::get_name()
+    o << "SELECT * from " << Model::get_name() << " "
       << fmt::vformat(Query.to_string(), fmt::make_format_args(values...));
 
     mDb->query_string(o.str(), [&](std::vector<std::string> const &columns,

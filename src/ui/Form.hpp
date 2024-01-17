@@ -180,3 +180,5 @@ private:
   }
 };
 } // namespace jui
+
+static void opcao_invalida() { fmt::print("Opcao Invalida !\n"); }

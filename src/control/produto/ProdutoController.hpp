@@ -6,6 +6,7 @@
 #include "ui/Form.hpp"
 #include "ui/Table.hpp"
 #include "utils/Format.hpp"
+#include "utils/Log.hpp"
 
 #include <cstdlib>
 #include <fstream>
@@ -35,6 +36,8 @@ enum class SelecaoProduto {
 using namespace jui;
 
 struct ProdutoController {
+  inline static const std::string Tag = "ProdutoController";
+
   ProdutoController(std::unique_ptr<ProdutoInteractor> produtoInteractor)
       : mProdutoInteractor{std::move(produtoInteractor)} {}
 
@@ -122,6 +125,8 @@ struct ProdutoController {
           preco["valor"] = input.get_decimal("preco");
 
           mProdutoInteractor->save_produto(item);
+
+          logt(TipoLog::Sistema, Tag, "inserindo produto:[{}]", item);
         })
         .on_failed(opcao_invalida)
         .show();
@@ -141,10 +146,10 @@ struct ProdutoController {
           }
 
           mProdutoInteractor->load_produto_by_id(produtoId.value())
-              .and_then([&](auto item) {
+              .and_then([&](auto produto) {
                 auto historicoPrecos =
                     mProdutoInteractor->load_historico_precos(
-                        item.template get<ProdutoModel>("id")
+                        produto.template get<ProdutoModel>("id")
                             .get_int()
                             .value());
 
@@ -159,6 +164,9 @@ struct ProdutoController {
                                  item["last"]};
                     })
                     .show();
+
+                logt(TipoLog::Sistema, Tag, "exibindo produto:[{}]", produto);
+      
                 return std::optional<bool>{true};
               });
         })
@@ -195,6 +203,8 @@ struct ProdutoController {
                           input.get_decimal("preco");
 
                       mProdutoInteractor->save_produto(item);
+      
+                      logt(TipoLog::Sistema, Tag, "alterando produto:[{}]", item);
                     })
                     .on_failed(opcao_invalida)
                     .show();
@@ -220,6 +230,9 @@ struct ProdutoController {
           mProdutoInteractor->load_produto_by_id(produtoId.value())
               .and_then([&](auto item) -> std::optional<bool> {
                 mProdutoInteractor->remove_produto(item);
+
+                logt(TipoLog::Sistema, Tag, "removendo produto:[{}]", item);
+
                 return {};
               });
         })
@@ -244,8 +257,6 @@ struct ProdutoController {
 private:
   std::unique_ptr<ProdutoInteractor> mProdutoInteractor;
 
-  static void opcao_invalida() { fmt::print("Opcao Invalida !\n"); }
-
   void listar_produtos(std::vector<ProdutoInteractorModel> &&items) {
     Table{items}
         .title("Listagem de produtos")
@@ -264,5 +275,7 @@ private:
                      produto["validade"], format_currency(preco["valor"])};
         })
         .show();
+
+        logt(TipoLog::Sistema, Tag, "listando produtos");
   }
 };

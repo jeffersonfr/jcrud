@@ -10,18 +10,25 @@
 #include <fmt/format.h>
 
 struct Log {
-  static void init() {
-    mRepository = jinject::inject<std::unique_ptr<LogRepository>>();
+  static Log &instance() {
+    static Log log;
+
+    if (!log.mRepository) {
+      log.mRepository = jinject::inject<std::unique_ptr<LogRepository>>();
+
+      if (!log.mRepository) {
+        throw std::runtime_error("Instantiation of LogRepository is incomplete");
+      }
+    }
+
+    return log;
   }
 
-  static void level(LevelLog value) {
-    mLevel = value;
-  }
+  void level(LevelLog value) { mLevel = value; }
 
   template <typename... Args>
-  static void msg(std::source_location const &location, LevelLog level,
-                  TipoLog type, std::string const &tag, std::string const &msg,
-                  Args... args) {
+  void msg(std::source_location const &location, LevelLog level, TipoLog type,
+           std::string const &tag, std::string const &msg, Args... args) const {
     if (static_cast<int>(level) < static_cast<int>(mLevel)) {
       return;
     }
@@ -40,19 +47,27 @@ struct Log {
   }
 
 private:
-  inline static std::unique_ptr<LogRepository> mRepository;
-  inline static LevelLog mLevel = LevelLog::Trace;
+  std::unique_ptr<LogRepository> mRepository;
+  LevelLog mLevel = LevelLog::Trace;
+
+  Log() {}
 };
 
 #define logt(...)                                                              \
-  Log::msg(std::source_location::current(), LevelLog::Trace, ##__VA_ARGS__)
+  Log::instance().msg(std::source_location::current(), LevelLog::Trace,        \
+                      ##__VA_ARGS__)
 #define logd(...)                                                              \
-  Log::msg(std::source_location::current(), LevelLog::Debug, ##__VA_ARGS__)
+  Log::instance().msg(std::source_location::current(), LevelLog::Debug,        \
+                      ##__VA_ARGS__)
 #define logi(...)                                                              \
-  Log::msg(std::source_location::current(), LevelLog::Info, ##__VA_ARGS__)
+  Log::instance().msg(std::source_location::current(), LevelLog::Info,         \
+                      ##__VA_ARGS__)
 #define logw(...)                                                              \
-  Log::msg(std::source_location::current(), LevelLog::Warn, ##__VA_ARGS__)
+  Log::instance().msg(std::source_location::current(), LevelLog::Warn,         \
+                      ##__VA_ARGS__)
 #define loge(...)                                                              \
-  Log::msg(std::source_location::current(), LevelLog::Error, ##__VA_ARGS__)
+  Log::instance().msg(std::source_location::current(), LevelLog::Error,        \
+                      ##__VA_ARGS__)
 #define logf(...)                                                              \
-  Log::msg(std::source_location::current(), LevelLog::Fatal, ##__VA_ARGS__)
+  Log::instance().msg(std::source_location::current(), LevelLog::Fatal,        \
+                      ##__VA_ARGS__)

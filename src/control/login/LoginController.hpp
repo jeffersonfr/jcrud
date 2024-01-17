@@ -4,6 +4,7 @@
 #include "ui/Form.hpp"
 #include "ui/Table.hpp"
 #include "utils/Format.hpp"
+#include "utils/Log.hpp"
 
 #include <cstdlib>
 #include <fstream>
@@ -24,6 +25,8 @@
 using namespace jui;
 
 struct LoginController {
+  inline static const std::string Tag = "LoginController";
+
   LoginController(std::unique_ptr<LoginInteractor> loginInteractor)
       : mLoginInteractor{std::move(loginInteractor)} {}
 
@@ -44,6 +47,8 @@ struct LoginController {
             auto cargos = mLoginInteractor->load_cargos(*usuario);
 
             callback(*usuario, cargos);
+
+            logt(TipoLog::Sistema, Tag, "logando o usuario:[{}]", *usuario);
           }
         })
         .on_failed(abort)

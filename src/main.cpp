@@ -2,6 +2,8 @@
 
 int main() {
   try {
+    Modules::load_modules();
+
     Sistema sistema;
 
     sistema.execute();

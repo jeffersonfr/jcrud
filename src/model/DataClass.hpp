@@ -12,17 +12,11 @@
 #include <vector>
 
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 
-enum class FieldType {
-  Serial,
-  Bool,
-  Int,
-  Decimal,
-  Text,
-  Timestamp
-};
+enum class FieldType { Serial, Bool, Int, Decimal, Text, Timestamp };
 
 template <typename T>
 concept DefaultValueConcept = requires(T t) {
@@ -30,16 +24,11 @@ concept DefaultValueConcept = requires(T t) {
 };
 
 struct NoDefaultValue {
-  static std::optional<std::string> get_value() {
-    return {};
-  }
+  static std::optional<std::string> get_value() { return {}; }
 };
 
-template <StringLiteral Value>
-struct DefaultValue {
-  static std::optional<std::string> get_value() {
-    return {Value.to_string()};
-  }
+template <StringLiteral Value> struct DefaultValue {
+  static std::optional<std::string> get_value() { return {Value.to_string()}; }
 };
 
 template <StringLiteral Value>
@@ -54,7 +43,8 @@ concept FieldConcept = requires(T t) {
   { T::is_nullable() } -> std::same_as<bool>;
 };
 
-template <StringLiteral Name, FieldType Type, bool Nullable = true, DefaultValueConcept Default = NoDefaultValue>
+template <StringLiteral Name, FieldType Type, bool Nullable = true,
+          DefaultValueConcept Default = NoDefaultValue>
 struct Field {
   constexpr static std::string get_name() { return Name.to_string(); }
 
@@ -62,7 +52,9 @@ struct Field {
 
   constexpr static bool is_nullable() { return Nullable; }
 
-  constexpr static std::optional<std::string> get_default() { return Default::get_value(); }
+  constexpr static std::optional<std::string> get_default() {
+    return Default::get_value();
+  }
 };
 
 template <StringLiteral Name, FieldType Type, bool Nullable = true>
@@ -232,7 +224,9 @@ struct Data {
 
   bool operator==(Data const &other) const { return mData == other.mData; }
 
-  bool operator==(auto const &other) const { return mData == Data{other}.mData; }
+  bool operator==(auto const &other) const {
+    return mData == Data{other}.mData;
+  }
 
 private:
   MyData mData;
@@ -255,6 +249,7 @@ std::string to_string(Data const &value) {
 
   return o.str();
 }
+
 template <StringLiteral Name, PrimaryConcept PrimaryKeys,
           ForeignConcept ForeignKeys, FieldConcept... Fields>
 struct DataClass {
@@ -330,7 +325,8 @@ struct DataClass {
     std::ostringstream o;
     bool first = true;
 
-    o << std::quoted(get_name()) << ": {";
+    o << "{";
+    // o << std::quoted(get_name(), '\'') << ": {";
 
     get_fields([&]<typename Field>() {
       if (!first) {
@@ -339,14 +335,14 @@ struct DataClass {
 
       first = false;
 
-      o << std::quoted(Field::get_name()) << ":";
+      o << std::quoted(Field::get_name(), '\'') << ":";
 
       this->operator[](Field::get_name())
           .get_value(overloaded{
               [&](nullptr_t arg) { o << "null"; },
               [&](bool arg) { o << (arg ? "true" : "false"); },
               [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
-              [&](std::string arg) { o << std::quoted(arg); }});
+              [&](std::string arg) { o << std::quoted(arg, '\''); }});
     });
 
     o << "}";
@@ -390,3 +386,8 @@ private:
     }
   }
 };
+
+template <StringLiteral Name, PrimaryConcept PrimaryKeys,
+          ForeignConcept ForeignKeys, FieldConcept... Fields>
+struct fmt::formatter<DataClass<Name, PrimaryKeys, ForeignKeys, Fields...>>
+    : fmt::ostream_formatter {};
