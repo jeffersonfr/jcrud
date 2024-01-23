@@ -403,9 +403,9 @@ private:
 
   template <std::size_t Index, typename TModel, typename... TModels>
   void for_each_update(Model const &item) const {
-    Repository<TModel> repository = jinject::get{};
+    std::unique_ptr<Repository<TModel>> repository = jinject::get{};
 
-    repository.update(item.template get<TModel>());
+    repository->update(item.template get<TModel>());
 
     if constexpr (sizeof...(TModels) > 0) {
       for_each_update<Index + 1, TModels...>(item);

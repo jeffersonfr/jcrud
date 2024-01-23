@@ -18,15 +18,13 @@ namespace jui {
 enum class TypeItem { Int, Decimal, Text, Date };
 
 struct Input {
-  Input(std::map<std::string, std::string> &values) : mValues{values} {}
+  Input(std::map<std::string, std::optional<std::string>> &values) : mValues{values} {}
 
   std::optional<std::string> get_text(std::string key) {
     auto it = mValues.find(key);
 
-    for (auto &it : mValues) {
-      if (strncmp(it.first.data(), key.data(), key.size()) == 0) {
-        return {it.second};
-      }
+    if (it != mValues.end()) {
+      return it->second;
     }
 
     return {};
@@ -39,17 +37,15 @@ struct Input {
       return {};
     }
 
-    auto value = *text;
-    long number;
-
-    auto [ptr, ec] =
-        std::from_chars(value.data(), value.data() + value.size(), number);
-
-    if (ec != std::errc{}) {
-      return {};
+    try {
+      return std::stoi(*text);
+    } catch (std::invalid_argument &e) {
+      // logt
+    } catch (std::out_of_range &e) {
+      // logt
     }
-
-    return number;
+      
+    return {};
   }
 
   std::optional<double> get_decimal(std::string key) {
@@ -59,17 +55,15 @@ struct Input {
       return {};
     }
 
-    auto value = *text;
-    double number;
-
-    auto [ptr, ec] =
-        std::from_chars(value.data(), value.data() + value.size(), number);
-
-    if (ec != std::errc{}) {
-      return {};
+    try {
+      return std::stof(*text);
+    } catch (std::invalid_argument &e) {
+      // logt
+    } catch (std::out_of_range &e) {
+      // logt
     }
-
-    return number;
+      
+    return {};
   }
 
   std::optional<std::chrono::year_month_day> get_date(std::string key) {
@@ -94,7 +88,7 @@ struct Input {
   }
 
 private:
-  std::map<std::string, std::string> &mValues;
+  std::map<std::string, std::optional<std::string>> &mValues;
 };
 
 } // namespace jui

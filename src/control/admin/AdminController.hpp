@@ -34,7 +34,7 @@ enum class SelecaoAdmin {
 using namespace jui;
 
 struct AdminController {
-  inline static constexpr std::string Tag = "AdminController";
+  inline static const std::string Tag = "AdminController";
 
   AdminController(std::unique_ptr<AdminInteractor> adminInteractor, std::unique_ptr<LoginInteractor> loginInteractor)
       : mAdminInteractor{std::move(adminInteractor)}, mLoginInteractor{std::move(loginInteractor)} {}
@@ -45,10 +45,8 @@ struct AdminController {
     bool result = true;
 
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
+        .title("Administracao")
         .before([&]() {
-          system("clear");
-
-          fmt::print("Administracao\n\n");
           fmt::print("Escolha uma opção:\n");
           fmt::print("\t{} - Buscar usuario\n",
                      static_cast<int>(SelecaoAdmin::BuscarUsuario));

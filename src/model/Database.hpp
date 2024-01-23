@@ -183,8 +183,7 @@ struct Database
 
     o << "UPDATE " << Model::get_name() << " SET ";
 
-    model.get_fields([&]<typename Field>()
-                     {
+    model.get_fields([&]<typename Field>() {
       auto const &value = model[Field::get_name()];
 
       if (default_with_null_value<Field>(value)) {
@@ -219,7 +218,8 @@ struct Database
           },
           [&](int64_t arg) {
             if (Field::get_type() != FieldType::Int and
-                Field::get_type() != FieldType::Serial) {
+                Field::get_type() != FieldType::Serial and
+                Field::get_type() != FieldType::Bool) {
               throw std::runtime_error(
                   fmt::format("unable to insert '{}', field '{}' is not "
                               "convertible to integer",

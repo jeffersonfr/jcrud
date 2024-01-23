@@ -214,6 +214,7 @@ private:
 
       ddl << Field::get_name();
 
+      // https://www.sqlite.org/datatype3.html
       if (Field::get_type() == FieldType::Serial) {
         hasSerial = true;
 
@@ -223,7 +224,7 @@ private:
       } else if (Field::get_type() == FieldType::Int) {
         ddl << " INTEGER";
       } else if (Field::get_type() == FieldType::Decimal) {
-        ddl << " DECIMAL";
+        ddl << " REAL";
       } else if (Field::get_type() == FieldType::Text) {
         ddl << " TEXT";
       } else if (Field::get_type() == FieldType::Timestamp) {

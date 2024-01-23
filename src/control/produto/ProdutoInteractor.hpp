@@ -57,8 +57,8 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
   }
 
   void save_produto(ProdutoInteractorModel const &item) {
-    mProdutoRepository->get_database()->transaction([&](Database &db) {
-      if (item.get<ProdutoModel>("id").is_null()) {
+    if (item.get<ProdutoModel>("id").is_null()) {
+      mProdutoRepository->get_database()->transaction([&](Database &db) {
         auto produto = mProdutoRepository->save(item.get<ProdutoModel>());
 
         if (produto.has_value()) {
@@ -66,10 +66,10 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
 
           mPrecoRepository->save(item.get<PrecoModel>());
         }
-      } else {
-        update(item);
-      }
-    });
+      });
+    } else {
+      update(item);
+    }
   }
 
   void remove_produto(ProdutoInteractorModel const &item) {

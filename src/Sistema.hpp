@@ -69,10 +69,8 @@ private:
 
   void do_menu() {
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
+      .title("Farmacia Pague+")
       .before([&]() {
-        system("clear");
-
-        fmt::print("Bem-vindo ao sistema da Farmácia Pague++ !\n\n");
         fmt::print("Escolha uma opção:\n");
 
         if (selecaoSet.count(

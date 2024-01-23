@@ -47,10 +47,8 @@ struct ProdutoController {
     bool result = true;
 
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
+        .title("Produtos")
         .before([&]() {
-          system("clear");
-
-          fmt::print("Produtos\n\n");
           fmt::print("Escolha uma opção:\n");
           fmt::print("\t{} - Inserir produto\n",
                      static_cast<int>(SelecaoProduto::Inserir));

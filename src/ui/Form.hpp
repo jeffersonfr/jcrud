@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <charconv>
+#include <chrono>
 #include <functional>
 #include <iostream>
 #include <map>
@@ -44,6 +45,12 @@ template <typename... Items> struct Form {
         items.size() != 0 and it != items.end()) {
       throw std::runtime_error("Duplicated itens in form");
     }
+  }
+
+  Form &title(std::string title) {
+    mTitle = title;
+
+    return *this;
   }
 
   Form &before(std::function<void()> callback) {
@@ -92,6 +99,12 @@ template <typename... Items> struct Form {
   void show() {
     struct sigaction new_action, old_action;
 
+    if (mTitle.has_value()) {
+      system("clear");
+
+      fmt::print("{}\n\n", *mTitle);
+    }
+
     mBefore();
 
     if (!mInterruptable) {
@@ -109,7 +122,7 @@ template <typename... Items> struct Form {
         mOnSuccess(Input(mValues));
       }
     } catch (std::runtime_error &e) {
-      fmt::print("[error]: {}\n", e.what());
+      fmt::print("[runtime error]: {}\n", e.what());
 
       mOnFailed();
     }
@@ -130,7 +143,7 @@ template <typename... Items> struct Form {
   }
 
 private:
-  std::map<std::string, std::string> mValues;
+  std::map<std::string, std::optional<std::string>> mValues;
 
   std::function<void()> mBefore = []() {};
   std::function<void()> mAfter = []() {};
@@ -138,6 +151,7 @@ private:
   std::function<void()> mOnFailed = []() {};
   std::function<void()> mOnCancelled = []() {};
 
+  std::optional<std::string> mTitle;
   bool mInterruptable = false;
 
   template <StringLiteral Name, StringLiteral Description, TypeItem Type>
@@ -161,22 +175,75 @@ private:
       help = "[ data no formato: ddmmaaaa ]";
     }
 
-    if (defaultValue == mValues.end()) {
-      fmt::print("{} {}\n: ", Description.to_string(), help);
-    } else {
-      fmt::print("{} <default: {}> {}\n: ", Description.to_string(),
-                 defaultValue->second, help);
-    }
+    fmt::print("{} <default: {}> {}\n: ", Description.to_string(),
+               defaultValue->second.value_or("--"), help);
+
+    mValues[Name.to_string()] =
+        read_value<Type>().or_else([&]() -> std::optional<std::string> {
+          if (defaultValue != mValues.end()) {
+            return defaultValue->second;
+          }
+
+          return {};
+        });
+  }
+
+  template <TypeItem Type> std::optional<std::string> read_value() {
+    std::string line;
 
     std::getline(std::cin, line);
 
     line = jmixin::String(line).trim();
 
-    if (line.empty() and defaultValue != mValues.end()) {
-      line = defaultValue->second;
+    if (line.empty()) {
+      return {};
     }
 
-    mValues[Name.to_string()] = line;
+    if (Type == TypeItem::Text) {
+      return line;
+    } else if (Type == TypeItem::Int) {
+      try {
+        std::stoi(line);
+
+        return line;
+      } catch (std::invalid_argument &e) {
+        // logt("");
+      } catch (std::out_of_range &e) {
+        // logt
+      }
+        
+      return {};
+    } else if (Type == TypeItem::Decimal) {
+      try {
+        std::stof(line);
+
+        return line;
+      } catch (std::invalid_argument &e) {
+        // logt
+      } catch (std::out_of_range &e) {
+        // logt
+      }
+        
+      return {};
+    } else if (Type == TypeItem::Date) {
+      try {
+        auto d = std::chrono::year{std::stoi(line.substr(0, 2))};
+        auto m = std::chrono::month{
+            static_cast<unsigned>(std::stoi(line.substr(2, 2)))};
+        auto y =
+            std::chrono::day{static_cast<unsigned>(std::stoi(line.substr(4, 4)))};
+
+        std::chrono::year_month_day ymd{d, m, y};
+
+        if (ymd.ok()) {
+          return line.substr(0, 8);
+        }
+      } catch (std::out_of_range &e) {
+        // logt
+      }
+    }
+
+    return {};
   }
 };
 } // namespace jui
