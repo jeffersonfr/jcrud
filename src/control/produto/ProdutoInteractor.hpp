@@ -28,7 +28,11 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
   }
 
   std::vector<ProdutoInteractorModel> load_all_produtos() {
-    auto items = load_all();
+    auto items = load_all() | std::ranges::views::filter([](auto const &item) {
+                   return !item.template get<ProdutoModel>("excluido")
+                               .get_bool()
+                               .value();
+                 });
 
     auto it = std::ranges::unique(items, [](auto a, auto b) {
       return a.template get<ProdutoModel>("id") ==
@@ -43,11 +47,10 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
   }
 
   std::optional<ProdutoInteractorModel> load_produto_by_id(int64_t id) {
-    auto produtos =
-        load_all_produtos() |
-        std::ranges::views::filter([&](auto const &produto) {
-          return produto.template get<ProdutoModel>("id") == id;
-        });
+    auto produtos = load_all_produtos() |
+                    std::ranges::views::filter([&](auto const &produto) {
+                      return produto.template get<ProdutoModel>("id") == id;
+                    });
 
     for (auto const &produto : produtos) {
       return produto;
@@ -74,13 +77,13 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
 
   void remove_produto(ProdutoInteractorModel const &item) {
     auto produtoId = item.get<ProdutoModel>("id").get_int();
-    
+
     if (!produtoId.has_value()) {
       return;
     }
 
     auto itemOther{std::move(item.get<ProdutoModel>())};
-    
+
     itemOther["excluido"] = true;
 
     mProdutoRepository->update(itemOther);
@@ -88,7 +91,7 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
     /*
     mProdutoRepository->get_database()->transaction([&](Database &db) {
       auto produtoId = item.get<ProdutoModel>("id").get_int();
-      
+
       if (!produtoId.has_value()) {
         return;
       }

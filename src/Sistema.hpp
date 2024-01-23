@@ -42,7 +42,6 @@ private:
   std::set<int> selecaoSet;
 
   void do_login() {
-
     Ambiente::usuario = {};
     Ambiente::cargos = {};
 
