@@ -24,8 +24,6 @@ struct Sistema {
   void execute() {
     using namespace jui;
 
-    logd(TipoLog::Sistema, Tag, "executando o sistema");
-
     do {
       if (!Ambiente::usuario.has_value()) {
         do_login();
@@ -62,6 +60,8 @@ private:
             selecaoSet.insert(static_cast<int>(SelecaoSistema::Produtos));
           }
         }
+
+        logd(TipoLog::Sistema, Tag, "login: {}", usuarioModel);
       }
     });
   }

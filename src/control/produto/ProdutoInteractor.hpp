@@ -67,7 +67,11 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
         if (produto.has_value()) {
           item.get<PrecoModel>("produto_id") = (*produto)["id"];
 
-          mPrecoRepository->save(item.get<PrecoModel>());
+          auto e = mPrecoRepository->save(item.get<PrecoModel>());
+
+          if (!e.has_value()) {
+            throw e.error();
+          }
         }
       });
     } else {

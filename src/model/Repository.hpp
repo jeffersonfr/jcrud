@@ -193,7 +193,7 @@ template <typename T> struct Repository {
     return {};
   }
 
-  std::expected<Model, std::exception> save(Model const &item) const {
+  [[nodiscard]] std::expected<Model, std::exception> save(Model const &item) const {
     try {
       return mDb->insert(item);
     } catch (std::runtime_error &e) {

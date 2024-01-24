@@ -31,7 +31,11 @@ struct AdminInteractor
   void save_usuario(UsuarioModel const &item)
   {
     if (item["id"].is_null()) {
-      mUsuarioRepository->save(item);
+      auto e = mUsuarioRepository->save(item);
+
+      if (!e.has_value()) {
+        throw e.error();
+      }
     } else {
       mUsuarioRepository->update(item);
     }
