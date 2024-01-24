@@ -326,7 +326,6 @@ struct DataClass {
     bool first = true;
 
     o << "{";
-    // o << std::quoted(get_name(), '\'') << ": {";
 
     get_fields([&]<typename Field>() {
       if (!first) {
@@ -335,14 +334,14 @@ struct DataClass {
 
       first = false;
 
-      o << std::quoted(Field::get_name(), '\'') << ":";
+      o << std::quoted(Field::get_name()) << ":";
 
       this->operator[](Field::get_name())
           .get_value(overloaded{
               [&](nullptr_t arg) { o << "null"; },
               [&](bool arg) { o << (arg ? "true" : "false"); },
               [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
-              [&](std::string arg) { o << std::quoted(arg, '\''); }});
+              [&](std::string arg) { o << std::quoted(arg); }});
     });
 
     o << "}";

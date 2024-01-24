@@ -35,16 +35,18 @@ struct Log {
 
     LogModel model;
 
-    std::string functionName = jmixin::String(location.function_name()).replace("\\\"", "'");
-
     model["level_log_id"] = static_cast<int>(level);
     model["tipo_log_id"] = static_cast<int>(type);
     model["localizacao"] =
         fmt::format("{} ({}:{}) {}: ", location.file_name(), location.line(),
-                    location.column(), functionName);
+                    location.column(), location.function_name());
     model["tag"] = tag;
     model["descricao"] = fmt::vformat(msg, fmt::make_format_args(args...));
 
+    model["localizacao"] = jmixin::String(model["localizacao"].get_text().value()).replace("\\\"", "'");
+    model["tag"] = jmixin::String(model["tag"].get_text().value()).replace("\\\"", "'");
+    model["descricao"] = jmixin::String(model["descricao"].get_text().value()).replace("\\\"", "'");
+    
     auto e = mRepository->save(model);
 
     if (!e.has_value()) {
