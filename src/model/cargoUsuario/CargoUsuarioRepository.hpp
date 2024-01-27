@@ -1,6 +1,6 @@
 #pragma once
 
 #include "model/Repository.hpp"
-#include "model/cargo_usuario/CargoUsuarioModel.hpp"
+#include "model/cargoUsuario/CargoUsuarioModel.hpp"
 
 using CargoUsuarioRepository = Repository<CargoUsuarioModel>;

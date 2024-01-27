@@ -1,7 +1,7 @@
 #pragma once
 
 #include "control/produto/ProdutoInteractor.hpp"
-#include "model/categoria_produto/CategoriaProdutoRepository.hpp"
+#include "model/categoriaProduto/CategoriaProdutoRepository.hpp"
 #include "model/produto/ProdutoRepository.hpp"
 #include "ui/Form.hpp"
 #include "ui/Table.hpp"
@@ -108,7 +108,6 @@ struct ProdutoController {
     Form<Item<"categoria", "Categoria do produto [usar o id]", TypeItem::Int>,
          Item<"nome", "Nome do produto", TypeItem::Text>,
          Item<"descricao", "Descricao do produto", TypeItem::Text>,
-         Item<"validade", "Data no formato 'ddmmaaaa'", TypeItem::Text>,
          Item<"preco", "Preco do produto", TypeItem::Decimal>>{}
         .on_success([&](Input input) {
           ProdutoInteractorModel item;
@@ -118,7 +117,6 @@ struct ProdutoController {
           produto["categoria_id"] = input.get_int("categoria");
           produto["nome"] = input.get_text("nome");
           produto["descricao"] = input.get_text("descricao");
-          produto["validade"] = input.get_text("validade");
 
           preco["valor"] = input.get_decimal("preco");
 
@@ -164,7 +162,7 @@ struct ProdutoController {
                     .show();
 
                 logt(TipoLog::Sistema, Tag, "exibindo produto:[{}]", produto);
-      
+
                 return std::optional<bool>{true};
               });
         })
@@ -201,8 +199,9 @@ struct ProdutoController {
                           input.get_decimal("preco");
 
                       mProdutoInteractor->save_produto(item);
-      
-                      logt(TipoLog::Sistema, Tag, "alterando produto:[{}]", item);
+
+                      logt(TipoLog::Sistema, Tag, "alterando produto:[{}]",
+                           item);
                     })
                     .on_failed(opcao_invalida)
                     .show();
@@ -259,21 +258,23 @@ private:
     Table{items}
         .title("Listagem de produtos")
         .head([]() {
-          return std::vector<Col>{{"id", 10},       {"categoria", 15},
-                                  {"nome", 32},     {"descricao", 32},
-                                  {"validade", 15}, {"preco", 15}};
+          return std::vector<Col>{{"id", 10},
+                                  {"categoria", 15},
+                                  {"nome", 32},
+                                  {"descricao", 32},
+                                  {"preco", 15}};
         })
         .data([&](auto const &item) {
           auto categoriaProduto = item.template get<CategoriaProdutoModel>();
           auto produto = item.template get<ProdutoModel>();
           auto preco = item.template get<PrecoModel>();
 
-          return Row{produto["id"],       categoriaProduto["descricao"],
-                     produto["nome"],     produto["descricao"],
-                     produto["validade"], format_currency(preco["valor"])};
+          return Row{produto["id"], categoriaProduto["descricao"],
+                     produto["nome"], produto["descricao"],
+                     format_currency(preco["valor"])};
         })
         .show();
 
-        logt(TipoLog::Sistema, Tag, "listando produtos");
+    logt(TipoLog::Sistema, Tag, "listando produtos");
   }
 };

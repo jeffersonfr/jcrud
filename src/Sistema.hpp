@@ -61,7 +61,7 @@ private:
           }
         }
 
-        logd(TipoLog::Sistema, Tag, "login: {}", usuarioModel);
+        logd(TipoLog::Sistema, Tag, "logado: {}", usuarioModel);
       }
     });
   }
@@ -70,7 +70,7 @@ private:
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
       .title("Farmacia Pague+")
       .before([&]() {
-        fmt::print("Escolha uma opção:\n");
+        fmt::print("{}", "Escolha uma opção:\n");
 
         if (selecaoSet.count(
                 static_cast<int>(SelecaoSistema::Administracao))) {

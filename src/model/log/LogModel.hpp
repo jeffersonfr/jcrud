@@ -1,8 +1,8 @@
 #pragma once
 
 #include "model/DataClass.hpp"
-#include "model/level_log/LevelLogModel.hpp"
-#include "model/tipo_log/TipoLogModel.hpp"
+#include "model/levelLog/LevelLogModel.hpp"
+#include "model/tipoLog/TipoLogModel.hpp"
 
 using LogModel = DataClass<"log", Primary<"id">, Foreign<Refer<LevelLogModel, "level_log_id">, Refer<TipoLogModel, "tipo_log_id">>,
   Field<"id", FieldType::Serial, false>,

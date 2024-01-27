@@ -1,6 +1,7 @@
 #pragma once
 
 #include "control/admin/AdminInteractor.hpp"
+#include "control/login/LoginInteractor.hpp"
 #include "ui/Form.hpp"
 #include "ui/Table.hpp"
 #include "utils/Format.hpp"

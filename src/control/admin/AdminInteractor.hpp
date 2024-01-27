@@ -2,7 +2,7 @@
 
 #include "model/cargo/CargoRepository.hpp"
 #include "model/usuario/UsuarioRepository.hpp"
-#include "model/cargo_usuario/CargoUsuarioRepository.hpp"
+#include "model/cargoUsuario/CargoUsuarioRepository.hpp"
 
 #include <expected>
 #include <optional>

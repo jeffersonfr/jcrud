@@ -43,12 +43,12 @@ struct LoginController {
           auto senha = input.get_text("senha").value_or("");
           auto usuario = mLoginInteractor->login(nome, senha);
 
+          logt(TipoLog::Sistema, Tag, "logando: {}", *usuario);
+
           if (usuario.has_value()) {
             auto cargos = mLoginInteractor->load_cargos(*usuario);
 
             callback(*usuario, cargos);
-
-            logt(TipoLog::Sistema, Tag, "logando o usuario:[{}]", *usuario);
           }
         })
         .on_failed(abort)

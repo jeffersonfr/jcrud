@@ -1,7 +1,7 @@
 #pragma once
 
 #include "control/produto/ProdutoInteractorModel.hpp"
-#include "model/categoria_produto/CategoriaProdutoRepository.hpp"
+#include "model/categoriaProduto/CategoriaProdutoRepository.hpp"
 #include "model/preco/PrecoRepository.hpp"
 #include "model/produto/ProdutoRepository.hpp"
 

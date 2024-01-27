@@ -1,8 +1,8 @@
 #pragma once
 
-#include "model/level_log/LevelLogModel.hpp"
+#include "model/levelLog/LevelLogModel.hpp"
 #include "model/log/LogRepository.hpp"
-#include "model/tipo_log/TipoLogModel.hpp"
+#include "model/tipoLog/TipoLogModel.hpp"
 
 #include <source_location>
 #include <string>
