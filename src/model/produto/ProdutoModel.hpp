@@ -1,6 +1,7 @@
 #pragma once
 
 #include "model/DataClass.hpp"
+#include "model/categoriaProduto/CategoriaProdutoModel.hpp"
 
 using ProdutoModel = DataClass<"produto", Primary<"id">, Foreign<Refer<CategoriaProdutoModel, "categoria_id">>,
   Field<"id", FieldType::Serial, false>,

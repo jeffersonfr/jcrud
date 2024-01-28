@@ -185,7 +185,11 @@ struct Data {
 
   template <typename T> Data(T &&data) : mData{std::forward<T>(data)} {}
 
-  template <typename T> Data(std::optional<T> data) : mData{data.value()} {}
+  template <typename T> Data(std::optional<T> data) {
+    if (data.has_value()) {
+      mData = data.value();
+    }
+  }
 
   template <typename F> constexpr void get_value(F &&callback) const {
     std::visit(std::forward<F>(callback), mData);

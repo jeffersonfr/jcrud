@@ -70,18 +70,24 @@ struct ProdutoController {
             return;
           }
 
-          if (*opcao == static_cast<int>(SelecaoProduto::Inserir)) {
-            inserir();
-          } else if (*opcao == static_cast<int>(SelecaoProduto::Listar)) {
-            listar();
-          } else if (*opcao == static_cast<int>(SelecaoProduto::Exibir)) {
-            exibir();
-          } else if (*opcao == static_cast<int>(SelecaoProduto::Alterar)) {
-            alterar();
-          } else if (*opcao == static_cast<int>(SelecaoProduto::Remover)) {
-            remover();
-          } else if (*opcao == static_cast<int>(SelecaoProduto::Relatorio)) {
-            relatorio();
+          try {
+            if (*opcao == static_cast<int>(SelecaoProduto::Inserir)) {
+              inserir();
+            } else if (*opcao == static_cast<int>(SelecaoProduto::Listar)) {
+              listar();
+            } else if (*opcao == static_cast<int>(SelecaoProduto::Exibir)) {
+              exibir();
+            } else if (*opcao == static_cast<int>(SelecaoProduto::Alterar)) {
+              alterar();
+            } else if (*opcao == static_cast<int>(SelecaoProduto::Remover)) {
+              remover();
+            } else if (*opcao == static_cast<int>(SelecaoProduto::Relatorio)) {
+              relatorio();
+            }
+          } catch (std::runtime_error &e) {
+            loge(TipoLog::Sistema, Tag, "{}", e.what());
+
+            fmt::print("{}", e.what());
           }
 
           fmt::print("Pressione qualquer tecla para continuar ...");

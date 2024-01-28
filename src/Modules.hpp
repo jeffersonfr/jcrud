@@ -1,6 +1,7 @@
 #pragma once
 
 #include "control/admin/AdminController.hpp"
+#include "control/estoque/EstoqueController.hpp"
 #include "control/login/LoginController.hpp"
 #include "control/produto/ProdutoController.hpp"
 #include "implementation/model/SqliteDatabase.hpp"
@@ -9,6 +10,7 @@
 #include "model/categoriaProduto/CategoriaProdutoRepository.hpp"
 #include "model/estoque/EstoqueRepository.hpp"
 #include "model/filial/FilialRepository.hpp"
+#include "model/historicoEstoque/HistoricoEstoqueRepository.hpp"
 #include "model/levelLog/LevelLogRepository.hpp"
 #include "model/log/LogRepository.hpp"
 #include "model/login/LoginRepository.hpp"
@@ -16,7 +18,6 @@
 #include "model/produto/ProdutoRepository.hpp"
 #include "model/tipoLog/TipoLogRepository.hpp"
 #include "model/usuario/UsuarioRepository.hpp"
-#include "model/historicoEstoque/HistoricoEstoqueRepository.hpp"
 
 #include "jinject/jinject.h"
 
@@ -164,6 +165,15 @@ private:
     UNIQUE(EstoqueRepository) {
       return new EstoqueRepository{inject<std::shared_ptr<Database>>()};
     };
+
+    UNIQUE(TipoNegocioRepository) {
+      return new TipoNegocioRepository{inject<std::shared_ptr<Database>>()};
+    };
+
+    UNIQUE(HistoricoEstoqueRepository) {
+      return new HistoricoEstoqueRepository{
+          inject<std::shared_ptr<Database>>()};
+    };
   }
 
   static void load_controls() {
@@ -186,6 +196,15 @@ private:
     UNIQUE(ProdutoController) {
       return new ProdutoController{
           inject<std::unique_ptr<ProdutoInteractor>>()};
+    };
+
+    UNIQUE(EstoqueInteractor) {
+      return new EstoqueInteractor{get{}, get{}};
+    };
+
+    UNIQUE(EstoqueController) {
+      return new EstoqueController{
+          inject<std::unique_ptr<EstoqueInteractor>>()};
     };
   }
 };

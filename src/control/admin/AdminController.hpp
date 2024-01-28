@@ -67,22 +67,28 @@ struct AdminController {
             return;
           }
 
-          if (*opcao == static_cast<int>(SelecaoAdmin::BuscarUsuario)) {
-            listar_usuario();
-          } else if (*opcao ==
-                     static_cast<int>(SelecaoAdmin::AdicionarUsuario)) {
-            adicionar_usuario();
-          } else if (*opcao == static_cast<int>(SelecaoAdmin::RemoverUsuario)) {
-            remover_usuario();
-          } else if (*opcao == static_cast<int>(SelecaoAdmin::AtualizarSenha)) {
-            atualizar_senha();
-          } else if (*opcao ==
-                     static_cast<int>(SelecaoAdmin::AtualizarCargos)) {
-            atualizar_cargos();
-          } else if (*opcao == static_cast<int>(SelecaoAdmin::Sair)) {
-            result = false;
+          try {
+            if (*opcao == static_cast<int>(SelecaoAdmin::BuscarUsuario)) {
+              listar_usuario();
+            } else if (*opcao ==
+                      static_cast<int>(SelecaoAdmin::AdicionarUsuario)) {
+              adicionar_usuario();
+            } else if (*opcao == static_cast<int>(SelecaoAdmin::RemoverUsuario)) {
+              remover_usuario();
+            } else if (*opcao == static_cast<int>(SelecaoAdmin::AtualizarSenha)) {
+              atualizar_senha();
+            } else if (*opcao ==
+                      static_cast<int>(SelecaoAdmin::AtualizarCargos)) {
+              atualizar_cargos();
+            } else if (*opcao == static_cast<int>(SelecaoAdmin::Sair)) {
+              result = false;
 
-            return;
+              return;
+            }
+          } catch (std::runtime_error &e) {
+            loge(TipoLog::Sistema, Tag, "{}", e.what());
+
+            fmt::print("{}", e.what());
           }
 
           fmt::print("Pressione qualquer tecla para continuar ...");

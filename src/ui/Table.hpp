@@ -46,7 +46,7 @@ private:
 template <std::ranges::range T> struct Table {
   using value_type = std::ranges::range_value_t<T>;
 
-  Table(T const &items) : mItems{items} {}
+  Table(T items) : mItems{std::move(items)} {}
 
   Table &title(std::string title) {
     mTitle = title;

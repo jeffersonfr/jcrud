@@ -11,7 +11,8 @@
 
 enum class SelecaoSistema {
   Administracao = 1,
-  Produtos = 2,
+  Produtos,
+  Estoque
 };
 
 struct Sistema {
@@ -37,6 +38,7 @@ private:
   std::unique_ptr<LoginController> mLoginController = get{};
   std::unique_ptr<AdminController> mAdminController = get{};
   std::unique_ptr<ProdutoController> mProdutoController = get{};
+  std::unique_ptr<EstoqueController> mEstoqueController = get{};
   std::set<int> selecaoSet;
 
   void do_login() {
@@ -55,9 +57,11 @@ private:
             selecaoSet.insert(
                 static_cast<int>(SelecaoSistema::Administracao));
             selecaoSet.insert(static_cast<int>(SelecaoSistema::Produtos));
+            selecaoSet.insert(static_cast<int>(SelecaoSistema::Estoque));
           } else if (cargo["id"].get_int().value() ==
                       static_cast<int>(Cargo::Operador)) {
             selecaoSet.insert(static_cast<int>(SelecaoSistema::Produtos));
+            selecaoSet.insert(static_cast<int>(SelecaoSistema::Estoque));
           }
         }
 
@@ -83,6 +87,12 @@ private:
           fmt::print("\t{} - Produtos\n",
                       static_cast<int>(SelecaoSistema::Produtos));
         }
+
+        if (selecaoSet.count(
+                static_cast<int>(SelecaoSistema::Estoque))) {
+          fmt::print("\t{} - Estoque\n",
+                      static_cast<int>(SelecaoSistema::Estoque));
+        }
       })
       .on_success([&](Input input) {
         auto opcao = input.get_int("opcao");
@@ -95,6 +105,8 @@ private:
           mAdminController->execute();
         } else if (*opcao == static_cast<int>(SelecaoSistema::Produtos)) {
           mProdutoController->execute();
+        } else if (*opcao == static_cast<int>(SelecaoSistema::Estoque)) {
+          mEstoqueController->execute();
         }
       })
       .on_failed(opcao_invalida)

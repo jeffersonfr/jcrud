@@ -2,9 +2,11 @@
 
 #include "model/DataClass.hpp"
 #include "model/tipoNegocio/TipoNegocioModel.hpp"
+#include "model/produto/ProdutoModel.hpp"
 
-using EstoqueModel = DataClass<"estoque", Primary<"produto_id", "lote">, Foreign<Refer<ProdutoModel, "produto_id">>,
+using EstoqueModel = DataClass<"estoque", Primary<"id">, Foreign<Refer<ProdutoModel, "produto_id">>,
+  Field<"id", FieldType::Serial, false>,
   Field<"produto_id", FieldType::Int, false>,
-  Field<"quantidade", FieldType::Int>,
-  Field<"lote", FieldType::Int, false>,
+  Field<"quantidade", FieldType::Int, false>,
+  Field<"lote", FieldType::Text, false>,
   Field<"validade", FieldType::Timestamp>>;

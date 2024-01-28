@@ -21,7 +21,7 @@ static bool cancelled = false;
 
 namespace jui {
 
-template <StringLiteral Name, StringLiteral Description, TypeItem Type>
+template <StringLiteral Name, StringLiteral Description, TypeItem Type, bool Nullable = false>
 struct Item {
   static constexpr std::string get_name() { return Name.to_string(); }
 
@@ -30,6 +30,8 @@ struct Item {
   }
 
   static constexpr TypeItem get_type() { return Type; }
+
+  static constexpr bool is_nullable() { return Nullable; }
 };
 
 template <typename... Items> struct Form {
@@ -154,8 +156,8 @@ private:
   std::optional<std::string> mTitle;
   bool mInterruptable = false;
 
-  template <StringLiteral Name, StringLiteral Description, TypeItem Type>
-  void execute(Item<Name, Description, Type> item) {
+  template <StringLiteral Name, StringLiteral Description, TypeItem Type, bool Nullable>
+  void execute(Item<Name, Description, Type, Nullable> item) {
     if (!mInterruptable) {
       if (cancelled) {
         return;
@@ -182,9 +184,11 @@ private:
         read_value<Type>().or_else([&]() -> std::optional<std::string> {
           if (defaultValue != mValues.end()) {
             return defaultValue->second;
+          } else if (Nullable) {
+            return {};
           }
 
-          return {};
+          throw std::runtime_error("item sem valor");
         });
   }
 
@@ -207,7 +211,7 @@ private:
 
         return line;
       } catch (std::invalid_argument &e) {
-        // logt("");
+        // logt
       } catch (std::out_of_range &e) {
         // logt
       }
