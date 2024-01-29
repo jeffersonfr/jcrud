@@ -185,10 +185,18 @@ struct Data {
 
   template <typename T> Data(T &&data) : mData{std::forward<T>(data)} {}
 
-  template <typename T> Data(std::optional<T> data) {
+  template <typename T> constexpr Data & operator=(T const &data) {
+    mData = data;
+
+    return *this;
+  }
+
+  template <typename T> constexpr Data & operator=(std::optional<T> data) {
     if (data.has_value()) {
       mData = data.value();
     }
+
+    return *this;
   }
 
   template <typename F> constexpr void get_value(F &&callback) const {
