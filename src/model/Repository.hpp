@@ -1,6 +1,7 @@
 #pragma once
 
 #include "model/Database.hpp"
+#include "model/CompoundModel.hpp"
 
 #include <algorithm>
 #include <fstream>

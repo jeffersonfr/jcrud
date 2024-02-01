@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ui/Input.hpp"
+#include "strategy/DecorateTitleStrategy.hpp"
 
 #include <algorithm>
 #include <charconv>
@@ -16,6 +17,7 @@
 #include <fmt/format.h>
 
 #include "jmixin/jstring.h"
+#include "jinject/jinject.h"
 
 static bool cancelled = false;
 
@@ -102,9 +104,11 @@ template <typename... Items> struct Form {
     struct sigaction new_action, old_action;
 
     if (mTitle.has_value()) {
+      std::unique_ptr<DecorateTitleStrategy> decorateTitleStrategy = jinject::get{};
+
       system("clear");
 
-      fmt::print("{}\n\n", *mTitle);
+      fmt::print("{}\n\n", decorateTitleStrategy->createFancyTitle(*mTitle));
     }
 
     mBefore();

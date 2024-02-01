@@ -87,17 +87,11 @@ struct EstoqueController {
         .on_success([&](Input input) {
           auto produtoId = input.get_int("id");
 
-          if (!produtoId.has_value()) {
-            fmt::print("Identificador do produto invalido");
-
-            return;
-          }
-
-          auto items = mEstoqueInteractor->load_all();/* |
+          auto items = mEstoqueInteractor->load_all() |
                        std::ranges::views::filter([&](auto const &item) {
                          return item.template get<EstoqueModel>("produto_id") ==
                                 produtoId;
-                       });*/
+                       });
 
           logt(TipoLog::Sistema, Tag, "exibindo produto em estoque:[{}]",
                produtoId.value());
@@ -148,19 +142,13 @@ struct EstoqueController {
   }
 
   void vender() {
-    // TODO:: fazer um decremento na tabela estoque e retornar um expected
     Form<Item<"estoque", "identificador do estoque [usar o id]", TypeItem::Int>,
          Item<"quantidade", "Quantidade do produto (independente da unidade)",
-              TypeItem::Int>>{}
+              TypeItem::Int>,
+         Item<"cnpj", "CNPJ", TypeItem::Text>>{}
         .on_success([&](Input input) {
           auto estoqueId = input.get_int("estoque");
           auto quantidade = input.get_int("quantidade").value();
-
-          if (!estoqueId.has_value()) {
-            fmt::print("Identificador do estoque invalido");
-
-            return;
-          }
 
           auto item = mEstoqueInteractor->load_estoque_by_id(*estoqueId);
 
@@ -170,20 +158,10 @@ struct EstoqueController {
             return;
           }
 
-          auto estoque = *item;
-
-          if (quantidade > estoque["quantidade"].get_int().value()) {
-            fmt::print("Quantidade superior ao limite disponivel");
-
-            return;
-          }
-
-          estoque["quantidade"] = estoque["quantidade"].get_int().value() - quantidade;
-
-          mEstoqueInteractor->save_venda(estoque,
+          mEstoqueInteractor->save_venda(*item, quantidade,
                                          input.get_text("cnpj").value());
 
-          logt(TipoLog::Sistema, Tag, "atualizando venda:[{}]", estoque);
+          logt(TipoLog::Sistema, Tag, "atualizando venda:[{}]", *item);
         })
         .on_failed(opcao_invalida)
         .show();

@@ -41,6 +41,7 @@ struct LoginController {
         .on_success([&](Input input) {
           auto nome = input.get_text("nome").value_or("");
           auto senha = input.get_text("senha").value_or("");
+
           auto usuario = mLoginInteractor->login(nome, senha);
 
           logt(TipoLog::Sistema, Tag, "logando: {}", *usuario);

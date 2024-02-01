@@ -141,12 +141,6 @@ struct ProdutoController {
         .on_success([&](Input input) {
           auto produtoId = input.get_int("id");
 
-          if (!produtoId.has_value()) {
-            fmt::print("Identificador do produto invalido");
-
-            return;
-          }
-
           mProdutoInteractor->load_produto_by_id(produtoId.value())
               .and_then([&](auto produto) {
                 auto historicoPrecos =
@@ -180,12 +174,6 @@ struct ProdutoController {
     Form<Item<"id", "Id do produto", TypeItem::Int>>{}
         .on_success([&](Input input) {
           auto produtoId = input.get_int("id");
-
-          if (!produtoId.has_value()) {
-            fmt::print("Identificador do produto invalido");
-
-            return;
-          }
 
           mProdutoInteractor->load_produto_by_id(produtoId.value())
               .and_then([&](auto item) -> std::optional<bool> {
@@ -223,12 +211,6 @@ struct ProdutoController {
     Form<Item<"id", "Id do produto", TypeItem::Int>>{}
         .on_success([&](Input input) {
           auto produtoId = input.get_int("id");
-
-          if (!produtoId.has_value()) {
-            fmt::print("Identificador do produto invalido");
-
-            return;
-          }
 
           mProdutoInteractor->load_produto_by_id(produtoId.value())
               .and_then([&](auto item) -> std::optional<bool> {
