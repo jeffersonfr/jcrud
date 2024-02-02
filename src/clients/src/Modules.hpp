@@ -1,5 +1,8 @@
 #pragma once
 
+#if JCRUD_CLIENT == Americanas
+  #include "clients/americanas/Modules.hpp"
+#else
 #include "control/admin/AdminController.hpp"
 #include "control/estoque/EstoqueController.hpp"
 #include "control/login/LoginController.hpp"
@@ -219,3 +222,4 @@ private:
     UNIQUE(DecorateTitleStrategy) { return new DecorateTitleStrategy{}; };
   }
 };
+#endif

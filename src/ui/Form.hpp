@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ui/Input.hpp"
 #include "strategy/DecorateTitleStrategy.hpp"
+#include "ui/Input.hpp"
 
 #include <algorithm>
 #include <charconv>
@@ -16,14 +16,15 @@
 
 #include <fmt/format.h>
 
-#include "jmixin/jstring.h"
 #include "jinject/jinject.h"
+#include "jmixin/jstring.h"
 
 static bool cancelled = false;
 
 namespace jui {
 
-template <StringLiteral Name, StringLiteral Description, TypeItem Type, bool Nullable = false>
+template <StringLiteral Name, StringLiteral Description, TypeItem Type,
+          bool Nullable = false>
 struct Item {
   static constexpr std::string get_name() { return Name.to_string(); }
 
@@ -104,7 +105,8 @@ template <typename... Items> struct Form {
     struct sigaction new_action, old_action;
 
     if (mTitle.has_value()) {
-      std::unique_ptr<DecorateTitleStrategy> decorateTitleStrategy = jinject::get{};
+      std::unique_ptr<DecorateTitleStrategy> decorateTitleStrategy =
+          jinject::get{};
 
       system("clear");
 
@@ -160,7 +162,8 @@ private:
   std::optional<std::string> mTitle;
   bool mInterruptable = false;
 
-  template <StringLiteral Name, StringLiteral Description, TypeItem Type, bool Nullable>
+  template <StringLiteral Name, StringLiteral Description, TypeItem Type,
+            bool Nullable>
   void execute(Item<Name, Description, Type, Nullable> item) {
     if (!mInterruptable) {
       if (cancelled) {
@@ -219,7 +222,7 @@ private:
       } catch (std::out_of_range &e) {
         // logt
       }
-        
+
       return {};
     } else if (Type == TypeItem::Decimal) {
       try {
@@ -231,15 +234,15 @@ private:
       } catch (std::out_of_range &e) {
         // logt
       }
-        
+
       return {};
     } else if (Type == TypeItem::Date) {
       try {
         auto d = std::chrono::year{std::stoi(line.substr(0, 2))};
         auto m = std::chrono::month{
             static_cast<unsigned>(std::stoi(line.substr(2, 2)))};
-        auto y =
-            std::chrono::day{static_cast<unsigned>(std::stoi(line.substr(4, 4)))};
+        auto y = std::chrono::day{
+            static_cast<unsigned>(std::stoi(line.substr(4, 4)))};
 
         std::chrono::year_month_day ymd{d, m, y};
 

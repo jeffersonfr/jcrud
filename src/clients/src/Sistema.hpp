@@ -1,5 +1,8 @@
 #pragma once
 
+#if JCRUD_CLIENT == Americanas
+  #include "clients/americanas/Modules.hpp"
+#else
 #include "Ambiente.hpp"
 #include "control/admin/AdminController.hpp"
 #include "control/produto/ProdutoController.hpp"
@@ -113,3 +116,4 @@ private:
         .show();
   }
 };
+#endif
