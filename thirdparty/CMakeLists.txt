@@ -29,6 +29,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SQLiteCpp)
 
+# FTXUI
+FetchContent_Declare(
+  FTXUI
+  GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI.git
+  GIT_TAG main
+)
+FetchContent_MakeAvailable(FTXUI)
+
 # expected
 FetchContent_Declare(
   expected
@@ -38,6 +46,6 @@ FetchContent_MakeAvailable(expected)
 
 FetchContent_GetProperties(expected)
 if(expected_POPULATED)
-  message(INFO "SOURCE_DIR: ${expected_SOURCE_DIR}")
-  message(INFO "BINARY_DIR: ${expected_BINARY_DIR}")
+  message("SOURCE_DIR: ${expected_SOURCE_DIR}")
+  message("BINARY_DIR: ${expected_BINARY_DIR}")
 endif()

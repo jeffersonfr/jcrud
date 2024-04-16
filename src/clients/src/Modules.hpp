@@ -22,7 +22,7 @@
 #include "model/usuario/UsuarioRepository.hpp"
 #include "clients/src/model/SqliteDatabase.hpp"
 #include "clients/src/Sistema.hpp"
-#include "strategy/DecorateTitleStrategy.hpp"
+#include "strategy/decorateTitle/DecorateTitleStrategy.hpp"
 
 #include "jinject/jinject.h"
 

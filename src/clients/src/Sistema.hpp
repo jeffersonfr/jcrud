@@ -11,6 +11,11 @@
 
 #include <fmt/format.h>
 
+#include "ftxui/component/captured_mouse.hpp"
+#include "ftxui/component/component.hpp"
+#include "ftxui/component/component_options.hpp"
+#include "ftxui/component/screen_interactive.hpp"
+
 enum class SelecaoSistema { Administracao = 1, Produtos, Estoque };
 
 struct Sistema {
@@ -75,6 +80,27 @@ private:
   }
 
   void do_menu() {
+    /*
+    auto screen = ftxui::ScreenInteractive::TerminalOutput();
+
+    std::vector<std::string> entries = {
+        "Administracao",
+        "Produtos",
+        "Estoque",
+    };
+    int selected = 0;
+
+    ftxui::MenuOption option;
+
+    option.on_enter = screen.ExitLoopClosure();
+    
+    auto menu = ftxui::Menu(&entries, &selected, option);
+
+    screen.Loop(menu);
+    */
+
+
+
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
         .title("Farmacia Pague+")
         .before([&]() {

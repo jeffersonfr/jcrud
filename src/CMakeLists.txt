@@ -24,4 +24,7 @@ target_link_libraries(${PROJECT_NAME}
     Boost::filesystem
     Boost::iostreams
     Boost::thread
+    ftxui::screen
+    ftxui::dom
+    ftxui::component
 )
