@@ -14,7 +14,7 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
   Debug
 )
 
-set(JCRUD_CLIENT "americanas" CACHE STRING "Cliente do sistema")
+set(JCRUD_CLIENT "Americanas" CACHE STRING "Cliente do sistema")
 set_property(CACHE JCRUD_CLIENT PROPERTY STRINGS
   Americanas
   BomPreco
