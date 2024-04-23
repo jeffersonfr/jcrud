@@ -1,6 +1,6 @@
 #pragma once
 
-#include "strategy/DecorateTitleStrategy.hpp"
+#include "strategy/decorateTitle/DecorateTitleStrategy.hpp"
 
 #include <string>
 
