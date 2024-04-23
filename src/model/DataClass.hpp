@@ -11,6 +11,8 @@
 #include <variant>
 #include <vector>
 
+#include <jinject/jinject.h>
+
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
@@ -185,13 +187,13 @@ struct Data {
 
   template <typename T> Data(T &&data) : mData{std::forward<T>(data)} {}
 
-  template <typename T> constexpr Data & operator=(T const &data) {
+  template <typename T> constexpr Data &operator=(T const &data) {
     mData = data;
 
     return *this;
   }
 
-  template <typename T> constexpr Data & operator=(std::optional<T> data) {
+  template <typename T> constexpr Data &operator=(std::optional<T> data) {
     if (data.has_value()) {
       mData = data.value();
     }
@@ -402,3 +404,67 @@ template <StringLiteral Name, PrimaryConcept PrimaryKeys,
           ForeignConcept ForeignKeys, FieldConcept... Fields>
 struct fmt::formatter<DataClass<Name, PrimaryKeys, ForeignKeys, Fields...>>
     : fmt::ostream_formatter {};
+
+namespace jinject {
+template <StringLiteral Name, PrimaryConcept PrimaryKeys,
+          ForeignConcept ForeignKeys, FieldConcept... Fields>
+struct introspection<DataClass<Name, PrimaryKeys, ForeignKeys, Fields...>> {
+  static std::string to_string() {
+    std::string primaryKeys, foreignKeys, fields;
+    bool first = true;
+
+    PrimaryKeys::template get_keys([&]<StringLiteral Key>() {
+      get_fields([&]<typename Field>() {
+        if (!first) {
+          primaryKeys += ", ";
+        }
+
+        first = false;
+
+        primaryKeys += Field::get_name();
+      });
+    });
+
+    first = true;
+
+    ForeignKeys::template get_refers([&]<typename FKey>() {
+      if (!first) {
+        foreignKeys += ", ";
+      }
+
+      first = false;
+
+      foreignKeys += FKey::get_name();
+    });
+
+    first = true;
+
+    get_fields([&]<typename Field>() {
+      if (!first) {
+        fields += ", ";
+      }
+
+      first = false;
+
+      fields += Field::get_name();
+    });
+
+    return fmt::format("DataClass<{}, PrimaryKeys<{}>, ForeignKeys<{}>, Fields<{}>>",
+                       Name.to_string(), primaryKeys, foreignKeys, fields);
+  }
+
+private:
+  template <typename F> static constexpr void get_fields(F callback) {
+    for_each<Fields...>(callback);
+  }
+
+  template <typename Arg, typename... Args, typename F>
+  static void for_each(F callback) {
+    callback.template operator()<Arg>();
+
+    if constexpr (sizeof...(Args) > 0) {
+      return for_each<Args...>(callback);
+    }
+  }
+};
+} // namespace jinject

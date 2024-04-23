@@ -417,3 +417,12 @@ private:
     for_each_update<0, Models...>(model);
   }
 };
+
+namespace jinject {
+  template <typename T>
+  struct introspection<Repository<T>> {
+    static std::string to_string() {
+      return fmt::format("Repository<{}>", introspection<T>::to_string());
+    }
+  };
+}
