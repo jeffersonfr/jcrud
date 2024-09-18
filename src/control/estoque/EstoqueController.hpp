@@ -59,11 +59,11 @@ struct EstoqueController {
           }
 
           try {
-            if (*opcao == static_cast<int>(SelecaoEstoque::Exibir)) {
+            if (opcao == SelecaoEstoque::Exibir) {
               exibir();
-            } else if (*opcao == static_cast<int>(SelecaoEstoque::Comprar)) {
+            } else if (opcao == SelecaoEstoque::Comprar) {
               comprar();
-            } else if (*opcao == static_cast<int>(SelecaoEstoque::Vender)) {
+            } else if (opcao == SelecaoEstoque::Vender) {
               vender();
             }
           } catch (std::runtime_error &e) {

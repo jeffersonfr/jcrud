@@ -44,9 +44,9 @@ struct LoginController {
 
           auto usuario = mLoginInteractor->login(nome, senha);
 
-          logt(TipoLog::Sistema, Tag, "logando: {}", *usuario);
-
           if (usuario.has_value()) {
+            logt(TipoLog::Sistema, Tag, "logando: {}", *usuario);
+  
             auto cargos = mLoginInteractor->load_cargos(*usuario);
 
             callback(*usuario, cargos);

@@ -71,17 +71,17 @@ struct ProdutoController {
           }
 
           try {
-            if (*opcao == static_cast<int>(SelecaoProduto::Inserir)) {
+            if (opcao == SelecaoProduto::Inserir) {
               inserir();
-            } else if (*opcao == static_cast<int>(SelecaoProduto::Listar)) {
+            } else if (opcao == SelecaoProduto::Listar) {
               listar();
-            } else if (*opcao == static_cast<int>(SelecaoProduto::Exibir)) {
+            } else if (opcao == SelecaoProduto::Exibir) {
               exibir();
-            } else if (*opcao == static_cast<int>(SelecaoProduto::Alterar)) {
+            } else if (opcao == SelecaoProduto::Alterar) {
               alterar();
-            } else if (*opcao == static_cast<int>(SelecaoProduto::Remover)) {
+            } else if (opcao == SelecaoProduto::Remover) {
               remover();
-            } else if (*opcao == static_cast<int>(SelecaoProduto::Relatorio)) {
+            } else if (opcao == SelecaoProduto::Relatorio) {
               relatorio();
             }
           } catch (std::runtime_error &e) {

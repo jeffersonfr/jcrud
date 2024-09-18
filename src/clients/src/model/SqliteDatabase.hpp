@@ -126,7 +126,7 @@ template <typename... Tables> struct SqliteDatabase : public Database {
     migracaoModel["version"] = 0;
 
     query_string(
-        "CREATE TABLE IF NOT EXISTS migracao (version INTEGER NOT NULL);",
+        std::format("CREATE TABLE IF NOT EXISTS {} (version INTEGER NOT NULL);", migracaoModel.get_name()),
         [&](auto...) { return false; });
 
     query_string(fmt::format("SELECT * FROM {};", MigracaoModel::get_name()),

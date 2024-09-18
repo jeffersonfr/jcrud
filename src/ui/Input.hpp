@@ -30,7 +30,7 @@ struct Input {
     return {};
   }
 
-  std::optional<long> get_int(std::string key) {
+  std::optional<int32_t> get_int(std::string key) {
     auto text = get_text(key);
 
     if (!text.has_value()) {
@@ -48,6 +48,24 @@ struct Input {
     return {};
   }
 
+  std::optional<int64_t> get_long(std::string key) {
+    auto text = get_text(key);
+
+    if (!text.has_value()) {
+      return {};
+    }
+
+    try {
+      return std::stoll(*text);
+    } catch (std::invalid_argument &e) {
+      // logt
+    } catch (std::out_of_range &e) {
+      // logt
+    }
+      
+    return {};
+  }
+
   std::optional<double> get_decimal(std::string key) {
     auto text = get_text(key);
 
@@ -56,7 +74,7 @@ struct Input {
     }
 
     try {
-      return std::stof(*text);
+      return std::stod(*text);
     } catch (std::invalid_argument &e) {
       // logt
     } catch (std::out_of_range &e) {
@@ -91,4 +109,15 @@ private:
   std::map<std::string, std::optional<std::string>> &mValues;
 };
 
+template <typename T>
+  requires (std::is_enum_v<T>)
+  bool operator == (std::optional<int32_t> const &a, T b) {
+    return a.has_value() and *a == static_cast<int32_t>(b);
+  }
+
+template <typename T>
+  requires (std::is_enum_v<T>)
+  bool operator == (std::optional<int64_t> const &a, T b) {
+    return a.has_value() and *a == static_cast<int32_t>(b);
+  }
 } // namespace jui

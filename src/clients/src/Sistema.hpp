@@ -62,13 +62,11 @@ private:
 
       if (Ambiente::cargos.has_value()) {
         for (auto const &cargo : Ambiente::cargos.value()) {
-          if (cargo["id"].get_int().value() ==
-              static_cast<int>(Cargo::Administrador)) {
+          if (cargo["id"].get_int() == Cargo::Administrador) {
             selecaoSet.insert(static_cast<int>(SelecaoSistema::Administracao));
             selecaoSet.insert(static_cast<int>(SelecaoSistema::Produtos));
             selecaoSet.insert(static_cast<int>(SelecaoSistema::Estoque));
-          } else if (cargo["id"].get_int().value() ==
-                     static_cast<int>(Cargo::Operador)) {
+          } else if (cargo["id"].get_int() == Cargo::Operador) {
             selecaoSet.insert(static_cast<int>(SelecaoSistema::Produtos));
             selecaoSet.insert(static_cast<int>(SelecaoSistema::Estoque));
           }
@@ -129,11 +127,11 @@ private:
             return;
           }
 
-          if (*opcao == static_cast<int>(SelecaoSistema::Administracao)) {
+          if (opcao == SelecaoSistema::Administracao) {
             mAdminController->execute();
-          } else if (*opcao == static_cast<int>(SelecaoSistema::Produtos)) {
+          } else if (opcao == SelecaoSistema::Produtos) {
             mProdutoController->execute();
-          } else if (*opcao == static_cast<int>(SelecaoSistema::Estoque)) {
+          } else if (opcao == SelecaoSistema::Estoque) {
             mEstoqueController->execute();
           }
         })

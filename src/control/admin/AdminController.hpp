@@ -68,19 +68,17 @@ struct AdminController {
           }
 
           try {
-            if (*opcao == static_cast<int>(SelecaoAdmin::BuscarUsuario)) {
+            if (opcao == SelecaoAdmin::BuscarUsuario) {
               listar_usuario();
-            } else if (*opcao ==
-                      static_cast<int>(SelecaoAdmin::AdicionarUsuario)) {
+            } else if (opcao == SelecaoAdmin::AdicionarUsuario) {
               adicionar_usuario();
-            } else if (*opcao == static_cast<int>(SelecaoAdmin::RemoverUsuario)) {
+            } else if (opcao == SelecaoAdmin::RemoverUsuario) {
               remover_usuario();
-            } else if (*opcao == static_cast<int>(SelecaoAdmin::AtualizarSenha)) {
+            } else if (opcao == SelecaoAdmin::AtualizarSenha) {
               atualizar_senha();
-            } else if (*opcao ==
-                      static_cast<int>(SelecaoAdmin::AtualizarCargos)) {
+            } else if (opcao == SelecaoAdmin::AtualizarCargos) {
               atualizar_cargos();
-            } else if (*opcao == static_cast<int>(SelecaoAdmin::Sair)) {
+            } else if (opcao == SelecaoAdmin::Sair) {
               result = false;
 
               return;

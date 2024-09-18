@@ -77,6 +77,7 @@
     "typeindex": "cpp",
     "typeinfo": "cpp",
     "future": "cpp",
-    "shared_mutex": "cpp"
+    "shared_mutex": "cpp",
+    "csignal": "cpp"
   }
 }

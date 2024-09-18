@@ -69,11 +69,11 @@ private:
             return;
           }
 
-          if (*opcao == static_cast<int>(SelecaoSistema::Administracao)) {
+          if (opcao == SelecaoSistema::Administracao) {
             mAdminController->execute();
-          } else if (*opcao == static_cast<int>(SelecaoSistema::Produtos)) {
+          } else if (opcao == SelecaoSistema::Produtos) {
             mProdutoController->execute();
-          } else if (*opcao == static_cast<int>(SelecaoSistema::Estoque)) {
+          } else if (opcao == SelecaoSistema::Estoque) {
             mEstoqueController->execute();
           }
         })
