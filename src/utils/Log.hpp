@@ -6,8 +6,7 @@
 
 #include <source_location>
 #include <string>
-
-#include <fmt/format.h>
+#include <format>
 
 struct Log {
   static Log &instance() {
@@ -38,10 +37,10 @@ struct Log {
     model["level_log_id"] = static_cast<int>(level);
     model["tipo_log_id"] = static_cast<int>(type);
     model["localizacao"] =
-        fmt::format("{} ({}:{}) {}: ", location.file_name(), location.line(),
+        std::format("{} ({}:{}) {}: ", location.file_name(), location.line(),
                     location.column(), location.function_name());
     model["tag"] = tag;
-    model["descricao"] = fmt::vformat(msg, fmt::make_format_args(args...));
+    model["descricao"] = std::vformat(msg, std::make_format_args(args...));
 
     model["localizacao"] = jmixin::String(model["localizacao"].get_text().value()).replace("\\\"", "'");
     model["tag"] = jmixin::String(model["tag"].get_text().value()).replace("\\\"", "'");

@@ -10,11 +10,10 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <format>
 
 #include <signal.h>
 #include <unistd.h>
-
-#include <fmt/format.h>
 
 #include "jinject/jinject.h"
 #include "jmixin/jstring.h"
@@ -110,7 +109,7 @@ template <typename... Items> struct Form {
 
       system("clear");
 
-      fmt::print("{}\n\n", decorateTitleStrategy->createFancyTitle(*mTitle));
+      std::print("{}\n\n", decorateTitleStrategy->createFancyTitle(*mTitle));
     }
 
     mBefore();
@@ -130,7 +129,7 @@ template <typename... Items> struct Form {
         mOnSuccess(Input(mValues));
       }
     } catch (std::runtime_error &e) {
-      fmt::print("[runtime error]: {}\n", e.what());
+      std::print("[runtime error]: {}\n", e.what());
 
       mOnFailed();
     }
@@ -184,7 +183,7 @@ private:
       help = "[ data no formato: ddmmaaaa ]";
     }
 
-    fmt::print("{} <default: {}> {}\n: ", Description.to_string(),
+    std::print("{} <default: {}> {}\n: "), Description.to_string(),
                defaultValue->second.value_or("--"), help);
 
     mValues[Name.to_string()] =
@@ -259,4 +258,4 @@ private:
 };
 } // namespace jui
 
-static void opcao_invalida() { fmt::print("Opcao Invalida !\n"); }
+static void opcao_invalida() { std::print("Opcao Invalida !\n"); }

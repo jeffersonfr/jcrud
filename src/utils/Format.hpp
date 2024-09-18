@@ -2,14 +2,14 @@
 
 #include "model/DataClass.hpp"
 
-#include <fmt/format.h>
+#include <format>
 
 std::string format_currency(Data const &value) {
   if (value.is_null()) {
     return "<null>";
   }
 
-  return fmt::format("{:>10.2F}", value.get_decimal().value_or(NAN));
+  return std::format("{:>10.2F}", value.get_decimal().value_or(NAN));
 }
 
 template <typename Clock>
@@ -33,7 +33,7 @@ std::string format_timestamp(std::chrono::time_point<Clock> tp) {
   /*
   std::ostringstream o;
 
-  o << fmt::format("{0:%0d}{0:%0m}{0:%0y}.", tp);
+  o << std::format("{0:%0d}{0:%0m}{0:%0y}.", tp);
 
   return o.str();
   */

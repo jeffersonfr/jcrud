@@ -8,8 +8,7 @@
 #include <iostream>
 #include <map>
 #include <string>
-
-#include <fmt/format.h>
+#include <format>
 
 #include "jmixin/jstring.h"
 

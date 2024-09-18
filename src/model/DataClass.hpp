@@ -10,11 +10,10 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include <format>
+#include <ostream>
 
 #include <jinject/jinject.h>
-
-#include <fmt/format.h>
-#include <fmt/ostream.h>
 
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 
@@ -34,7 +33,7 @@ template <StringLiteral Value> struct DefaultValue {
 };
 
 template <StringLiteral Value>
-using TextValue = DefaultValue<fmt::format("'{}'", Value.to_string())>;
+using TextValue = DefaultValue<std::format("'{}'", Value.to_string())>;
 
 using TimestampValue = DefaultValue<"(datetime('now', 'localtime'))">;
 
@@ -279,7 +278,7 @@ struct DataClass {
     std::sort(fields.begin(), fields.end());
     if (auto it = std::unique(fields.begin(), fields.end());
         it != fields.end()) {
-      throw std::runtime_error(fmt::format(
+      throw std::runtime_error(std::format(
           "Duplicated fields in model definition of '{}'", Name.to_string()));
     }
   }
@@ -296,7 +295,7 @@ struct DataClass {
 
       if (index < 0) {
         throw std::runtime_error(
-            fmt::format("Inexistent primary key '{}' on table '{}'",
+            std::format("Inexistent primary key '{}' on table '{}'",
                         Key.to_string(), get_name()));
       }
 
@@ -318,7 +317,7 @@ struct DataClass {
 
     if (index < 0) {
       throw std::runtime_error(
-          fmt::format("Field '{}' not available in '{}'", name, get_name()));
+          std::format("Field '{}' not available in '{}'", name, get_name()));
     }
 
     return mFields[index];
@@ -329,7 +328,7 @@ struct DataClass {
 
     if (index < 0) {
       throw std::runtime_error(
-          fmt::format("Field '{}' not available in '{}'", name, get_name()));
+          std::format("Field '{}' not available in '{}'", name, get_name()));
     }
 
     return mFields[index];
@@ -383,7 +382,7 @@ private:
 
   template <typename F> static void for_each(F callback) {
     throw std::runtime_error(
-        fmt::format("No fields available in '{}'", get_name()));
+        std::format("No fields available in '{}'", get_name()));
   }
 
   template <int Index = 0, typename Arg, typename... Args>
@@ -402,8 +401,8 @@ private:
 
 template <StringLiteral Name, PrimaryConcept PrimaryKeys,
           ForeignConcept ForeignKeys, FieldConcept... Fields>
-struct fmt::formatter<DataClass<Name, PrimaryKeys, ForeignKeys, Fields...>>
-    : fmt::ostream_formatter {};
+struct std::formatter<DataClass<Name, PrimaryKeys, ForeignKeys, Fields...>>
+    : std::ostream_formatter {};
 
 namespace jinject {
 template <StringLiteral Name, PrimaryConcept PrimaryKeys,
@@ -449,7 +448,7 @@ struct introspection<DataClass<Name, PrimaryKeys, ForeignKeys, Fields...>> {
       fields += Field::get_name();
     });
 
-    return fmt::format("DataClass<{}, PrimaryKeys<{}>, ForeignKeys<{}>, Fields<{}>>",
+    return std::format("DataClass<{}, PrimaryKeys<{}>, ForeignKeys<{}>, Fields<{}>>",
                        Name.to_string(), primaryKeys, foreignKeys, fields);
   }
 

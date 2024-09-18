@@ -12,6 +12,6 @@ int main() {
   } catch (std::runtime_error &e) {
     logf(TipoLog::Sistema, Sistema::Tag, e.what());
 
-    fmt::print("{}\n", e.what());
+    std::print("{}\n", e.what());
   }
 }

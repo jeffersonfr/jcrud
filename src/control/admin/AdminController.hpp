@@ -18,8 +18,7 @@
 #include <string_view>
 #include <tuple>
 #include <vector>
-
-#include <fmt/format.h>
+#include <format>
 
 #include "jinject/jinject.h"
 
@@ -48,16 +47,16 @@ struct AdminController {
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
         .title("Administracao")
         .before([&]() {
-          fmt::print("Escolha uma opção:\n");
-          fmt::print("\t{} - Buscar usuario\n",
+          std::print("Escolha uma opção:\n");
+          std::print("\t{} - Buscar usuario\n",
                      static_cast<int>(SelecaoAdmin::BuscarUsuario));
-          fmt::print("\t{} - Adicionar usuario\n",
+          std::print("\t{} - Adicionar usuario\n",
                      static_cast<int>(SelecaoAdmin::AdicionarUsuario));
-          fmt::print("\t{} - Remover usuario\n",
+          std::print("\t{} - Remover usuario\n",
                      static_cast<int>(SelecaoAdmin::RemoverUsuario));
-          fmt::print("\t{} - Atualizar senha\n",
+          std::print("\t{} - Atualizar senha\n",
                      static_cast<int>(SelecaoAdmin::AtualizarSenha));
-          fmt::print("\t{} - Atualizar cargos\n",
+          std::print("\t{} - Atualizar cargos\n",
                      static_cast<int>(SelecaoAdmin::AtualizarCargos));
         })
         .on_success([&](Input input) {
@@ -88,10 +87,10 @@ struct AdminController {
           } catch (std::runtime_error &e) {
             loge(TipoLog::Sistema, Tag, "{}", e.what());
 
-            fmt::print("{}", e.what());
+            std::print("{}", e.what());
           }
 
-          fmt::print("Pressione qualquer tecla para continuar ...");
+          std::print("Pressione qualquer tecla para continuar ...");
 
           std::cin.ignore();
         })
@@ -181,7 +180,7 @@ struct AdminController {
             std::string senhaNovaEncriptada = crypt(senhaNova.c_str(), "aa");
 
             if (senhaAtualEncriptada != usuario["senha"]) {
-              fmt::print("Senhas diferentes\n");
+              std::print("Senhas diferentes\n");
 
               return;
             }

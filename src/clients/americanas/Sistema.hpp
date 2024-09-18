@@ -6,7 +6,7 @@
 #include "ui/Form.hpp"
 #include "utils/Log.hpp"
 
-#include <fmt/format.h>
+#include <format>
 
 enum class SelecaoSistema { Administracao = 1, Produtos, Estoque };
 
@@ -44,21 +44,21 @@ private:
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
         .title("Farmacia Pague+")
         .before([&]() {
-          fmt::print("{}", "Escolha uma opção:\n");
+          std::print("{}", "Escolha uma opção:\n");
 
           if (selecaoSet.count(
                   static_cast<int>(SelecaoSistema::Administracao))) {
-            fmt::print("\t{} - Administracao\n",
+            std::print("\t{} - Administracao\n",
                        static_cast<int>(SelecaoSistema::Administracao));
           }
 
           if (selecaoSet.count(static_cast<int>(SelecaoSistema::Produtos))) {
-            fmt::print("\t{} - Produtos\n",
+            std::print("\t{} - Produtos\n",
                        static_cast<int>(SelecaoSistema::Produtos));
           }
 
           if (selecaoSet.count(static_cast<int>(SelecaoSistema::Estoque))) {
-            fmt::print("\t{} - Estoque\n",
+            std::print("\t{} - Estoque\n",
                        static_cast<int>(SelecaoSistema::Estoque));
           }
         })

@@ -19,8 +19,7 @@
 #include <string_view>
 #include <tuple>
 #include <vector>
-
-#include <fmt/format.h>
+#include <format>
 
 #include "jinject/jinject.h"
 
@@ -49,18 +48,18 @@ struct ProdutoController {
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
         .title("Produtos")
         .before([&]() {
-          fmt::print("Escolha uma opção:\n");
-          fmt::print("\t{} - Inserir produto\n",
+          std::print("Escolha uma opção:\n");
+          std::print("\t{} - Inserir produto\n",
                      static_cast<int>(SelecaoProduto::Inserir));
-          fmt::print("\t{} - Listar todos os produtos\n",
+          std::print("\t{} - Listar todos os produtos\n",
                      static_cast<int>(SelecaoProduto::Listar));
-          fmt::print("\t{} - Exibir um produto (pesquisar por nome)\n",
+          std::print("\t{} - Exibir um produto (pesquisar por nome)\n",
                      static_cast<int>(SelecaoProduto::Exibir));
-          fmt::print("\t{} - Alterar um produto (pesquisar por nome)\n",
+          std::print("\t{} - Alterar um produto (pesquisar por nome)\n",
                      static_cast<int>(SelecaoProduto::Alterar));
-          fmt::print("\t{} - Remover um produto (pesquisar por nome)\n",
+          std::print("\t{} - Remover um produto (pesquisar por nome)\n",
                      static_cast<int>(SelecaoProduto::Remover));
-          fmt::print("\t{} - Exibir relatório\n",
+          std::print("\t{} - Exibir relatório\n",
                      static_cast<int>(SelecaoProduto::Relatorio));
         })
         .on_success([&](Input input) {
@@ -87,10 +86,10 @@ struct ProdutoController {
           } catch (std::runtime_error &e) {
             loge(TipoLog::Sistema, Tag, "{}", e.what());
 
-            fmt::print("{}", e.what());
+            std::print("{}", e.what());
           }
 
-          fmt::print("Pressione qualquer tecla para continuar ...");
+          std::print("Pressione qualquer tecla para continuar ...");
 
           std::cin.ignore();
         })

@@ -42,4 +42,4 @@ private:
 };
 
 template <typename... Models>
-struct fmt::formatter<CompoundModel<Models...>> : fmt::ostream_formatter {};
+struct std::formatter<CompoundModel<Models...>> : std::ostream_formatter {};

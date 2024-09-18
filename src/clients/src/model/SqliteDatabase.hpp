@@ -13,10 +13,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <format>
 
 #include <SQLiteCpp/SQLiteCpp.h>
-
-#include <fmt/format.h>
 
 using MigracaoModel = DataClass<"migracao", Primary<"id">, NoForeign,
                                 Field<"id", FieldType::Int, false>,
@@ -41,7 +40,7 @@ template <typename... Tables> struct SqliteDatabase : public Database {
                      [](auto...) { return false; });
       } catch (std::runtime_error &e) {
         throw std::runtime_error(
-            fmt::format("On '{}' -> {}", Table::get_name(), e.what()));
+            std::format("On '{}' -> {}", Table::get_name(), e.what()));
       }
     });
   }
@@ -100,7 +99,7 @@ template <typename... Tables> struct SqliteDatabase : public Database {
 
       return query.getChanges();
     } catch (std::exception &e) {
-      throw std::runtime_error(fmt::format("{}: {}", e.what(), sql));
+      throw std::runtime_error(std::format("{}: {}", e.what(), sql));
     }
   }
 
@@ -126,10 +125,10 @@ template <typename... Tables> struct SqliteDatabase : public Database {
     migracaoModel["version"] = 0;
 
     query_string(
-        "CREATE TABLE IF NOT EXISTS migracao (version INTEGER NOT NULL);",
+        std::format("CREATE TABLE IF NOT EXISTS {} (version INTEGER NOT NULL);", migracaoModel.get_name()),
         [&](auto...) { return false; });
 
-    query_string(fmt::format("SELECT * FROM {};", MigracaoModel::get_name()),
+    query_string(std::format("SELECT * FROM {};", MigracaoModel::get_name()),
                  [&](std::vector<std::string> const &columns,
                      std::vector<Data> const &values) {
                    for (int i = 0; i < columns.size(); i++) {
@@ -161,7 +160,7 @@ template <typename... Tables> struct SqliteDatabase : public Database {
 
         update(migracaoModel);
       } catch (std::exception &e) {
-        throw std::runtime_error(fmt::format(
+        throw std::runtime_error(std::format(
             "Unable to proceed with migration [{} v{}]: {}",
             MigracaoModel::get_name(), migration.get_id(), e.what()));
       }
@@ -237,7 +236,7 @@ private:
         ddl << " NULL";
 
         if (defaultValue.has_value()) {
-          throw std::runtime_error(fmt::format(
+          throw std::runtime_error(std::format(
               "Unable to use default value with nullable field '{}' in '{}'",
               Field::get_name(), model.get_name()));
         }
@@ -252,7 +251,7 @@ private:
 
     model.get_keys([&]<typename Field>() {
       if (Field::is_nullable()) {
-        throw std::runtime_error(fmt::format(
+        throw std::runtime_error(std::format(
             "Primary key of '{}' must be not null", model.get_name()));
       }
     });
@@ -260,7 +259,7 @@ private:
     if (hasSerial) {
       if (PrimaryKeys::get_size() != 1) {
         throw std::runtime_error(
-            fmt::format("Serial must be the unique primary key on table '{}'",
+            std::format("Serial must be the unique primary key on table '{}'",
                         Name.to_string()));
       }
     } else {

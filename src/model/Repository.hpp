@@ -10,10 +10,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <format>
 
 #include "jinject/jinject.h"
-
-#include <fmt/format.h>
 
 template <typename T> struct Repository {
 
@@ -29,7 +28,7 @@ template <typename T> struct Repository {
     std::ostringstream o;
 
     o << "SELECT * from " << Model::get_name() << " "
-      << fmt::vformat(Query.to_string(), fmt::make_format_args(values...));
+      << std::vformat(Query.to_string(), std::make_format_args(values...));
 
     mDb->query_string(o.str(), [&](std::vector<std::string> const &columns,
                                    std::vector<Data> const &values) {
@@ -422,7 +421,7 @@ namespace jinject {
   template <typename T>
   struct introspection<Repository<T>> {
     static std::string to_string() {
-      return fmt::format("Repository<{}>", introspection<T>::to_string());
+      return std::format("Repository<{}>", introspection<T>::to_string());
     }
   };
 }

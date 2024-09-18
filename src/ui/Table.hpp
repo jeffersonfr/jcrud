@@ -8,8 +8,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
-
-#include <fmt/format.h>
+#include <format>
 
 namespace jui {
 
@@ -69,7 +68,7 @@ template <std::ranges::range T> struct Table {
   void show() {
     // title
     if (!mTitle.empty()) {
-      fmt::print("\n# {}", mTitle);
+      std::print("\n# {}", mTitle);
     }
 
     // head
@@ -86,10 +85,10 @@ template <std::ranges::range T> struct Table {
     line[line.size() - 1] = '+';
     head[head.size() - 1] = '|';
 
-    fmt::print("\n");
-    fmt::print("{}\n", line);
-    fmt::print("{}\n", head);
-    fmt::print("{}\n", line);
+    std::print("\n");
+    std::print("{}\n", line);
+    std::print("{}\n", head);
+    std::print("{}\n", line);
 
     // rows
     for (auto &item : mItems) {
@@ -101,10 +100,10 @@ template <std::ranges::range T> struct Table {
         row += jmixin::String(cols[i]).upper_case().ellipses(headItems[i].size).center(headItems[i].size) + '|';
       }
 
-      fmt::print("{}\n", row);
+      std::print("{}\n", row);
     }
 
-    fmt::print("{}\n\n", line);
+    std::print("{}\n\n", line);
   }
 
 private:

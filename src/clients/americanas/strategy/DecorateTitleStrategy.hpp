@@ -3,11 +3,10 @@
 #include "strategy/decorateTitle/DecorateTitleStrategy.hpp"
 
 #include <string>
-
-#include "fmt/format.h"
+#include <format>
 
 struct DecorateTitleStrategyAmericanas : public DecorateTitleStrategy {
   std::string createFancyTitle(std::string const &title) override {
-    return fmt::format(":: --- {} --- ::", title);
+    return std::format(":: --- {} --- ::", title);
   }
 };

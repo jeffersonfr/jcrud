@@ -20,8 +20,7 @@
 #include <string_view>
 #include <tuple>
 #include <vector>
-
-#include <fmt/format.h>
+#include <format>
 
 #include "jinject/jinject.h"
 
@@ -43,12 +42,12 @@ struct EstoqueController {
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
         .title("Estoque")
         .before([&]() {
-          fmt::print("Escolha uma opção:\n");
-          fmt::print("\t{} - Exibir\n",
+          std::print("Escolha uma opção:\n");
+          std::print("\t{} - Exibir\n",
                      static_cast<int>(SelecaoEstoque::Exibir));
-          fmt::print("\t{} - Comprar\n",
+          std::print("\t{} - Comprar\n",
                      static_cast<int>(SelecaoEstoque::Comprar));
-          fmt::print("\t{} - Vender\n",
+          std::print("\t{} - Vender\n",
                      static_cast<int>(SelecaoEstoque::Vender));
         })
         .on_success([&](Input input) {
@@ -69,10 +68,10 @@ struct EstoqueController {
           } catch (std::runtime_error &e) {
             loge(TipoLog::Sistema, Tag, "{}", e.what());
 
-            fmt::print("{}", e.what());
+            std::print("{}", e.what());
           }
 
-          fmt::print("Pressione qualquer tecla para continuar ...");
+          std::print("Pressione qualquer tecla para continuar ...");
 
           std::cin.ignore();
         })
@@ -153,7 +152,7 @@ struct EstoqueController {
           auto item = mEstoqueInteractor->load_estoque_by_id(*estoqueId);
 
           if (!item.has_value()) {
-            fmt::print("Item nao encontrado");
+            std::print("Item nao encontrado");
 
             return;
           }

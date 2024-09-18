@@ -17,8 +17,7 @@
 #include <string_view>
 #include <tuple>
 #include <vector>
-
-#include <fmt/format.h>
+#include <format>
 
 #include "jinject/jinject.h"
 
@@ -36,7 +35,7 @@ struct LoginController {
         .before([&]() {
           system("clear");
 
-          fmt::print("Login\n\n");
+          std::print("Login\n\n");
         })
         .on_success([&](Input input) {
           auto nome = input.get_text("nome").value_or("");

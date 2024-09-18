@@ -9,8 +9,7 @@
 #include <string>
 #include <variant>
 #include <vector>
-
-#include <fmt/format.h>
+#include <format>
 
 struct Database {
   virtual ~Database() = default;
@@ -107,7 +106,7 @@ struct Database {
             if (!Field::is_nullable() and
                 Field::get_type() != FieldType::Serial) {
               throw std::runtime_error(
-                  fmt::format("unable to insert '{}', field '{}' is not null",
+                  std::format("unable to insert '{}', field '{}' is not null",
                               Model::get_name(), Field::get_name()));
             }
             o << "null";
@@ -116,7 +115,7 @@ struct Database {
             if (Field::get_type() != FieldType::Bool and
                 Field::get_type() != FieldType::Int) {
               throw std::runtime_error(
-                  fmt::format("unable to insert '{}', field '{}' is not "
+                  std::format("unable to insert '{}', field '{}' is not "
                               "convertible to boolean",
                               Model::get_name(), Field::get_name()));
             }
@@ -128,7 +127,7 @@ struct Database {
                 Field::get_type() != FieldType::Timestamp and
                 Field::get_type() != FieldType::Bool) {
               throw std::runtime_error(
-                  fmt::format("unable to insert '{}', field '{}' is not "
+                  std::format("unable to insert '{}', field '{}' is not "
                               "convertible to integer",
                               Model::get_name(), Field::get_name()));
             }
@@ -137,7 +136,7 @@ struct Database {
           [&](double arg) {
             if (Field::get_type() != FieldType::Decimal) {
               throw std::runtime_error(
-                  fmt::format("unable to insert '{}', field '{}' is not "
+                  std::format("unable to insert '{}', field '{}' is not "
                               "convertible to double",
                               Model::get_name(), Field::get_name()));
             }
@@ -146,7 +145,7 @@ struct Database {
           [&](std::string arg) {
             if (Field::get_type() != FieldType::Text and
                 Field::get_type() != FieldType::Timestamp) {
-              throw std::runtime_error(fmt::format(
+              throw std::runtime_error(std::format(
                   "unable to insert '{}', field '{}' is not a text value",
                   Model::get_name(), Field::get_name()));
             }
@@ -192,7 +191,7 @@ struct Database {
             if (!Field::is_nullable() and
                 Field::get_type() != FieldType::Serial) {
               throw std::runtime_error(
-                  fmt::format("unable to update '{}', field '{}' is not null",
+                  std::format("unable to update '{}', field '{}' is not null",
                               Model::get_name(), Field::get_name()));
             }
             o << "null";
@@ -201,7 +200,7 @@ struct Database {
             if (Field::get_type() != FieldType::Bool and
                 Field::get_type() != FieldType::Int) {
               throw std::runtime_error(
-                  fmt::format("unable to update '{}', field '{}' is not "
+                  std::format("unable to update '{}', field '{}' is not "
                               "convertible to boolean",
                               Model::get_name(), Field::get_name()));
             }
@@ -213,7 +212,7 @@ struct Database {
                 Field::get_type() != FieldType::Timestamp and
                 Field::get_type() != FieldType::Bool) {
               throw std::runtime_error(
-                  fmt::format("unable to update '{}', field '{}' is not "
+                  std::format("unable to update '{}', field '{}' is not "
                               "convertible to integer",
                               Model::get_name(), Field::get_name()));
             }
@@ -222,7 +221,7 @@ struct Database {
           [&](double arg) {
             if (Field::get_type() != FieldType::Decimal) {
               throw std::runtime_error(
-                  fmt::format("unable to update '{}', field '{}' is not "
+                  std::format("unable to update '{}', field '{}' is not "
                               "convertible to double",
                               Model::get_name(), Field::get_name()));
             }
@@ -231,7 +230,7 @@ struct Database {
           [&](std::string arg) {
             if (Field::get_type() != FieldType::Text and
                 Field::get_type() != FieldType::Timestamp) {
-              throw std::runtime_error(fmt::format(
+              throw std::runtime_error(std::format(
                   "unable to update '{}', field '{}' is not a text value",
                   Model::get_name(), Field::get_name()));
             }
