@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/Repository.hpp"
+#include "database/Repository.hpp"
 #include "model/usuario/UsuarioModel.hpp"
 
 using UsuarioRepository = Repository<UsuarioModel>;

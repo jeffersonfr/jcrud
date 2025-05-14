@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/DataClass.hpp"
+#include "database/DataClass.hpp"
 #include "model/cargo/CargoModel.hpp"
 
 using UsuarioModel = DataClass<"usuario", Primary<"id">, NoForeign,

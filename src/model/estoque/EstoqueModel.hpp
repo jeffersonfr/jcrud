@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/DataClass.hpp"
+#include "database/DataClass.hpp"
 #include "model/tipoNegocio/TipoNegocioModel.hpp"
 #include "model/produto/ProdutoModel.hpp"
 

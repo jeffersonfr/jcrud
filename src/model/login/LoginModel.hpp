@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/DataClass.hpp"
+#include "database/DataClass.hpp"
 
 using LoginModel = DataClass<
     "login", Primary<"filial_id", "usuario_id">,

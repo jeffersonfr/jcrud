@@ -1,7 +1,7 @@
 #pragma once
 
-#include "model/DataClass.hpp"
-#include "model/Migration.hpp"
+#include "database/DataClass.hpp"
+#include "database/Migration.hpp"
 
 #include <chrono>
 #include <functional>
@@ -36,7 +36,7 @@ struct Database {
                               std::vector<Data> const &values) {
       Model model;
 
-      for (int i = 0; i < columns.size(); i++) {
+      for (int i = 0; i < (int)columns.size(); i++) {
         std::string const &column = columns[i];
 
         model[column] = values[i];
@@ -247,7 +247,7 @@ struct Database {
 
   template <typename Model> bool remove(Model const &model) {
     std::ostringstream o;
-    bool first = true;
+    // bool first = true;
 
     o << "DELETE FROM " << Model::get_name();
 

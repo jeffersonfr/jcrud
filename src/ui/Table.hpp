@@ -97,7 +97,7 @@ template <std::ranges::range T> struct Table {
 
       std::string row = "|";
 
-      for (int i = 0; i < cols.size(); i++) {
+      for (int i = 0; i < (int)cols.size(); i++) {
         row += jmixin::String(cols[i]).upper_case().ellipses(headItems[i].size).center(headItems[i].size) + '|';
       }
 

@@ -3,6 +3,7 @@
 #include "control/estoque/EstoqueInteractorModel.hpp"
 #include "model/estoque/EstoqueRepository.hpp"
 #include "model/historicoEstoque/HistoricoEstoqueRepository.hpp"
+#include "model/base/cnpj.hpp"
 
 #include <expected>
 #include <optional>
@@ -20,14 +21,14 @@ struct EstoqueInteractor : public Repository<EstoqueInteractorModel> {
       : mEstoqueRepository{std::move(estoqueRepository)},
         mHistoricoEstoqueRepository{std::move(historicoEstoqueRepository)} {}
 
-  void save_compra(EstoqueModel const &item, std::string cnpj) {
+  void save_compra(EstoqueModel const &item, Cnpj cnpj) {
     HistoricoEstoqueModel historicoEstoque;
 
     historicoEstoque["produto_id"] = item["produto_id"];
     historicoEstoque["tipo_negocio_id"] = static_cast<int>(TipoNegocio::Compra);
     historicoEstoque["quantidade"] = item["quantidade"];
     historicoEstoque["lote"] = item["lote"];
-    historicoEstoque["cnpj"] = cnpj;
+    historicoEstoque["cnpj"] = cnpj.to_string();
     historicoEstoque["validade"] = item["validade"];
 
     mEstoqueRepository->get_database()->transaction([&](Database &db) {
@@ -46,37 +47,42 @@ struct EstoqueInteractor : public Repository<EstoqueInteractorModel> {
     });
   }
 
-  void save_venda(EstoqueModel const &item, int quantidadeVenda, std::string cnpj) {
-    HistoricoEstoqueModel historicoEstoque;
+  void store_venda(int estoqueId, int quantidadeVenda, Cnpj cnpj) {
+    load_estoque_by_id(estoqueId)
+      .and_then([&](EstoqueModel const &item) {
+        HistoricoEstoqueModel historicoEstoque;
 
-    historicoEstoque["produto_id"] = item["produto_id"];
-    historicoEstoque["tipo_negocio_id"] = static_cast<int>(TipoNegocio::Venda);
-    historicoEstoque["quantidade"] = quantidadeVenda;
-    historicoEstoque["lote"] = item["lote"];
-    historicoEstoque["cnpj"] = cnpj;
-    historicoEstoque["validade"] = item["validade"];
+        historicoEstoque["produto_id"] = item["produto_id"];
+        historicoEstoque["tipo_negocio_id"] = static_cast<int>(TipoNegocio::Venda);
+        historicoEstoque["quantidade"] = quantidadeVenda;
+        historicoEstoque["lote"] = item["lote"];
+        historicoEstoque["cnpj"] = cnpj.to_string();
+        historicoEstoque["validade"] = item["validade"];
 
-    mEstoqueRepository->get_database()->transaction([&](Database &db) {
-      int quantidadeAtual = item["quantidade"].get_int().value();
+        mEstoqueRepository->get_database()->transaction([&](Database &db) {
+          int quantidadeAtual = item["quantidade"].get_int().value();
 
-      if (quantidadeAtual < quantidadeVenda) {
-        throw std::runtime_error("Quantidade superior ao limite disponivel");
-      } else if (quantidadeAtual == quantidadeVenda) {
-        mEstoqueRepository->remove(item);
-      } else {
-        EstoqueModel estoque = std::move(item);
-        
-        estoque["quantidade"] = quantidadeAtual - quantidadeVenda;
+          if (quantidadeAtual < quantidadeVenda) {
+            throw std::runtime_error("Quantidade superior ao limite disponivel");
+          } else if (quantidadeAtual == quantidadeVenda) {
+            mEstoqueRepository->remove(item);
+          } else {
+            EstoqueModel estoque = std::move(item);
+            
+            estoque["quantidade"] = quantidadeAtual - quantidadeVenda;
 
-        mEstoqueRepository->update(estoque);
-      }
+            mEstoqueRepository->update(estoque);
+          }
 
-      auto e = mHistoricoEstoqueRepository->save(historicoEstoque);
+          mHistoricoEstoqueRepository->save(historicoEstoque)
+            .or_else([](auto e) -> std::expected<HistoricoEstoqueModel, std::runtime_error> { 
+              throw e;
+            });
+        });
 
-      if (!e.has_value()) {
-        throw e.error();
-      }
-    });
+
+        return std::optional<bool>{true};
+      });
   }
 
   std::optional<EstoqueModel> load_estoque_by_id(int64_t id) {

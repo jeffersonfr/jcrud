@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/CompoundModel.hpp"
+#include "database/CompoundModel.hpp"
 #include "model/categoriaProduto/CategoriaProdutoModel.hpp"
 #include "model/produto/ProdutoModel.hpp"
 #include "model/preco/PrecoModel.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/DataClass.hpp"
+#include "database/DataClass.hpp"
 #include "model/tipoNegocio/TipoNegocioModel.hpp"
 
 using HistoricoEstoqueModel = DataClass<"historico_estoque", Primary<"id">, Foreign<Refer<ProdutoModel, "produto_id">, Refer<TipoNegocioModel, "tipo_negocio_id">>,

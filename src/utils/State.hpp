@@ -15,7 +15,7 @@ private:
   MutableState<T> &mState;
 };
 
-template <typename T> struct MutableState : public State<T> {
+template <typename T> struct VolatileState : public State<T> {
   friend class State<T>;
 
   MutableState() : State<T>(*this) {}
@@ -28,4 +28,31 @@ template <typename T> struct MutableState : public State<T> {
 
 private:
   std::function<void(T const &)> mCallback;
+};
+
+template <typename T> struct MutableState : public State<T> {
+  friend class State<T>;
+
+  MutableState() : State<T>(*this) {}
+
+  void observe(std::function<void(T const &)> callback) override {
+    mCallback = callback;
+  }
+
+  void notify(T const &data) { 
+    std::scoped_lock lock(mMutex);
+
+    mData = data;
+
+    mCallback(data);
+  }
+
+  std::optional<T> get() {
+    return mData;
+  }
+
+private:
+  std::function<void(T const &)> mCallback;
+  std::optional<T> mData;
+  std::mutex mMutex;
 };

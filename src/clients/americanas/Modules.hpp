@@ -17,9 +17,9 @@
 #include "model/produto/ProdutoRepository.hpp"
 #include "model/tipoLog/TipoLogRepository.hpp"
 #include "model/usuario/UsuarioRepository.hpp"
-#include "clients/src/model/SqliteDatabase.hpp"
 #include "clients/americanas/Sistema.hpp"
 #include "clients/americanas/strategy/DecorateTitleStrategy.hpp"
+#include "database/SqliteDatabase.hpp"
 
 #include "jinject/jinject.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/DataClass.hpp"
+#include "database/DataClass.hpp"
 #include "model/levelLog/LevelLogModel.hpp"
 #include "model/tipoLog/TipoLogModel.hpp"
 

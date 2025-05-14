@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/DataClass.hpp"
+#include "database/DataClass.hpp"
 
 template <typename... Models> struct CompoundModel : public Models... {
   CompoundModel() = default;

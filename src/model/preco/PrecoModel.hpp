@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/DataClass.hpp"
+#include "database/DataClass.hpp"
 
 using PrecoModel = DataClass<"preco", Primary<"id">, Foreign<Refer<ProdutoModel, "produto_id">>,
   Field<"id", FieldType::Serial, false>,

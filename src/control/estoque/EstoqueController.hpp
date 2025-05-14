@@ -4,6 +4,7 @@
 #include "model/estoque/EstoqueRepository.hpp"
 #include "model/produto/ProdutoRepository.hpp"
 #include "model/tipoNegocio/TipoNegocioRepository.hpp"
+#include "model/base/cnpj.hpp"
 #include "ui/Form.hpp"
 #include "ui/Table.hpp"
 #include "utils/Format.hpp"
@@ -52,20 +53,21 @@ struct EstoqueController {
                      static_cast<int>(SelecaoEstoque::Vender));
         })
         .on_success([&](Input input) {
-          auto opcao = input.get_int("opcao");
-
-          if (!opcao.has_value()) {
-            return;
-          }
-
           try {
-            if (opcao == SelecaoEstoque::Exibir) {
-              exibir();
-            } else if (opcao == SelecaoEstoque::Comprar) {
-              comprar();
-            } else if (opcao == SelecaoEstoque::Vender) {
-              vender();
-            }
+            input.get_int("opcao")
+              .and_then([&](auto value) {
+                SelecaoEstoque opcao = static_cast<SelecaoEstoque>(value);
+
+                if (opcao == SelecaoEstoque::Exibir) {
+                  exibir();
+                } else if (opcao == SelecaoEstoque::Comprar) {
+                  comprar();
+                } else if (opcao == SelecaoEstoque::Vender) {
+                  vender();
+                }
+
+                return std::optional<bool>{true};
+              });
           } catch (std::runtime_error &e) {
             loge(TipoLog::Sistema, Tag, "{}", e.what());
 
@@ -131,9 +133,15 @@ struct EstoqueController {
           estoque["lote"] = input.get_text("lote");
           estoque["validade"] = input.get_text("validade");
 
-          std::string cnpj = input.get_text("cnpj").value();
+          auto cnpj = Cnpj::from(input.get_text("cnpj"));
 
-          mEstoqueInteractor->save_compra(estoque, cnpj);
+          if (!cnpj) {
+            logt(TipoLog::Sistema, Tag, "CNPJ invalido.");
+
+            return;
+          }
+
+          mEstoqueInteractor->save_compra(estoque, *cnpj);
 
           logt(TipoLog::Sistema, Tag, "atualizando compra:[{}]", estoque);
         })
@@ -149,19 +157,21 @@ struct EstoqueController {
         .on_success([&](Input input) {
           auto estoqueId = input.get_int("estoque");
           auto quantidade = input.get_int("quantidade").value();
+          auto cnpj = Cnpj::from(input.get_text("cnpj"));
 
-          auto item = mEstoqueInteractor->load_estoque_by_id(*estoqueId);
-
-          if (!item.has_value()) {
-            fmt::print("Item nao encontrado");
+          if (!estoqueId) {
+            logt(TipoLog::Sistema, Tag, "ID do estoque invalido.");
 
             return;
           }
 
-          mEstoqueInteractor->save_venda(*item, quantidade,
-                                         input.get_text("cnpj").value());
+          if (!cnpj) {
+            logt(TipoLog::Sistema, Tag, "CNPJ invalido.");
 
-          logt(TipoLog::Sistema, Tag, "atualizando venda:[{}]", *item);
+            return;
+          }
+
+          mEstoqueInteractor->store_venda(*estoqueId, quantidade, *cnpj);
         })
         .on_failed(opcao_invalida)
         .show();

@@ -6,7 +6,7 @@ class Database;
 
 struct Migration {
   Migration(int id, std::function<void(Database &)> callback)
-    : mId{id}, mCallback{callback}
+    : mCallback{callback}, mId{id}
   {
   }
 

@@ -29,7 +29,7 @@ struct LoginInteractor : public Repository<LoginInteractorModel> {
 
           return item.template get<UsuarioModel>("apelido") == nome and
                  item.template get<UsuarioModel>("senha") == senhaEncriptada;
-        });
+        }) | std::ranges::views::take(1);
 
     for (auto const &item : items) {
       return {item.template get<UsuarioModel>()};

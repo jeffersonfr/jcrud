@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/CompoundModel.hpp"
+#include "database/CompoundModel.hpp"
 #include "model/filial/FilialModel.hpp"
 #include "model/cargo/CargoModel.hpp"
 #include "model/usuario/UsuarioModel.hpp"

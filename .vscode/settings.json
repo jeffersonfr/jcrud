@@ -78,6 +78,10 @@
     "typeinfo": "cpp",
     "future": "cpp",
     "shared_mutex": "cpp",
-    "csignal": "cpp"
+    "csignal": "cpp",
+    "cfenv": "cpp",
+    "format": "cpp",
+    "stdfloat": "cpp",
+    "text_encoding": "cpp"
   }
 }

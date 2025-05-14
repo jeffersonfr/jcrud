@@ -1,7 +1,7 @@
 #pragma once
 
-#include "model/Database.hpp"
-#include "model/Migration.hpp"
+#include "database/Database.hpp"
+#include "database/Migration.hpp"
 #include "utils/Log.hpp"
 
 #include <algorithm>
@@ -132,7 +132,7 @@ template <typename... Tables> struct SqliteDatabase : public Database {
     query_string(fmt::format("SELECT * FROM {};", MigracaoModel::get_name()),
                  [&](std::vector<std::string> const &columns,
                      std::vector<Data> const &values) {
-                   for (int i = 0; i < columns.size(); i++) {
+                   for (int i = 0; i < (int)columns.size(); i++) {
                      if (columns[i] == "version") {
                        migracaoModel["version"] = values[0].get_int().value();
                      }

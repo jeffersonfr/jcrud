@@ -37,8 +37,10 @@ using namespace jui;
 struct AdminController {
   inline static const std::string Tag = "AdminController";
 
-  AdminController(std::unique_ptr<AdminInteractor> adminInteractor, std::unique_ptr<LoginInteractor> loginInteractor)
-      : mAdminInteractor{std::move(adminInteractor)}, mLoginInteractor{std::move(loginInteractor)} {}
+  AdminController(std::unique_ptr<AdminInteractor> adminInteractor,
+                  std::unique_ptr<LoginInteractor> loginInteractor)
+      : mAdminInteractor{std::move(adminInteractor)},
+        mLoginInteractor{std::move(loginInteractor)} {}
 
   bool execute() {
     using namespace jui;
@@ -61,28 +63,26 @@ struct AdminController {
                      static_cast<int>(SelecaoAdmin::AtualizarCargos));
         })
         .on_success([&](Input input) {
-          auto opcao = input.get_int("opcao");
-
-          if (!opcao.has_value()) {
-            return;
-          }
-
           try {
-            if (opcao == SelecaoAdmin::BuscarUsuario) {
-              listar_usuario();
-            } else if (opcao == SelecaoAdmin::AdicionarUsuario) {
-              adicionar_usuario();
-            } else if (opcao == SelecaoAdmin::RemoverUsuario) {
-              remover_usuario();
-            } else if (opcao == SelecaoAdmin::AtualizarSenha) {
-              atualizar_senha();
-            } else if (opcao == SelecaoAdmin::AtualizarCargos) {
-              atualizar_cargos();
-            } else if (opcao == SelecaoAdmin::Sair) {
-              result = false;
+            input.get_int("opcao").and_then([&](auto value) {
+              auto opcao = static_cast<SelecaoAdmin>(value);
 
-              return;
-            }
+              if (opcao == SelecaoAdmin::BuscarUsuario) {
+                listar_usuario();
+              } else if (opcao == SelecaoAdmin::AdicionarUsuario) {
+                adicionar_usuario();
+              } else if (opcao == SelecaoAdmin::RemoverUsuario) {
+                remover_usuario();
+              } else if (opcao == SelecaoAdmin::AtualizarSenha) {
+                atualizar_senha();
+              } else if (opcao == SelecaoAdmin::AtualizarCargos) {
+                atualizar_cargos();
+              } else if (opcao == SelecaoAdmin::Sair) {
+                result = false;
+              }
+
+              return std::optional<bool>{true};
+            });
           } catch (std::runtime_error &e) {
             loge(TipoLog::Sistema, Tag, "{}", e.what());
 
@@ -113,7 +113,8 @@ struct AdminController {
               })
               .show();
 
-          logt(TipoLog::Sistema, Tag, "listando usuario por nome:[{}]", input.get_text("nome").value());
+          logt(TipoLog::Sistema, Tag, "listando usuario por nome:[{}]",
+               input.get_text("nome").value());
         })
         .on_failed(opcao_invalida)
         .show();
@@ -154,7 +155,7 @@ struct AdminController {
             mAdminInteractor->remove_usuario(item);
 
             logt(TipoLog::Sistema, Tag, "removendo usuario:[{}]", item);
-  
+
             return;
           }
         })
@@ -188,7 +189,8 @@ struct AdminController {
 
             mAdminInteractor->save_usuario(usuario);
 
-            logt(TipoLog::Sistema, Tag, "atualizando senha do usuario:[{}]", usuario);
+            logt(TipoLog::Sistema, Tag, "atualizando senha do usuario:[{}]",
+                 usuario);
           }
         })
         .on_failed(opcao_invalida)
@@ -207,27 +209,33 @@ struct AdminController {
         .show();
 
     Form<Item<"id", "Id do usuario", TypeItem::Int>,
-         Item<"cargos", "Lista de cargos separados por virgula [1,2,3,...]", TypeItem::Text>>{}
+         Item<"cargos", "Lista de cargos separados por virgula [1,2,3,...]",
+              TypeItem::Text>>{}
         .on_success([&](Input input) {
           auto usuarioId = input.get_int("id");
-          auto usuarioList = mAdminInteractor->load_usuario_by<"id">(usuarioId.value());
+          auto usuarioList =
+              mAdminInteractor->load_usuario_by<"id">(usuarioId.value());
 
-          auto cargoList = jmixin::String{input.get_text("cargos").value_or("")}.split(",");
+          auto cargoList =
+              jmixin::String{input.get_text("cargos").value_or("")}.split(",");
           std::set<int> cargoSet;
 
           for (auto const &cargo : cargoList) {
             cargoSet.insert(std::atoi(cargo.c_str()));
           }
 
-          auto items = mAdminInteractor->load_all_cargos() 
-            | std::ranges::views::filter([&](auto const &item) {
-              return cargoSet.count(item["id"].get_int().value_or(-1)) != 0;
-            });
+          auto items =
+              mAdminInteractor->load_all_cargos() |
+              std::ranges::views::filter([&](auto const &item) {
+                return cargoSet.count(item["id"].get_int().value_or(-1)) != 0;
+              });
 
           for (auto const &usuario : usuarioList) {
-            mAdminInteractor->update_cargos(usuario, std::vector<CargoModel>{items.begin(), items.end()});
+            mAdminInteractor->update_cargos(
+                usuario, std::vector<CargoModel>{items.begin(), items.end()});
 
-            logt(TipoLog::Sistema, Tag, "atualizando cargos do usuario:[{}]", usuario);
+            logt(TipoLog::Sistema, Tag, "atualizando cargos do usuario:[{}]",
+                 usuario);
 
             return;
           }

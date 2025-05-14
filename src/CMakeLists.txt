@@ -1,3 +1,6 @@
+# add_compile_options(-Wall -Wextra -Wpedantic -Wconversion -Werror -Wnrvo -Wpadded -pedantic)
+add_compile_options(-Wall -Werror -Wpedantic -Wconversion -Werror -pedantic)
+
 include_directories(".")
 
 find_package(Boost REQUIRED

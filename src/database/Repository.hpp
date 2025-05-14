@@ -1,7 +1,7 @@
 #pragma once
 
-#include "model/Database.hpp"
-#include "model/CompoundModel.hpp"
+#include "database/Database.hpp"
+#include "database/CompoundModel.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -35,7 +35,7 @@ template <typename T> struct Repository {
                                    std::vector<Data> const &values) {
       Model item;
 
-      for (int i = 0; i < columns.size(); i++) {
+      for (int i = 0; i < (int)columns.size(); i++) {
         std::string const &column = columns[i];
 
         item[column] = values[i];
@@ -84,7 +84,7 @@ template <typename T> struct Repository {
                                    std::vector<Data> const &values) {
       Model item;
 
-      for (int i = 0; i < columns.size(); i++) {
+      for (int i = 0; i < (int)columns.size(); i++) {
         std::string const &column = columns[i];
 
         item[column] = values[i];
