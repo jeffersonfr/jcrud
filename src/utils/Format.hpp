@@ -12,7 +12,7 @@ std::string format_currency(Data const &value) {
   return fmt::format("{:>10.2F}", value.get_decimal().value_or(NAN));
 }
 
-template <typename Clock>
+template<typename Clock>
 std::string format_timestamp(std::chrono::time_point<Clock> tp) {
   /*
   std::time_t time = secs.count();

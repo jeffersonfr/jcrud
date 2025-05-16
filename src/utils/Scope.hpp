@@ -8,7 +8,7 @@
 
 struct Scope {
   Scope(std::size_t threads = 1)
-  : mThreads{}, mIoService{}, mStrand{mIoService} {
+    : mThreads{}, mIoService{}, mStrand{mIoService} {
     for (auto i = 0; i < threads; ++i) {
       mThreads.create_thread([&]() { mIoService.run(); });
     }

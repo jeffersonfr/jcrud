@@ -16,12 +16,13 @@
 
 struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
   ProdutoInteractor(
-      std::unique_ptr<CategoriaProdutoRepository> categoriaProdutoRepository,
-      std::unique_ptr<ProdutoRepository> produtoRepository,
-      std::unique_ptr<PrecoRepository> precoRepository)
-      : mCategoriaProdutoRepository{std::move(categoriaProdutoRepository)},
-        mProdutoRepository{std::move(produtoRepository)},
-        mPrecoRepository{std::move(precoRepository)} {}
+    std::unique_ptr<CategoriaProdutoRepository> categoriaProdutoRepository,
+    std::unique_ptr<ProdutoRepository> produtoRepository,
+    std::unique_ptr<PrecoRepository> precoRepository)
+    : mCategoriaProdutoRepository{std::move(categoriaProdutoRepository)},
+      mProdutoRepository{std::move(produtoRepository)},
+      mPrecoRepository{std::move(precoRepository)} {
+  }
 
   std::vector<CategoriaProdutoModel> load_all_categorias() {
     return mCategoriaProdutoRepository->load_all();
@@ -29,10 +30,10 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
 
   std::vector<ProdutoInteractorModel> load_all_produtos() {
     auto items = load_all() | std::ranges::views::filter([](auto const &item) {
-                   return !item.template get<ProdutoModel>("excluido")
-                               .get_bool()
-                               .value();
-                 });
+      return !item.template get<ProdutoModel>("excluido")
+        .get_bool()
+        .value();
+    });
 
     auto it = std::ranges::unique(items, [](auto a, auto b) {
       return a.template get<ProdutoModel>("id") ==
@@ -52,61 +53,45 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
                       return produto.template get<ProdutoModel>("id") == id;
                     });
 
-    for (auto const &produto : produtos) {
+    for (auto const &produto: produtos) {
       return produto;
     }
 
     return {};
   }
 
-  void save_produto(ProdutoInteractorModel const &item) {
+  std::optional<std::string> save_produto(ProdutoInteractorModel const &item) {
     if (item.get<ProdutoModel>("id").is_null()) {
-      mProdutoRepository->get_database()->transaction([&](Database &db) {
-        auto produto = mProdutoRepository->save(item.get<ProdutoModel>());
+      try {
+        mProdutoRepository->get_database()->transaction([&](Database &db) {
+          auto produto = mProdutoRepository->save(item.get<ProdutoModel>());
 
-        if (produto.has_value()) {
-          item.get<PrecoModel>("produto_id") = (*produto)["id"];
+          if (produto.has_value()) {
+            item.get<PrecoModel>("produto_id") = (*produto)["id"];
 
-          auto e = mPrecoRepository->save(item.get<PrecoModel>());
+            auto e = mPrecoRepository->save(item.get<PrecoModel>());
 
-          if (!e.has_value()) {
-            throw e.error();
+            if (!e.has_value()) {
+              throw e.error();
+            }
           }
-        }
-      });
-    } else {
-      update(item);
-    }
-  }
-
-  void remove_produto(ProdutoInteractorModel const &item) {
-    auto produtoId = item.get<ProdutoModel>("id").get_int();
-
-    if (!produtoId.has_value()) {
-      return;
-    }
-
-    auto itemOther{std::move(item.get<ProdutoModel>())};
-
-    itemOther["excluido"] = true;
-
-    mProdutoRepository->update(itemOther);
-
-    /*
-    mProdutoRepository->get_database()->transaction([&](Database &db) {
-      auto produtoId = item.get<ProdutoModel>("id").get_int();
-
-      if (!produtoId.has_value()) {
-        return;
+        });
+      } catch (std::runtime_error &e) {
+        return e.what();
       }
 
-      std::ranges::for_each(
-          mPrecoRepository->load_by<"produto_id">(id),
-          [&](auto const &item) { mPrecoRepository->remove(item); });
+      return {};
+    }
 
-      mProdutoRepository->remove(item);
-    });
-     */
+    return update(item);
+  }
+
+  std::optional<std::string> remove_produto(ProdutoInteractorModel produtoInteractor) {
+    auto produto{std::move(produtoInteractor.get<ProdutoModel>())};
+
+    produto["excluido"] = true;
+
+    return mProdutoRepository->update(produto);
   }
 
 private:

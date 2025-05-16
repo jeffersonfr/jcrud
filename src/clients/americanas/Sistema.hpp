@@ -16,9 +16,9 @@ struct Sistema {
   Sistema(std::unique_ptr<AdminController> adminController,
           std::unique_ptr<ProdutoController> produtoController,
           std::unique_ptr<EstoqueController> estoqueController)
-      : mAdminController{std::move(adminController)},
-        mProdutoController{std::move(produtoController)},
-        mEstoqueController{std::move(estoqueController)} {
+    : mAdminController{std::move(adminController)},
+      mProdutoController{std::move(produtoController)},
+      mEstoqueController{std::move(estoqueController)} {
     Log::instance().level(LevelLog::Trace);
   }
 
@@ -30,7 +30,7 @@ struct Sistema {
     selecaoSet.insert(static_cast<int>(SelecaoSistema::Estoque));
 
     do {
-        do_menu();
+      do_menu();
     } while (true);
   }
 
@@ -41,44 +41,44 @@ private:
   std::set<int> selecaoSet;
 
   void do_menu() {
-    Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
-        .title("Farmacia Pague+")
-        .before([&]() {
-          fmt::print("{}", "Escolha uma opção:\n");
+    Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int> >{}
+      .title("Farmacia Pague+")
+      .before([&]() {
+        fmt::print("{}", "Escolha uma opção:\n");
 
-          if (selecaoSet.count(
-                  static_cast<int>(SelecaoSistema::Administracao))) {
-            fmt::print("\t{} - Administracao\n",
-                       static_cast<int>(SelecaoSistema::Administracao));
-          }
+        if (selecaoSet.count(
+          static_cast<int>(SelecaoSistema::Administracao))) {
+          fmt::print("\t{} - Administracao\n",
+                     static_cast<int>(SelecaoSistema::Administracao));
+        }
 
-          if (selecaoSet.count(static_cast<int>(SelecaoSistema::Produtos))) {
-            fmt::print("\t{} - Produtos\n",
-                       static_cast<int>(SelecaoSistema::Produtos));
-          }
+        if (selecaoSet.count(static_cast<int>(SelecaoSistema::Produtos))) {
+          fmt::print("\t{} - Produtos\n",
+                     static_cast<int>(SelecaoSistema::Produtos));
+        }
 
-          if (selecaoSet.count(static_cast<int>(SelecaoSistema::Estoque))) {
-            fmt::print("\t{} - Estoque\n",
-                       static_cast<int>(SelecaoSistema::Estoque));
-          }
-        })
-        .on_success([&](Input input) {
-          auto opcao = input.get_int("opcao");
+        if (selecaoSet.count(static_cast<int>(SelecaoSistema::Estoque))) {
+          fmt::print("\t{} - Estoque\n",
+                     static_cast<int>(SelecaoSistema::Estoque));
+        }
+      })
+      .on_success([&](Input input) {
+        auto opcao = input.get_int("opcao");
 
-          if (!opcao.has_value() or selecaoSet.count(*opcao) == 0) {
-            return;
-          }
+        if (!opcao.has_value() or selecaoSet.count(*opcao) == 0) {
+          return;
+        }
 
-          if (opcao == SelecaoSistema::Administracao) {
-            mAdminController->execute();
-          } else if (opcao == SelecaoSistema::Produtos) {
-            mProdutoController->execute();
-          } else if (opcao == SelecaoSistema::Estoque) {
-            mEstoqueController->execute();
-          }
-        })
-        .on_failed(opcao_invalida)
-        .interruptable()
-        .show();
+        if (opcao == SelecaoSistema::Administracao) {
+          mAdminController->execute();
+        } else if (opcao == SelecaoSistema::Produtos) {
+          mProdutoController->execute();
+        } else if (opcao == SelecaoSistema::Estoque) {
+          mEstoqueController->execute();
+        }
+      })
+      .on_failed(opcao_invalida)
+      .interruptable()
+      .show();
   }
 };

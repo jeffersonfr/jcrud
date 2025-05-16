@@ -16,37 +16,43 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
-template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts>
+struct overloaded : Ts... {
+  using Ts::operator()...;
+};
 
 enum class FieldType { Serial, Bool, Int, Decimal, Text, Timestamp };
 
-template <typename T>
-concept DefaultValueConcept = requires(T t) {
-  { T::get_value() } -> std::same_as<std::optional<std::string>>;
+template<typename T>
+concept DefaultValueConcept = requires(T t)
+{
+  { T::get_value() } -> std::same_as<std::optional<std::string> >;
 };
 
 struct NoDefaultValue {
   static std::optional<std::string> get_value() { return {}; }
 };
 
-template <StringLiteral Value> struct DefaultValue {
+template<StringLiteral Value>
+struct DefaultValue {
   static std::optional<std::string> get_value() { return {Value.to_string()}; }
 };
 
-template <StringLiteral Value>
+template<StringLiteral Value>
 using TextValue = DefaultValue<fmt::format("'{}'", Value.to_string())>;
 
 using TimestampValue = DefaultValue<"(datetime('now', 'localtime'))">;
 
-template <typename T>
-concept FieldConcept = requires(T t) {
+template<typename T>
+concept FieldConcept = requires(T t)
+{
   { T::get_name() } -> std::same_as<std::string>;
   { T::get_type() } -> std::same_as<FieldType>;
   { T::is_nullable() } -> std::same_as<bool>;
 };
 
-template <StringLiteral Name, FieldType Type, bool Nullable = true,
-          DefaultValueConcept Default = NoDefaultValue>
+template<StringLiteral Name, FieldType Type, bool Nullable = true,
+  DefaultValueConcept Default = NoDefaultValue>
 struct Field {
   constexpr static std::string get_name() { return Name.to_string(); }
 
@@ -59,32 +65,37 @@ struct Field {
   }
 };
 
-template <StringLiteral Name, FieldType Type, bool Nullable = true>
+template<StringLiteral Name, FieldType Type, bool Nullable = true>
 std::ostream &operator<<(std::ostream &out, Field<Name, Type, Nullable> field) {
   out << get_name(field) << " " << get_type(field) << " " << is_nullable(field);
 
   return out;
 }
 
-template <StringLiteral Name, bool Nullable = true>
+template<StringLiteral Name, bool Nullable = true>
 using BoolField = Field<Name, FieldType::Bool, Nullable>;
 
-template <StringLiteral Name, bool Nullable = true>
+template<StringLiteral Name, bool Nullable = true>
 using IntField = Field<Name, FieldType::Int, Nullable>;
 
-template <StringLiteral Name, bool Nullable = true>
+template<StringLiteral Name, bool Nullable = true>
 using DecimalField = Field<Name, FieldType::Decimal, Nullable>;
 
-template <StringLiteral Name, bool Nullable = true>
+template<StringLiteral Name, bool Nullable = true>
 using TextField = Field<Name, FieldType::Text, Nullable>;
 
-template <typename T>
-concept PrimaryConcept = requires(T t) {
+template<typename T>
+concept PrimaryConcept = requires(T t)
+{
   { T::get_size() } -> std::same_as<std::size_t>;
-  {T::get_keys([]<Field F>() {})};
+  {
+    T::get_keys([]<Field F>() {
+    })
+  };
 };
 
-template <StringLiteral... Keys> struct Primary {
+template<StringLiteral... Keys>
+struct Primary {
   constexpr Primary() {
     std::array<std::string_view, sizeof...(Keys)> primaryKeys;
     int i = 0;
@@ -94,19 +105,20 @@ template <StringLiteral... Keys> struct Primary {
     std::sort(primaryKeys.begin(), primaryKeys.end());
 
     if (auto it = std::unique(primaryKeys.begin(), primaryKeys.end());
-        primaryKeys.size() != 0 and it != primaryKeys.end()) {
+      primaryKeys.size() != 0 and it != primaryKeys.end()) {
       throw std::runtime_error("Duplicated primary key");
     }
   }
 
   static constexpr std::size_t get_size() { return sizeof...(Keys); }
 
-  template <typename F> static constexpr void get_keys(F callback) {
+  template<typename F>
+  static constexpr void get_keys(F callback) {
     for_each<F, Keys...>(callback);
   }
 
 private:
-  template <typename F, StringLiteral Arg, StringLiteral... Args>
+  template<typename F, StringLiteral Arg, StringLiteral... Args>
   static constexpr void for_each(F callback) {
     callback.template operator()<Arg>();
 
@@ -115,34 +127,42 @@ private:
     }
   }
 
-  template <typename F> static constexpr void for_each(F callback) {
+  template<typename F>
+  static constexpr void for_each(F callback) {
     // no primary keys
   }
 };
 
 using NoPrimary = Primary<>;
 
-template <typename T>
-concept ReferConcept = requires(T t) {
+template<typename T>
+concept ReferConcept = requires(T t)
+{
   {
-    typename T::Model {}
-    } -> std::same_as<typename T::Model>;
+    typename T::Model{}
+  } -> std::same_as<typename T::Model>;
   { T::get_name() } -> std::same_as<std::string>;
 };
 
-template <typename T, StringLiteral Field> struct Refer {
+template<typename T, StringLiteral Field>
+struct Refer {
   using Model = T;
 
   constexpr static std::string get_name() { return Field.to_string(); }
 };
 
-template <typename T>
-concept ForeignConcept = requires(T t) {
+template<typename T>
+concept ForeignConcept = requires(T t)
+{
   { T::get_size() } -> std::same_as<std::size_t>;
-  {T::get_refers([]<Refer R>() {})};
+  {
+    T::get_refers([]<Refer R>() {
+    })
+  };
 };
 
-template <ReferConcept... Refers> struct Foreign {
+template<ReferConcept... Refers>
+struct Foreign {
   constexpr Foreign() {
     std::array<std::string_view, sizeof...(Refers)> refers;
     int i = 0;
@@ -152,19 +172,20 @@ template <ReferConcept... Refers> struct Foreign {
     std::sort(refers.begin(), refers.end());
 
     if (auto it = std::unique(refers.begin(), refers.end());
-        refers.size() != 0 and it != refers.end()) {
+      refers.size() != 0 and it != refers.end()) {
       throw std::runtime_error("Duplicated foreign key");
     }
   }
 
   static constexpr std::size_t get_size() { return sizeof...(Refers); }
 
-  template <typename F> static constexpr void get_refers(F callback) {
+  template<typename F>
+  static constexpr void get_refers(F callback) {
     for_each<F, Refers...>(callback);
   }
 
 private:
-  template <typename F, typename Arg, typename... Args>
+  template<typename F, typename Arg, typename... Args>
   static constexpr void for_each(F callback) {
     callback.template operator()<Arg>();
 
@@ -173,7 +194,8 @@ private:
     }
   }
 
-  template <typename F> static constexpr void for_each(F callback) {
+  template<typename F>
+  static constexpr void for_each(F callback) {
     // no primary keys
   }
 };
@@ -185,15 +207,19 @@ struct Data {
 
   Data() = default;
 
-  template <typename T> Data(T &&data) : mData{std::forward<T>(data)} {}
+  template<typename T>
+  Data(T &&data) : mData{std::forward<T>(data)} {
+  }
 
-  template <typename T> constexpr Data &operator=(T const &data) {
+  template<typename T>
+  constexpr Data &operator=(T const &data) {
     mData = data;
 
     return *this;
   }
 
-  template <typename T> constexpr Data &operator=(std::optional<T> data) {
+  template<typename T>
+  constexpr Data &operator=(std::optional<T> data) {
     if (data.has_value()) {
       mData = data.value();
     }
@@ -201,7 +227,8 @@ struct Data {
     return *this;
   }
 
-  template <typename F> constexpr void get_value(F &&callback) const {
+  template<typename F>
+  constexpr void get_value(F &&callback) const {
     std::visit(std::forward<F>(callback), mData);
   }
 
@@ -209,7 +236,7 @@ struct Data {
 
   std::optional<bool> get_bool() const {
     return get_int().and_then(
-        [](auto value) { return std::optional{static_cast<bool>(value)}; });
+      [](auto value) { return std::optional{static_cast<bool>(value)}; });
   }
 
   std::optional<int64_t> get_int() const {
@@ -249,11 +276,14 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &out, Data const &value) {
-  value.get_value(overloaded{[&](nullptr_t arg) {},
-                             [&](bool arg) { out << (arg ? "true" : "false"); },
-                             [&](int64_t arg) { out << std::to_string(arg); },
-                             [&](double arg) { out << std::to_string(arg); },
-                             [&](std::string arg) { out << arg; }});
+  value.get_value(overloaded{
+    [&](nullptr_t arg) {
+    },
+    [&](bool arg) { out << (arg ? "true" : "false"); },
+    [&](int64_t arg) { out << std::to_string(arg); },
+    [&](double arg) { out << std::to_string(arg); },
+    [&](std::string arg) { out << arg; }
+  });
 
   return out;
 }
@@ -266,8 +296,8 @@ std::string to_string(Data const &value) {
   return o.str();
 }
 
-template <StringLiteral Name, PrimaryConcept PrimaryKeys,
-          ForeignConcept ForeignKeys, FieldConcept... Fields>
+template<StringLiteral Name, PrimaryConcept PrimaryKeys,
+  ForeignConcept ForeignKeys, FieldConcept... Fields>
 struct DataClass {
   using Keys = PrimaryKeys;
   using Refers = ForeignKeys;
@@ -280,26 +310,28 @@ struct DataClass {
 
     std::sort(fields.begin(), fields.end());
     if (auto it = std::unique(fields.begin(), fields.end());
-        it != fields.end()) {
+      it != fields.end()) {
       throw std::runtime_error(fmt::format(
-          "Duplicated fields in model definition of '{}'", Name.to_string()));
+        "Duplicated fields in model definition of '{}'", Name.to_string()));
     }
   }
 
   static constexpr std::string get_name() { return Name.to_string(); }
 
-  template <typename F> static constexpr void get_fields(F callback) {
+  template<typename F>
+  static constexpr void get_fields(F callback) {
     for_each<Fields...>(callback);
   }
 
-  template <typename F> static constexpr void get_keys(F callback) {
+  template<typename F>
+  static constexpr void get_keys(F callback) {
     PrimaryKeys::template get_keys([&]<StringLiteral Key>() {
       int index = index_of<0, Fields...>(Key.to_string());
 
       if (index < 0) {
         throw std::runtime_error(
-            fmt::format("Inexistent primary key '{}' on table '{}'",
-                        Key.to_string(), get_name()));
+          fmt::format("Inexistent primary key '{}' on table '{}'",
+                      Key.to_string(), get_name()));
       }
 
       get_fields([&]<typename Field>() {
@@ -310,9 +342,10 @@ struct DataClass {
     });
   }
 
-  template <typename F> static constexpr void get_refers(F callback) {
+  template<typename F>
+  static constexpr void get_refers(F callback) {
     ForeignKeys::template get_refers(
-        [&]<typename FKey>() { callback.template operator()<FKey>(); });
+      [&]<typename FKey>() { callback.template operator()<FKey>(); });
   }
 
   constexpr Data const &operator[](std::string_view name) const {
@@ -320,7 +353,7 @@ struct DataClass {
 
     if (index < 0) {
       throw std::runtime_error(
-          fmt::format("Field '{}' not available in '{}'", name, get_name()));
+        fmt::format("Field '{}' not available in '{}'", name, get_name()));
     }
 
     return mFields[index];
@@ -331,7 +364,7 @@ struct DataClass {
 
     if (index < 0) {
       throw std::runtime_error(
-          fmt::format("Field '{}' not available in '{}'", name, get_name()));
+        fmt::format("Field '{}' not available in '{}'", name, get_name()));
     }
 
     return mFields[index];
@@ -353,11 +386,12 @@ struct DataClass {
       o << std::quoted(Field::get_name()) << ":";
 
       this->operator[](Field::get_name())
-          .get_value(overloaded{
-              [&](nullptr_t arg) { o << "null"; },
-              [&](bool arg) { o << (arg ? "true" : "false"); },
-              [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
-              [&](std::string arg) { o << std::quoted(arg); }});
+        .get_value(overloaded{
+          [&](nullptr_t arg) { o << "null"; },
+          [&](bool arg) { o << (arg ? "true" : "false"); },
+          [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
+          [&](std::string arg) { o << std::quoted(arg); }
+        });
     });
 
     o << "}";
@@ -374,7 +408,7 @@ struct DataClass {
 private:
   std::array<Data, sizeof...(Fields)> mFields;
 
-  template <typename Arg, typename... Args, typename F>
+  template<typename Arg, typename... Args, typename F>
   static void for_each(F callback) {
     callback.template operator()<Arg>();
 
@@ -383,12 +417,13 @@ private:
     }
   }
 
-  template <typename F> static void for_each(F callback) {
+  template<typename F>
+  static void for_each(F callback) {
     throw std::runtime_error(
-        fmt::format("No fields available in '{}'", get_name()));
+      fmt::format("No fields available in '{}'", get_name()));
   }
 
-  template <int Index = 0, typename Arg, typename... Args>
+  template<int Index = 0, typename Arg, typename... Args>
   static constexpr int index_of(std::string_view name) {
     if (Arg::get_name() == name) {
       return Index;
@@ -402,71 +437,73 @@ private:
   }
 };
 
-template <StringLiteral Name, PrimaryConcept PrimaryKeys,
-          ForeignConcept ForeignKeys, FieldConcept... Fields>
-struct fmt::formatter<DataClass<Name, PrimaryKeys, ForeignKeys, Fields...>>
-    : fmt::ostream_formatter {};
+template<StringLiteral Name, PrimaryConcept PrimaryKeys,
+  ForeignConcept ForeignKeys, FieldConcept... Fields>
+struct fmt::formatter<DataClass<Name, PrimaryKeys, ForeignKeys, Fields...> >
+  : fmt::ostream_formatter {
+};
 
 namespace jinject {
-template <StringLiteral Name, PrimaryConcept PrimaryKeys,
-          ForeignConcept ForeignKeys, FieldConcept... Fields>
-struct introspection<DataClass<Name, PrimaryKeys, ForeignKeys, Fields...>> {
-  static std::string to_string() {
-    std::string primaryKeys, foreignKeys, fields;
-    bool first = true;
+  template<StringLiteral Name, PrimaryConcept PrimaryKeys,
+    ForeignConcept ForeignKeys, FieldConcept... Fields>
+  struct introspection<DataClass<Name, PrimaryKeys, ForeignKeys, Fields...> > {
+    static std::string to_string() {
+      std::string primaryKeys, foreignKeys, fields;
+      bool first = true;
 
-    PrimaryKeys::template get_keys([&]<StringLiteral Key>() {
-      get_fields([&]<typename Field>() {
+      PrimaryKeys::template get_keys([&]<StringLiteral Key>() {
+        get_fields([&]<typename Field>() {
+          if (!first) {
+            primaryKeys += ", ";
+          }
+
+          first = false;
+
+          primaryKeys += Field::get_name();
+        });
+      });
+
+      first = true;
+
+      ForeignKeys::template get_refers([&]<typename FKey>() {
         if (!first) {
-          primaryKeys += ", ";
+          foreignKeys += ", ";
         }
 
         first = false;
 
-        primaryKeys += Field::get_name();
+        foreignKeys += FKey::get_name();
       });
-    });
 
-    first = true;
+      first = true;
 
-    ForeignKeys::template get_refers([&]<typename FKey>() {
-      if (!first) {
-        foreignKeys += ", ";
-      }
+      get_fields([&]<typename Field>() {
+        if (!first) {
+          fields += ", ";
+        }
 
-      first = false;
+        first = false;
 
-      foreignKeys += FKey::get_name();
-    });
+        fields += Field::get_name();
+      });
 
-    first = true;
-
-    get_fields([&]<typename Field>() {
-      if (!first) {
-        fields += ", ";
-      }
-
-      first = false;
-
-      fields += Field::get_name();
-    });
-
-    return fmt::format("DataClass<{}, PrimaryKeys<{}>, ForeignKeys<{}>, Fields<{}>>",
-                       Name.to_string(), primaryKeys, foreignKeys, fields);
-  }
-
-private:
-  template <typename F> static constexpr void get_fields(F callback) {
-    for_each<Fields...>(callback);
-  }
-
-  template <typename Arg, typename... Args, typename F>
-  static void for_each(F callback) {
-    callback.template operator()<Arg>();
-
-    if constexpr (sizeof...(Args) > 0) {
-      return for_each<Args...>(callback);
+      return fmt::format("DataClass<{}, PrimaryKeys<{}>, ForeignKeys<{}>, Fields<{}>>",
+                         Name.to_string(), primaryKeys, foreignKeys, fields);
     }
-  }
-};
+
+  private:
+    template<typename F>
+    static constexpr void get_fields(F callback) {
+      for_each<Fields...>(callback);
+    }
+
+    template<typename Arg, typename... Args, typename F>
+    static void for_each(F callback) {
+      callback.template operator()<Arg>();
+
+      if constexpr (sizeof...(Args) > 0) {
+        return for_each<Args...>(callback);
+      }
+    }
+  };
 } // namespace jinject

@@ -14,7 +14,7 @@ struct Log {
     static Log log;
 
     if (!log.mRepository) {
-      log.mRepository = jinject::inject<std::unique_ptr<LogRepository>>();
+      log.mRepository = jinject::inject<std::unique_ptr<LogRepository> >();
 
       if (!log.mRepository) {
         throw std::runtime_error("Instantiation of LogRepository is incomplete");
@@ -26,7 +26,7 @@ struct Log {
 
   void level(LevelLog value) { mLevel = value; }
 
-  template <typename... Args>
+  template<typename... Args>
   void msg(std::source_location const &location, LevelLog level, TipoLog type,
            std::string const &tag, std::string const &msg, Args... args) const {
     if (static_cast<int>(level) < static_cast<int>(mLevel)) {
@@ -38,15 +38,15 @@ struct Log {
     model["level_log_id"] = static_cast<int>(level);
     model["tipo_log_id"] = static_cast<int>(type);
     model["localizacao"] =
-        fmt::format("{} ({}:{}) {}: ", location.file_name(), location.line(),
-                    location.column(), location.function_name());
+      fmt::format("{} ({}:{}) {}: ", location.file_name(), location.line(),
+                  location.column(), location.function_name());
     model["tag"] = tag;
     model["descricao"] = fmt::vformat(msg, fmt::make_format_args(args...));
 
     model["localizacao"] = jmixin::String(model["localizacao"].get_text().value()).replace("\\\"", "'");
     model["tag"] = jmixin::String(model["tag"].get_text().value()).replace("\\\"", "'");
     model["descricao"] = jmixin::String(model["descricao"].get_text().value()).replace("\\\"", "'");
-    
+
     auto e = mRepository->save(model);
 
     if (!e.has_value()) {
@@ -54,11 +54,21 @@ struct Log {
     }
   }
 
+  void msg(std::source_location const &location, LevelLog level, TipoLog type,
+           std::string const &tag, std::optional<std::string> msg) const {
+    msg.and_then([&](std::string const &value) -> std::optional<bool> {
+      this->msg(location, level, type, tag, value);
+
+      return {};
+    });
+  }
+
 private:
   std::unique_ptr<LogRepository> mRepository;
   LevelLog mLevel = LevelLog::Trace;
 
-  Log() {}
+  Log() {
+  }
 };
 
 #define logt(...)                                                              \
@@ -78,4 +88,8 @@ private:
                       ##__VA_ARGS__)
 #define logf(...)                                                              \
   Log::instance().msg(std::source_location::current(), LevelLog::Fatal,        \
+                      ##__VA_ARGS__)
+
+#define logopt(...)                                                            \
+  Log::instance().msg(std::source_location::current(), LevelLog::Error,        \
                       ##__VA_ARGS__)

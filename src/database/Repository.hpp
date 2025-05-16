@@ -15,15 +15,16 @@
 
 #include <fmt/format.h>
 
-template <typename T> struct Repository {
-
+template<typename T>
+struct Repository {
   using Model = T;
 
-  Repository(std::shared_ptr<Database> db) : mDb{db} {}
+  Repository(std::shared_ptr<Database> db) : mDb{db} {
+  }
 
   std::shared_ptr<Database> get_database() { return mDb; }
 
-  template <StringLiteral Query>
+  template<StringLiteral Query>
   std::vector<Model> select(auto... values) const {
     std::vector<Model> items;
     std::ostringstream o;
@@ -35,7 +36,7 @@ template <typename T> struct Repository {
                                    std::vector<Data> const &values) {
       Model item;
 
-      for (int i = 0; i < (int)columns.size(); i++) {
+      for (int i = 0; i < (int) columns.size(); i++) {
         std::string const &column = columns[i];
 
         item[column] = values[i];
@@ -51,7 +52,8 @@ template <typename T> struct Repository {
 
   std::vector<Model> load_all() const { return select<"ORDER BY ROWID">(); }
 
-  template <StringLiteral... Fields> int64_t count_by(auto... values) const {
+  template<StringLiteral... Fields>
+  int64_t count_by(auto... values) const {
     std::ostringstream o;
     int64_t result = 0L;
 
@@ -69,7 +71,7 @@ template <typename T> struct Repository {
     return result;
   }
 
-  template <StringLiteral... Fields>
+  template<StringLiteral... Fields>
   std::vector<Model> load_by(auto... values) const {
     std::vector<Model> items;
     std::ostringstream o;
@@ -84,7 +86,7 @@ template <typename T> struct Repository {
                                    std::vector<Data> const &values) {
       Model item;
 
-      for (int i = 0; i < (int)columns.size(); i++) {
+      for (int i = 0; i < (int) columns.size(); i++) {
         std::string const &column = columns[i];
 
         item[column] = values[i];
@@ -98,7 +100,7 @@ template <typename T> struct Repository {
     return items;
   }
 
-  template <StringLiteral... Fields>
+  template<StringLiteral... Fields>
   std::optional<Model> first_by(auto... values) const {
     std::vector<Model> items;
     std::ostringstream o;
@@ -139,7 +141,7 @@ template <typename T> struct Repository {
     return {items[0]};
   }
 
-  template <StringLiteral... Fields>
+  template<StringLiteral... Fields>
   std::optional<Model> last_by(auto... values) const {
     std::vector<Model> items;
     std::ostringstream o;
@@ -204,28 +206,51 @@ template <typename T> struct Repository {
 
   void save_all(std::vector<Model> const &items) const {
     mDb->transaction([&](Database &db) {
-      for (auto const &item : items) {
+      for (auto const &item: items) {
         save(item);
       }
     });
   }
 
-  void update(Model const &item) const { mDb->update(item); }
+  std::optional<std::string> update(Model const &item) const {
+    try {
+      mDb->update(item);
 
-  void remove(Model const &model) const { mDb->remove(model); }
-
-  void remove_all(std::vector<Model> const &items) const {
-    mDb->transaction([&](Database &db) {
-      for (auto const &item : items) {
-        remove(item);
-      }
-    });
+      return {};
+    } catch (std::runtime_error &e) {
+      return e.what();
+    }
   }
 
-  template <StringLiteral... Fields> void remove_by(Data values...) const {
+  std::optional<std::string> remove(Model const &model) const {
+    try {
+      mDb->remove(model);
+    } catch (std::runtime_error &e) {
+      return e.what();
+    }
+
+    return {};
+  }
+
+  std::optional<std::string> remove_all(std::vector<Model> const &items) const {
+    try {
+      mDb->transaction([&](Database &db) {
+        for (auto const &item: items) {
+          remove(item);
+        }
+      });
+    } catch (std::runtime_error &e) {
+      return e.what();
+    }
+
+    return {};
+  }
+
+  template<StringLiteral... Fields>
+  void remove_by(Data values...) const {
     auto items = load_by<Fields...>(values);
 
-    for (auto const &item : items) {
+    for (auto const &item: items) {
       remove(item);
     }
   }
@@ -233,39 +258,40 @@ template <typename T> struct Repository {
 private:
   std::shared_ptr<Database> mDb;
 
-  template <StringLiteral... Keys>
+  template<StringLiteral... Keys>
   auto find_expanded(Primary<Keys...> primaryKeys, auto... values) {
     return load_by<Keys...>(values...);
   }
 
-  template <std::size_t Index, StringLiteral Field, StringLiteral... Fields>
+  template<std::size_t Index, StringLiteral Field, StringLiteral... Fields>
   void for_each_where(std::ostream &out, Data value, auto... values) const {
     if (Index != 0) {
       out << " AND ";
     }
 
     value.get_value(overloaded{
-        [&](nullptr_t arg) { out << "(" << Field.to_string() << " IS NULL)"; },
-        [&](bool arg) {
-          out << "(" << Field.to_string() << " = " << (arg ? "true" : "false")
-              << ")";
-        },
-        [&](int64_t arg) {
-          out << "(" << Field.to_string() << " = " << arg << ")";
-        },
-        [&](double arg) {
-          out << "(" << Field.to_string() << " = " << arg << ")";
-        },
-        [&](std::string arg) {
-          out << "(" << Field.to_string() << " LIKE '%" << arg << "%')";
-        }});
+      [&](nullptr_t arg) { out << "(" << Field.to_string() << " IS NULL)"; },
+      [&](bool arg) {
+        out << "(" << Field.to_string() << " = " << (arg ? "true" : "false")
+          << ")";
+      },
+      [&](int64_t arg) {
+        out << "(" << Field.to_string() << " = " << arg << ")";
+      },
+      [&](double arg) {
+        out << "(" << Field.to_string() << " = " << arg << ")";
+      },
+      [&](std::string arg) {
+        out << "(" << Field.to_string() << " LIKE '%" << arg << "%')";
+      }
+    });
 
     if constexpr (sizeof...(Fields) > 0) {
       for_each_where<Index + 1, Fields...>(values...);
     }
   }
 
-  template <std::size_t Index, StringLiteral Field, StringLiteral... Fields>
+  template<std::size_t Index, StringLiteral Field, StringLiteral... Fields>
   void for_each_order(std::ostream &out) const {
     if (Index != 0) {
       out << ", ";
@@ -279,11 +305,12 @@ private:
   }
 };
 
-template <typename... Models> struct Repository<CompoundModel<Models...>> {
-
+template<typename... Models>
+struct Repository<CompoundModel<Models...> > {
   using Model = CompoundModel<Models...>;
 
-  Repository(std::shared_ptr<Database> db = jinject::get{}) : mDb{db} {}
+  Repository(std::shared_ptr<Database> db = jinject::get{}) : mDb{db} {
+  }
 
   std::shared_ptr<Database> get_database() { return mDb; }
 
@@ -321,22 +348,34 @@ template <typename... Models> struct Repository<CompoundModel<Models...>> {
     return items;
   }
 
-  void update(Model const &item) {
-    mDb->transaction([&](Database &db) { update_internal(item); });
+  std::optional<std::string> update(Model const &item) {
+    try {
+      mDb->transaction([&](Database &db) { update_internal(item); });
+    } catch (std::runtime_error &e) {
+      return e.what();
+    }
+
+    return {};
   }
 
-  void update_all(std::vector<Model> const &items) const {
-    mDb->transaction([&](Database &db) {
-      for (auto const &item : items) {
-        update_internal(item);
-      }
-    });
+  std::optional<std::string> update_all(std::vector<Model> const &items) const {
+    try {
+      mDb->transaction([&](Database &db) {
+        for (auto const &item: items) {
+          update_internal(item);
+        }
+      });
+    } catch (std::runtime_error &e) {
+      return e.what();
+    }
+
+    return {};
   }
 
 private:
   std::shared_ptr<Database> mDb;
 
-  template <std::size_t Index, typename TModel, typename... TModels>
+  template<std::size_t Index, typename TModel, typename... TModels>
   void for_each_fill_model(Model &item, auto itColumn, auto itValue) const {
     int count{};
 
@@ -351,7 +390,7 @@ private:
     }
   }
 
-  template <std::size_t Index, typename TModel, typename... TModels>
+  template<std::size_t Index, typename TModel, typename... TModels>
   void for_each_model(std::ostream &out) const {
     if (Index != 0) {
       out << ", ";
@@ -364,7 +403,7 @@ private:
     }
   }
 
-  template <std::size_t Index, typename TModel, typename... TModels>
+  template<std::size_t Index, typename TModel, typename... TModels>
   void for_each_join(std::ostream &out) const {
     if (Index != 0) {
       out << " INNER JOIN ";
@@ -377,7 +416,7 @@ private:
     }
   }
 
-  template <std::size_t Index, typename TModel, typename... TModels>
+  template<std::size_t Index, typename TModel, typename... TModels>
   void for_each_where(std::ostream &out) const {
     int indexRefers = 0;
 
@@ -387,10 +426,10 @@ private:
       }
 
       out << TModel::get_name() << "." << FKey::get_name() << " = "
-          << FKey::Model::get_name() << ".";
+        << FKey::Model::get_name() << ".";
 
       FKey::Model::get_keys(
-          [&]<typename Field>() { out << Field::get_name(); });
+        [&]<typename Field>() { out << Field::get_name(); });
     });
 
     if constexpr (sizeof...(TModels) > 0) {
@@ -402,9 +441,9 @@ private:
     }
   }
 
-  template <std::size_t Index, typename TModel, typename... TModels>
+  template<std::size_t Index, typename TModel, typename... TModels>
   void for_each_update(Model const &item) const {
-    std::unique_ptr<Repository<TModel>> repository = jinject::get{};
+    std::unique_ptr<Repository<TModel> > repository = jinject::get{};
 
     repository->update(item.template get<TModel>());
 
@@ -419,8 +458,8 @@ private:
 };
 
 namespace jinject {
-  template <typename T>
-  struct introspection<Repository<T>> {
+  template<typename T>
+  struct introspection<Repository<T> > {
     static std::string to_string() {
       return fmt::format("Repository<{}>", introspection<T>::to_string());
     }

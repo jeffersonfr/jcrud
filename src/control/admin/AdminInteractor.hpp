@@ -4,74 +4,109 @@
 #include "model/usuario/UsuarioRepository.hpp"
 #include "model/cargoUsuario/CargoUsuarioRepository.hpp"
 
-#include <expected>
 #include <optional>
 #include <ranges>
-#include <string>
 #include <utility>
 #include <vector>
 
 #include "jinject/jinject.h"
+#include "model/base/id.hpp"
 
-struct AdminInteractor
-{
+struct AdminInteractor {
   AdminInteractor(std::unique_ptr<UsuarioRepository> usuarioRepository,
                   std::unique_ptr<CargoRepository> cargoRepository,
                   std::unique_ptr<CargoUsuarioRepository> cargoUsuarioRepository)
-      : mUsuarioRepository{std::move(usuarioRepository)},
-        mCargoRepository{std::move(cargoRepository)},
-        mCargoUsuarioRepository{std::move(cargoUsuarioRepository)} {}
+    : mUsuarioRepository{std::move(usuarioRepository)},
+      mCargoRepository{std::move(cargoRepository)},
+      mCargoUsuarioRepository{std::move(cargoUsuarioRepository)} {
+  }
 
-  template <StringLiteral... Fields>
-  std::vector<UsuarioModel> load_usuario_by(auto... values) const
-  {
+  template<StringLiteral... Fields>
+  [[nodiscard]] std::vector<UsuarioModel> load_usuario_by(auto... values) const {
     return mUsuarioRepository->load_by<Fields...>(values...);
   }
 
-  void save_usuario(UsuarioModel const &item)
-  {
-    if (item["id"].is_null()) {
-      auto e = mUsuarioRepository->save(item);
+  [[nodiscard]] std::optional<UsuarioModel> load_usuario_by_id(Id id) const {
+    auto usuarioList = load_usuario_by<"id">(id.value());
 
-      if (!e.has_value()) {
-        throw e.error();
-      }
-    } else {
-      mUsuarioRepository->update(item);
+    if (usuarioList.empty()) {
+      return {};
     }
+
+    return usuarioList[0];
   }
 
-  void remove_usuario(UsuarioModel const &item)
-  {
-    UsuarioModel other{std::move(item)};
+  std::optional<std::string> save_usuario(UsuarioModel const &item) {
+    if (item["id"].is_null()) {
+      if (auto result = mUsuarioRepository->save(item); !result.has_value()) {
+        return result.error().what();
+      }
 
-    other["excluido"] = true;
+      return {};
+    }
 
-    save_usuario(other);
+    return mUsuarioRepository->update(item);
   }
 
-  void update_cargos(UsuarioModel const &usuario,
-                     std::vector<CargoModel> const &cargos)
-  {
-    auto usuarioId = usuario["id"].get_int().value_or(-1);
+  std::optional<std::string> update_usuario_password(Id usuarioId, std::string const &senhaAtual,
+                                                     std::string const &senhaNova) {
+    return load_usuario_by_id(usuarioId)
+      .and_then([&](UsuarioModel value) -> std::optional<std::string> {
+        std::string senhaAtualEncriptada = crypt(senhaAtual.c_str(), "aa");
+        std::string senhaNovaEncriptada = crypt(senhaNova.c_str(), "aa");
 
-    mCargoUsuarioRepository->get_database()->transaction([&](Database &db) {
-      std::ranges::for_each(
-          mCargoUsuarioRepository->load_by<"usuario_id">(usuarioId),
+        if (senhaAtualEncriptada != value["senha"]) {
+          return "Erro ao atualizar a senha.";
+        }
+
+        value["senha"] = senhaNovaEncriptada;
+
+        save_usuario(value);
+
+        return {};
+      }).value_or("");
+  }
+
+  std::optional<std::string> remove_usuario(Id usuarioId) {
+    return load_usuario_by_id(usuarioId)
+      .and_then([&](UsuarioModel value) -> std::optional<std::string> {
+        value["excluido"] = true;
+
+        save_usuario(value);
+
+        return {};
+      }).value_or("");
+  }
+
+  std::optional<std::string> update_cargos(Id usuarioId, std::set<int> const &cargoIds) {
+    auto items = load_all_cargos() |
+                 std::ranges::views::filter([&](auto const &item) {
+                   return cargoIds.contains(item["id"].get_int().value_or(-1));
+                 });
+    std::vector<CargoModel> cargos{items.begin(), items.end()};
+
+    try {
+      mCargoUsuarioRepository->get_database()->transaction([&](Database &db) {
+        std::ranges::for_each(
+          mCargoUsuarioRepository->load_by<"usuario_id">(usuarioId.value()),
           [&](auto const &item) { mCargoUsuarioRepository->remove(item); });
 
-      std::ranges::for_each(
+        std::ranges::for_each(
           cargos,
           [&](auto const &item) {
             insert<CargoUsuarioModel, "cargo_id", "usuario_id">(db)
-              .values(item["id"].get_int().value(), usuarioId)
+              .values(item["id"].get_int().value(), usuarioId.value())
               .without_transaction();
           });
-    });
+      });
+    } catch (std::runtime_error &e) {
+      return e.what();
+    }
+
+    return {};
   }
 
-  std::vector<CargoModel> load_all_cargos() const
-  {
+  [[nodiscard]] std::vector<CargoModel> load_all_cargos() const {
     return mCargoRepository->load_all();
   }
 

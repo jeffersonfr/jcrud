@@ -19,15 +19,15 @@
 #include <fmt/format.h>
 
 using MigracaoModel = DataClass<"migracao", Primary<"id">, NoForeign,
-                                Field<"id", FieldType::Int, false>,
-                                Field<"version", FieldType::Int>>;
+  Field<"id", FieldType::Int, false>,
+  Field<"version", FieldType::Int> >;
 
-template <typename... Tables> struct SqliteDatabase : public Database {
+template<typename... Tables>
+struct SqliteDatabase : public Database {
   inline static std::string const Tag = "SqliteDatabase";
 
   SqliteDatabase(std::string dbName)
-      : mDb(dbName, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
-
+    : mDb(dbName, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
     // Initialize MigracaoModel locally
     query_string(this->template create_ddl(MigracaoModel{}),
                  [](auto...) { return false; });
@@ -41,7 +41,7 @@ template <typename... Tables> struct SqliteDatabase : public Database {
                      [](auto...) { return false; });
       } catch (std::runtime_error &e) {
         throw std::runtime_error(
-            fmt::format("On '{}' -> {}", Table::get_name(), e.what()));
+          fmt::format("On '{}' -> {}", Table::get_name(), e.what()));
       }
     });
   }
@@ -59,7 +59,7 @@ template <typename... Tables> struct SqliteDatabase : public Database {
   int64_t query_string(std::string const &sql,
                        std::function<bool(std::vector<std::string> const &,
                                           std::vector<Data> const &)>
-                           callback) override {
+                       callback) override {
     try {
       SQLite::Statement query(mDb, sql);
 
@@ -126,13 +126,13 @@ template <typename... Tables> struct SqliteDatabase : public Database {
     migracaoModel["version"] = 0;
 
     query_string(
-        std::format("CREATE TABLE IF NOT EXISTS {} (version INTEGER NOT NULL);", migracaoModel.get_name()),
-        [&](auto...) { return false; });
+      std::format("CREATE TABLE IF NOT EXISTS {} (version INTEGER NOT NULL);", migracaoModel.get_name()),
+      [&](auto...) { return false; });
 
     query_string(fmt::format("SELECT * FROM {};", MigracaoModel::get_name()),
                  [&](std::vector<std::string> const &columns,
                      std::vector<Data> const &values) {
-                   for (int i = 0; i < (int)columns.size(); i++) {
+                   for (int i = 0; i < (int) columns.size(); i++) {
                      if (columns[i] == "version") {
                        migracaoModel["version"] = values[0].get_int().value();
                      }
@@ -146,10 +146,10 @@ template <typename... Tables> struct SqliteDatabase : public Database {
     }
 
     std::sort(
-        mMigrations.begin(), mMigrations.end(),
-        [](auto const &a, auto const &b) { return a.get_id() < b.get_id(); });
+      mMigrations.begin(), mMigrations.end(),
+      [](auto const &a, auto const &b) { return a.get_id() < b.get_id(); });
 
-    for (auto const &migration : mMigrations) {
+    for (auto const &migration: mMigrations) {
       if (migration.get_id() <= migracaoModel["version"].get_int().value()) {
         continue;
       }
@@ -162,8 +162,8 @@ template <typename... Tables> struct SqliteDatabase : public Database {
         update(migracaoModel);
       } catch (std::exception &e) {
         throw std::runtime_error(fmt::format(
-            "Unable to proceed with migration [{} v{}]: {}",
-            MigracaoModel::get_name(), migration.get_id(), e.what()));
+          "Unable to proceed with migration [{} v{}]: {}",
+          MigracaoModel::get_name(), migration.get_id(), e.what()));
       }
     }
   }
@@ -177,15 +177,17 @@ private:
       auto const &value = values[i];
 
       value.get_value(
-          overloaded{[&](nullptr_t arg) { query.bind(i + 1, nullptr); },
-                     [&](bool arg) { query.bind(i + 1, arg); },
-                     [&](int64_t arg) { query.bind(i + 1, arg); },
-                     [&](double arg) { query.bind(i + 1, arg); },
-                     [&](std::string arg) { query.bind(i + 1, arg); }});
+        overloaded{
+          [&](nullptr_t arg) { query.bind(i + 1, nullptr); },
+          [&](bool arg) { query.bind(i + 1, arg); },
+          [&](int64_t arg) { query.bind(i + 1, arg); },
+          [&](double arg) { query.bind(i + 1, arg); },
+          [&](std::string arg) { query.bind(i + 1, arg); }
+        });
     }
   }
 
-  template <typename Arg, typename... Args, typename F>
+  template<typename Arg, typename... Args, typename F>
   static constexpr void for_each(F callback) {
     callback.template operator()<Arg>();
 
@@ -194,12 +196,14 @@ private:
     }
   }
 
-  template <typename F> static constexpr void for_each(F callback) {}
+  template<typename F>
+  static constexpr void for_each(F callback) {
+  }
 
-  template <StringLiteral Name, typename PrimaryKeys, typename ForeignKeys,
-            typename... Fields>
+  template<StringLiteral Name, typename PrimaryKeys, typename ForeignKeys,
+    typename... Fields>
   static constexpr std::string
-  create_ddl(DataClass<Name, PrimaryKeys, ForeignKeys, Fields...> &&model) {
+    create_ddl(DataClass<Name, PrimaryKeys, ForeignKeys, Fields...> &&model) {
     std::ostringstream ddl;
     bool hasSerial = false;
 
@@ -238,8 +242,8 @@ private:
 
         if (defaultValue.has_value()) {
           throw std::runtime_error(fmt::format(
-              "Unable to use default value with nullable field '{}' in '{}'",
-              Field::get_name(), model.get_name()));
+            "Unable to use default value with nullable field '{}' in '{}'",
+            Field::get_name(), model.get_name()));
         }
       } else {
         ddl << " NOT NULL";
@@ -253,29 +257,29 @@ private:
     model.get_keys([&]<typename Field>() {
       if (Field::is_nullable()) {
         throw std::runtime_error(fmt::format(
-            "Primary key of '{}' must be not null", model.get_name()));
+          "Primary key of '{}' must be not null", model.get_name()));
       }
     });
 
     if (hasSerial) {
       if (PrimaryKeys::get_size() != 1) {
         throw std::runtime_error(
-            fmt::format("Serial must be the unique primary key on table '{}'",
-                        Name.to_string()));
+          fmt::format("Serial must be the unique primary key on table '{}'",
+                      Name.to_string()));
       }
     } else {
       std::array<std::string, PrimaryKeys::get_size()> primaryKeys;
       int i{};
 
       model.get_keys(
-          [&]<typename Field>() { primaryKeys[i++] = Field::get_name(); });
+        [&]<typename Field>() { primaryKeys[i++] = Field::get_name(); });
 
       if (!primaryKeys.empty()) {
         ddl << ", PRIMARY KEY (";
 
         bool first = true;
 
-        for (auto const &key : primaryKeys) {
+        for (auto const &key: primaryKeys) {
           if (first == false) {
             ddl << ", ";
           }
@@ -295,10 +299,10 @@ private:
       // INFO:: foreign key references just one primary key
       model.get_refers([&]<typename FKey>() {
         ddl << "FOREIGN KEY(" << FKey::get_name() << ") REFERENCES "
-            << FKey::Model::get_name();
+          << FKey::Model::get_name();
 
         FKey::Model::get_keys(
-            [&]<typename Field>() { ddl << "(" << Field::get_name() << ")"; });
+          [&]<typename Field>() { ddl << "(" << Field::get_name() << ")"; });
       });
     }
 
@@ -307,10 +311,10 @@ private:
     return ddl.str();
   }
 
-  template <StringLiteral Name, typename PrimaryKeys, typename ForeignKeys,
-            typename... Fields>
+  template<StringLiteral Name, typename PrimaryKeys, typename ForeignKeys,
+    typename... Fields>
   static constexpr std::string
-  drop_ddl(DataClass<Name, PrimaryKeys, Fields...> const &dataClass) {
+    drop_ddl(DataClass<Name, PrimaryKeys, Fields...> const &dataClass) {
     std::ostringstream ddl;
 
     ddl << "DROP TABLE " << Name.to_string() << ";";

@@ -3,18 +3,18 @@
 #include <optional>
 #include <string>
 
-class Cnpj {
+class Rg {
 public:
-  static std::optional<Cnpj> from(std::optional<std::string> value) {
+  static std::optional<Rg> from(std::optional<std::string> value) {
     return value
-      .and_then([](std::string const &value) -> std::optional<Cnpj> {
-        Cnpj cnpj{value};
+      .and_then([](std::string const &value) -> std::optional<Rg> {
+        Rg rg{value};
 
-        if (!cnpj.is_valid()) {
+        if (!rg.is_valid()) {
           return {};
         }
 
-        return cnpj;
+        return rg;
       });
   }
 
@@ -25,7 +25,7 @@ public:
 private:
   std::string mValue;
 
-  explicit Cnpj(std::string value) : mValue{std::move(value)} {
+  explicit Rg(std::string value) : mValue{std::move(value)} {
   }
 
   [[nodiscard]] bool is_valid() const {

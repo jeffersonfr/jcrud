@@ -2,10 +2,13 @@
 
 #include <functional>
 
-template <typename T> struct MutableState;
+template<typename T>
+struct MutableState;
 
-template <typename T> struct State {
-  State(MutableState<T> &state) : mState{state} {}
+template<typename T>
+struct State {
+  State(MutableState<T> &state) : mState{state} {
+  }
 
   virtual void observe(std::function<void(T const &)> callback) {
     mState.mCallback = callback;
@@ -15,10 +18,12 @@ private:
   MutableState<T> &mState;
 };
 
-template <typename T> struct VolatileState : public State<T> {
+template<typename T>
+struct VolatileState : public State<T> {
   friend class State<T>;
 
-  MutableState() : State<T>(*this) {}
+  MutableState() : State<T>(*this) {
+  }
 
   void observe(std::function<void(T const &)> callback) override {
     mCallback = callback;
@@ -30,16 +35,18 @@ private:
   std::function<void(T const &)> mCallback;
 };
 
-template <typename T> struct MutableState : public State<T> {
+template<typename T>
+struct MutableState : public State<T> {
   friend class State<T>;
 
-  MutableState() : State<T>(*this) {}
+  MutableState() : State<T>(*this) {
+  }
 
   void observe(std::function<void(T const &)> callback) override {
     mCallback = callback;
   }
 
-  void notify(T const &data) { 
+  void notify(T const &data) {
     std::scoped_lock lock(mMutex);
 
     mData = data;

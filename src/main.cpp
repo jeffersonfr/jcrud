@@ -2,7 +2,7 @@
 
 int main() {
   using namespace jinject;
-  
+
   try {
     Modules::load_modules();
 
