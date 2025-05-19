@@ -9,18 +9,15 @@
 
 #include <cstdlib>
 #include <fstream>
-#include <functional>
 #include <iostream>
 #include <optional>
-#include <ranges>
-#include <sstream>
 #include <string>
 #include <string_view>
-#include <tuple>
 #include <vector>
 
 #include <fmt/format.h>
 
+#include "control/ErrorMsg.hpp"
 #include "jinject/jinject.h"
 #include "model/base/id.hpp"
 
@@ -37,9 +34,6 @@ using namespace jui;
 
 struct AdminController {
   inline static const std::string Tag = "AdminController";
-
-  const char *ID_USUARIO_INVALIDO = "Id do usuario invalid.";
-  const char *LISTA_CARGOS_VAZIA = "Lista de cargos vazia.";
 
   AdminController(std::unique_ptr<AdminInteractor> adminInteractor,
                   std::unique_ptr<LoginInteractor> loginInteractor)
@@ -149,7 +143,7 @@ struct AdminController {
         auto usuarioId = Id::from(input.get_int("id"));
 
         if (!usuarioId) {
-          logt(TipoLog::Sistema, Tag, ID_USUARIO_INVALIDO);
+          logt(TipoLog::Sistema, Tag, ErrorMsg::ID_USUARIO_INVALIDO);
 
           return;
         }
@@ -170,7 +164,7 @@ struct AdminController {
         auto senhaNova = input.get_text("senhaNovaa").value_or("");
 
         if (!usuarioId) {
-          logt(TipoLog::Sistema, Tag, ID_USUARIO_INVALIDO);
+          logt(TipoLog::Sistema, Tag, ErrorMsg::ID_USUARIO_INVALIDO);
 
           return;
         }
@@ -215,13 +209,13 @@ struct AdminController {
           });
 
         if (!usuarioId) {
-          logt(TipoLog::Sistema, Tag, ID_USUARIO_INVALIDO);
+          logt(TipoLog::Sistema, Tag, ErrorMsg::ID_USUARIO_INVALIDO);
 
           return;
         }
 
         if (!cargoIds) {
-          logt(TipoLog::Sistema, Tag, LISTA_CARGOS_VAZIA);
+          logt(TipoLog::Sistema, Tag, ErrorMsg::LISTA_CARGOS_VAZIA);
 
           return;
         }

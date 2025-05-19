@@ -61,20 +61,16 @@ struct AdminInteractor {
 
         value["senha"] = senhaNovaEncriptada;
 
-        save_usuario(value);
-
-        return {};
+        return save_usuario(value);
       }).value_or("");
   }
 
   std::optional<std::string> remove_usuario(Id usuarioId) {
     return load_usuario_by_id(usuarioId)
-      .and_then([&](UsuarioModel value) -> std::optional<std::string> {
+      .and_then([&](UsuarioModel value) {
         value["excluido"] = true;
 
-        save_usuario(value);
-
-        return {};
+        return save_usuario(value);
       }).value_or("");
   }
 

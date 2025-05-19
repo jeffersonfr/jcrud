@@ -39,12 +39,12 @@ struct LoginController {
         auto senha = input.get_text("senha").value_or("");
 
         mLoginInteractor->login(nome, senha)
-          .and_then([&](UsuarioModel const &value) -> std::optional<bool> {
+          .and_then([&](UsuarioModel const &value) {
             logt(TipoLog::Sistema, Tag, "logando: {}", value); // TODO:: adicionar o tempo
 
             callback(value, mLoginInteractor->load_cargos(value));
 
-            return {};
+            return std::optional{true};
           });
       })
       .on_failed(abort)

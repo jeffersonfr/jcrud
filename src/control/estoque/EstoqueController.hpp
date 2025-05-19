@@ -21,6 +21,7 @@
 
 #include <fmt/format.h>
 
+#include "control/ErrorMsg.hpp"
 #include "jinject/jinject.h"
 
 enum class SelecaoEstoque { Exibir = 1, Comprar, Vender };
@@ -64,7 +65,7 @@ struct EstoqueController {
                 vender();
               }
 
-              return std::optional<bool>{true};
+              return std::optional{true};
             });
         } catch (std::runtime_error &e) {
           loge(TipoLog::Sistema, Tag, "{}", e.what());
@@ -88,7 +89,7 @@ struct EstoqueController {
         auto produtoId = Id::from(input.get_int("id"));
 
         if (!produtoId) {
-          logt(TipoLog::Sistema, Tag, "Id do produto invalido.");
+          logt(TipoLog::Sistema, Tag, ErrorMsg::ID_PRODUTO_INVALIDO);
 
           return;
         }
@@ -144,7 +145,7 @@ struct EstoqueController {
         auto cnpj = Cnpj::from(input.get_text("cnpj"));
 
         if (!cnpj) {
-          logt(TipoLog::Sistema, Tag, "CNPJ invalido.");
+          logt(TipoLog::Sistema, Tag, ErrorMsg::CNPJ_INVALIDO);
 
           return;
         }
@@ -172,7 +173,7 @@ struct EstoqueController {
         }
 
         if (!cnpj) {
-          logt(TipoLog::Sistema, Tag, "CNPJ invalido.");
+          logt(TipoLog::Sistema, Tag, ErrorMsg::CNPJ_INVALIDO);
 
           return;
         }

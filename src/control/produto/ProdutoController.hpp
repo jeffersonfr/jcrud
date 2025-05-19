@@ -135,7 +135,7 @@ struct ProdutoController {
         auto produtoId = input.get_int("id");
 
         mProdutoInteractor->load_produto_by_id(produtoId.value())
-          .and_then([&](auto produto) -> std::optional<bool> {
+          .and_then([&](auto produto) {
             auto historicoPrecos =
               mProdutoInteractor->load_historico_precos(
                 produto.template get<ProdutoModel>("id")
@@ -158,8 +158,8 @@ struct ProdutoController {
               })
               .show();
 
-            return {};
-          });
+            return std::optional{true};
+        });
       })
       .on_failed(opcao_invalida)
       .show();
@@ -171,7 +171,7 @@ struct ProdutoController {
         auto produtoId = input.get_int("id");
 
         mProdutoInteractor->load_produto_by_id(produtoId.value())
-          .and_then([&](auto item) -> std::optional<bool> {
+          .and_then([&](auto item) {
             Form<Item<"nome", "Nome do produto", TypeItem::Text>,
                 Item<"descricao", "Descricao do produto", TypeItem::Text>,
                 Item<"preco", "Preco do produto", TypeItem::Decimal> >{}
@@ -190,7 +190,7 @@ struct ProdutoController {
               .on_failed(opcao_invalida)
               .show();
 
-            return {};
+            return std::optional{true};
           });
       })
       .on_failed(opcao_invalida)
@@ -203,10 +203,10 @@ struct ProdutoController {
         auto produtoId = input.get_int("id");
 
         mProdutoInteractor->load_produto_by_id(produtoId.value())
-          .and_then([&](auto item) -> std::optional<bool> {
-            mProdutoInteractor->remove_produto(item);
+          .and_then([&](auto item) {
+            logopt(TipoLog::Sistema, Tag, mProdutoInteractor->remove_produto(std::move(item)));
 
-            return {};
+            return std::optional{true};
           });
       })
       .on_failed(opcao_invalida)
