@@ -116,7 +116,7 @@ struct AdminController {
       .show();
   }
 
-  void adicionar_usuario() {
+  void adicionar_usuario() const {
     Form<Item<"nome", "Nome do usuario", TypeItem::Text>,
         Item<"cpf", "CPF", TypeItem::Text>,
         Item<"telefone", "Telefone", TypeItem::Text>,
@@ -137,7 +137,7 @@ struct AdminController {
       .show();
   }
 
-  void remover_usuario() {
+  void remover_usuario() const {
     Form<Item<"id", "Id do usuario", TypeItem::Int> >{}
       .on_success([&](Input input) {
         auto usuarioId = Id::from(input.get_int("id"));
@@ -154,7 +154,7 @@ struct AdminController {
       .show();
   }
 
-  void atualizar_senha() {
+  void atualizar_senha() const {
     Form<Item<"id", "Id do usuario", TypeItem::Int>,
         Item<"senhaAntiga", "Senha atual", TypeItem::Text>,
         Item<"senhaNova", "Senha nova", TypeItem::Text> >{}

@@ -4,7 +4,6 @@
 #include "ui/Input.hpp"
 
 #include <algorithm>
-#include <charconv>
 #include <chrono>
 #include <functional>
 #include <iostream>
@@ -58,31 +57,31 @@ namespace jui {
       return *this;
     }
 
-    Form &before(std::function<void()> callback) {
+    Form &before(std::function<void()> const &callback) {
       mBefore = callback;
 
       return *this;
     }
 
-    Form &on_success(std::function<void(Input)> callback) {
+    Form &on_success(std::function<void(Input)> const &callback) {
       mOnSuccess = callback;
 
       return *this;
     }
 
-    Form &on_failed(std::function<void()> callback) {
+    Form &on_failed(std::function<void()> const &callback) {
       mOnFailed = callback;
 
       return *this;
     }
 
-    Form &on_cancelled(std::function<void()> callback) {
+    Form &on_cancelled(std::function<void()> const &callback) {
       mOnCancelled = callback;
 
       return *this;
     }
 
-    Form &after(std::function<void()> callback) {
+    Form &after(std::function<void()> const &callback) {
       mAfter = callback;
 
       return *this;
@@ -145,7 +144,7 @@ namespace jui {
 
         cancelled = false;
 
-        sigaction(SIGINT, &old_action, NULL);
+        sigaction(SIGINT, &old_action, nullptr);
       }
 
       mAfter();
@@ -224,9 +223,9 @@ namespace jui {
           std::stoi(line);
 
           return line;
-        } catch (std::invalid_argument &e) {
+        } catch (std::invalid_argument &) {
           // logt
-        } catch (std::out_of_range &e) {
+        } catch (std::out_of_range &) {
           // logt
         }
 
@@ -236,9 +235,9 @@ namespace jui {
           std::stof(line);
 
           return line;
-        } catch (std::invalid_argument &e) {
+        } catch (std::invalid_argument &) {
           // logt
-        } catch (std::out_of_range &e) {
+        } catch (std::out_of_range &) {
           // logt
         }
 
@@ -258,7 +257,7 @@ namespace jui {
           if (ymd.ok()) {
             return line.substr(0, 8);
           }
-        } catch (std::out_of_range &e) {
+        } catch (std::out_of_range &) {
           // logt
         }
       }

@@ -7,7 +7,6 @@
 #include <functional>
 #include <optional>
 #include <string>
-#include <variant>
 #include <vector>
 
 #include <fmt/format.h>
@@ -36,7 +35,7 @@ struct Database {
                               std::vector<Data> const &values) {
       Model model;
 
-      for (int i = 0; i < (int) columns.size(); i++) {
+      for (int i = 0; i < static_cast<int>(columns.size()); i++) {
         std::string const &column = columns[i];
 
         model[column] = values[i];
@@ -312,7 +311,7 @@ private:
 
 template<typename Model, StringLiteral... Fields>
 struct InsertValue {
-  InsertValue(Database &db) : mDb{db} {
+  explicit InsertValue(Database &db) : mDb{db} {
   }
 
   ~InsertValue() {

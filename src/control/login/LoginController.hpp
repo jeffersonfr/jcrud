@@ -7,10 +7,8 @@
 #include <cstdlib>
 #include <functional>
 #include <optional>
-#include <ranges>
 #include <sstream>
 #include <string>
-#include <string_view>
 #include <vector>
 
 #include <fmt/format.h>
@@ -22,7 +20,7 @@ using namespace jui;
 struct LoginController {
   inline static const std::string Tag = "LoginController";
 
-  LoginController(std::unique_ptr<LoginInteractor> loginInteractor)
+  explicit LoginController(std::unique_ptr<LoginInteractor> loginInteractor)
     : mLoginInteractor{std::move(loginInteractor)} {
   }
 

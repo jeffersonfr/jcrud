@@ -62,7 +62,8 @@ struct AdminInteractor {
         value["senha"] = senhaNovaEncriptada;
 
         return save_usuario(value);
-      }).value_or("");
+      })
+      .value_or("");
   }
 
   std::optional<std::string> remove_usuario(Id usuarioId) {
@@ -71,7 +72,8 @@ struct AdminInteractor {
         value["excluido"] = true;
 
         return save_usuario(value);
-      }).value_or("");
+      })
+      .value_or("");
   }
 
   std::optional<std::string> update_cargos(Id usuarioId, std::set<int> const &cargoIds) {

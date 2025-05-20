@@ -6,12 +6,12 @@ class Database;
 
 struct Migration {
   Migration(int id, std::function<void(Database &)> callback)
-    : mCallback{callback}, mId{id} {
+    : mCallback{std::move(callback)}, mId{id} {
   }
 
   virtual ~Migration() = default;
 
-  int get_id() const {
+  int64_t get_id() const {
     return mId;
   }
 

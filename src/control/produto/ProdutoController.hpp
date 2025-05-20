@@ -13,7 +13,6 @@
 #include <ranges>
 #include <sstream>
 #include <string>
-#include <string_view>
 #include <vector>
 
 #include <fmt/format.h>
@@ -34,7 +33,7 @@ using namespace jui;
 struct ProdutoController {
   inline static const std::string Tag = "ProdutoController";
 
-  ProdutoController(std::unique_ptr<ProdutoInteractor> produtoInteractor)
+  explicit ProdutoController(std::unique_ptr<ProdutoInteractor> produtoInteractor)
     : mProdutoInteractor{std::move(produtoInteractor)} {
   }
 
@@ -112,8 +111,8 @@ struct ProdutoController {
         Item<"preco", "Preco do produto", TypeItem::Decimal> >{}
       .on_success([&](Input input) {
         ProdutoInteractorModel item;
-        ProdutoModel &produto = item.template get<ProdutoModel>();
-        PrecoModel &preco = item.template get<PrecoModel>();
+        auto &produto = item.get<ProdutoModel>();
+        auto &preco = item.get<PrecoModel>();
 
         produto["categoria_id"] = input.get_int("categoria");
         produto["nome"] = input.get_text("nome");
@@ -135,7 +134,7 @@ struct ProdutoController {
         auto produtoId = input.get_int("id");
 
         mProdutoInteractor->load_produto_by_id(produtoId.value())
-          .and_then([&](auto produto) {
+          .and_then([&](auto const &produto) {
             auto historicoPrecos =
               mProdutoInteractor->load_historico_precos(
                 produto.template get<ProdutoModel>("id")
@@ -243,9 +242,9 @@ private:
         };
       })
       .data([&](auto const &item) {
-        auto categoriaProduto = item.template get<CategoriaProdutoModel>();
-        auto produto = item.template get<ProdutoModel>();
-        auto preco = item.template get<PrecoModel>();
+        auto &categoriaProduto = item.template get<CategoriaProdutoModel>();
+        auto &produto = item.template get<ProdutoModel>();
+        auto &preco = item.template get<PrecoModel>();
 
         return Row{
           produto["id"], categoriaProduto["descricao"],

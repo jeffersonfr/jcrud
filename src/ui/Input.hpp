@@ -1,15 +1,8 @@
 #pragma once
 
-#include "utils/StringLiteral.hpp"
-
 #include <algorithm>
-#include <charconv>
-#include <functional>
-#include <iostream>
 #include <map>
 #include <string>
-
-#include <fmt/format.h>
 
 #include "jmixin/jstring.h"
 
@@ -20,7 +13,7 @@ namespace jui {
     Input(std::map<std::string, std::optional<std::string> > &values) : mValues{values} {
     }
 
-    std::optional<std::string> get_text(std::string key) {
+    std::optional<std::string> get_text(std::string const &key) const {
       auto it = mValues.find(key);
 
       if (it != mValues.end()) {
@@ -30,7 +23,7 @@ namespace jui {
       return {};
     }
 
-    std::optional<int32_t> get_int(std::string key) {
+    std::optional<int32_t> get_int(std::string const &key) const {
       auto text = get_text(key);
 
       if (!text.has_value()) {
@@ -39,16 +32,16 @@ namespace jui {
 
       try {
         return std::stoi(*text);
-      } catch (std::invalid_argument &e) {
+      } catch (std::invalid_argument &) {
         // logt
-      } catch (std::out_of_range &e) {
+      } catch (std::out_of_range &) {
         // logt
       }
 
       return {};
     }
 
-    std::optional<int64_t> get_long(std::string key) {
+    std::optional<int64_t> get_long(std::string const &key) const {
       auto text = get_text(key);
 
       if (!text.has_value()) {
@@ -57,16 +50,16 @@ namespace jui {
 
       try {
         return std::stoll(*text);
-      } catch (std::invalid_argument &e) {
+      } catch (std::invalid_argument &) {
         // logt
-      } catch (std::out_of_range &e) {
+      } catch (std::out_of_range &) {
         // logt
       }
 
       return {};
     }
 
-    std::optional<double> get_decimal(std::string key) {
+    std::optional<double> get_decimal(std::string const &key) const  {
       auto text = get_text(key);
 
       if (!text.has_value()) {
@@ -75,16 +68,16 @@ namespace jui {
 
       try {
         return std::stod(*text);
-      } catch (std::invalid_argument &e) {
+      } catch (std::invalid_argument &) {
         // logt
-      } catch (std::out_of_range &e) {
+      } catch (std::out_of_range &) {
         // logt
       }
 
       return {};
     }
 
-    std::optional<std::chrono::year_month_day> get_date(std::string key) {
+    std::optional<std::chrono::year_month_day> get_date(std::string const &key) const {
       auto text = get_text(key);
 
       if (!text.has_value()) {

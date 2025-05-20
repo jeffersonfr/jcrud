@@ -9,7 +9,6 @@
 #include <optional>
 #include <string>
 #include <variant>
-#include <vector>
 
 #include <jinject/jinject.h>
 
@@ -282,7 +281,7 @@ std::ostream &operator<<(std::ostream &out, Data const &value) {
     [&](bool arg) { out << (arg ? "true" : "false"); },
     [&](int64_t arg) { out << std::to_string(arg); },
     [&](double arg) { out << std::to_string(arg); },
-    [&](std::string arg) { out << arg; }
+    [&](std::string const &arg) { out << arg; }
   });
 
   return out;

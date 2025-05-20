@@ -5,14 +5,9 @@
 #include "model/historicoEstoque/HistoricoEstoqueRepository.hpp"
 #include "model/base/cnpj.hpp"
 
-#include <expected>
 #include <optional>
-#include <ranges>
 #include <string>
 #include <utility>
-#include <vector>
-
-#include "jinject/jinject.h"
 
 struct EstoqueInteractor : public Repository<EstoqueInteractorModel> {
   EstoqueInteractor(
@@ -35,12 +30,12 @@ struct EstoqueInteractor : public Repository<EstoqueInteractorModel> {
     try {
       mEstoqueRepository->get_database()->transaction([&](Database &db) {
         if (auto result = mEstoqueRepository->save(item); !result.has_value()) {
-          throw result.error();
+          throw std::move(result.error());
         }
 
         if (auto result = mHistoricoEstoqueRepository->save(historicoEstoque);
           !result.has_value()) {
-          throw result.error();
+          throw std::move(result.error());
         }
       });
     } catch (std::runtime_error &e) {
@@ -52,7 +47,7 @@ struct EstoqueInteractor : public Repository<EstoqueInteractorModel> {
 
   std::optional<std::string> store_venda(Id estoque, int quantidadeVenda, Cnpj cnpj) {
     return load_estoque_by_id(estoque)
-      .and_then([&](EstoqueModel const &item) -> std::optional<std::string> {
+      .and_then([&](EstoqueModel item) -> std::optional<std::string> {
         HistoricoEstoqueModel historicoEstoque;
 
         historicoEstoque["produto_id"] = item["produto_id"];
@@ -64,31 +59,29 @@ struct EstoqueInteractor : public Repository<EstoqueInteractorModel> {
 
         try {
           mEstoqueRepository->get_database()->transaction([&](Database &db) {
-            int quantidadeAtual = item["quantidade"].get_int().value();
+            auto quantidadeAtual = item["quantidade"].get_int().value();
 
             if (quantidadeAtual < quantidadeVenda) {
               throw std::runtime_error("Quantidade superior ao limite disponivel");
             } else if (quantidadeAtual == quantidadeVenda) {
               mEstoqueRepository->remove(item);
             } else {
-              EstoqueModel estoque = std::move(item);
+              item["quantidade"] = quantidadeAtual - quantidadeVenda;
 
-              estoque["quantidade"] = quantidadeAtual - quantidadeVenda;
-
-              mEstoqueRepository->update(estoque);
+              mEstoqueRepository->update(item);
             }
 
-            mHistoricoEstoqueRepository->save(historicoEstoque)
-              .or_else([](auto e) -> std::expected<HistoricoEstoqueModel, std::runtime_error> {
-                throw e;
-              });
+            if (auto result = mHistoricoEstoqueRepository->save(historicoEstoque); !result) {
+              throw std::move(result.error());
+            }
           });
         } catch (std::runtime_error &e) {
           return e.what();
         }
 
         return {};
-      }).or_else([]() -> std::optional<std::string> {
+      })
+      .or_else([]() -> std::optional<std::string> {
         return "Estoque id invalido.";
       });
   }

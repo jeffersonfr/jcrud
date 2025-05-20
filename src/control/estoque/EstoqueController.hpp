@@ -31,7 +31,7 @@ using namespace jui;
 struct EstoqueController {
   inline static const std::string Tag = "EstoqueController";
 
-  EstoqueController(std::unique_ptr<EstoqueInteractor> estoqueInteractor)
+  explicit EstoqueController(std::unique_ptr<EstoqueInteractor> estoqueInteractor)
     : mEstoqueInteractor{std::move(estoqueInteractor)} {
   }
 
@@ -55,7 +55,7 @@ struct EstoqueController {
         try {
           input.get_int("opcao")
             .and_then([&](auto value) {
-              SelecaoEstoque opcao = static_cast<SelecaoEstoque>(value);
+              auto opcao = static_cast<SelecaoEstoque>(value);
 
               if (opcao == SelecaoEstoque::Exibir) {
                 exibir();
@@ -126,7 +126,7 @@ struct EstoqueController {
       .show();
   }
 
-  void comprar() {
+  void comprar() const {
     Form<Item<"produto", "identificador do produto [usar o id]", TypeItem::Int>,
 
         Item<"quantidade", "Quantidade do produto (independente da unidade)",
@@ -156,7 +156,7 @@ struct EstoqueController {
       .show();
   }
 
-  void vender() {
+  void vender() const {
     Form<Item<"estoque", "identificador do estoque [usar o id]", TypeItem::Int>,
         Item<"quantidade", "Quantidade do produto (independente da unidade)",
           TypeItem::Int>,

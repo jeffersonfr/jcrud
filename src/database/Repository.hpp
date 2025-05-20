@@ -3,7 +3,6 @@
 #include "database/Database.hpp"
 #include "database/CompoundModel.hpp"
 
-#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -19,7 +18,7 @@ template<typename T>
 struct Repository {
   using Model = T;
 
-  Repository(std::shared_ptr<Database> db) : mDb{db} {
+  explicit Repository(std::shared_ptr<Database> db) : mDb{std::move(db)} {
   }
 
   std::shared_ptr<Database> get_database() { return mDb; }
@@ -36,7 +35,7 @@ struct Repository {
                                    std::vector<Data> const &values) {
       Model item;
 
-      for (int i = 0; i < (int) columns.size(); i++) {
+      for (int i = 0; i < static_cast<int>(columns.size()); i++) {
         std::string const &column = columns[i];
 
         item[column] = values[i];
@@ -86,7 +85,7 @@ struct Repository {
                                    std::vector<Data> const &values) {
       Model item;
 
-      for (int i = 0; i < (int) columns.size(); i++) {
+      for (int i = 0; i < static_cast<int>(columns.size()); i++) {
         std::string const &column = columns[i];
 
         item[column] = values[i];
@@ -309,7 +308,7 @@ template<typename... Models>
 struct Repository<CompoundModel<Models...> > {
   using Model = CompoundModel<Models...>;
 
-  Repository(std::shared_ptr<Database> db = jinject::get{}) : mDb{db} {
+  explicit Repository(std::shared_ptr<Database> db = jinject::get{}) : mDb{std::move(db)} {
   }
 
   std::shared_ptr<Database> get_database() { return mDb; }

@@ -4,7 +4,7 @@
 
 #include <fmt/format.h>
 
-std::string format_currency(Data const &value) {
+inline std::string format_currency(Data const &value) {
   if (value.is_null()) {
     return "<null>";
   }

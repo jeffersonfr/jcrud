@@ -2,16 +2,12 @@
 
 #include "database/Database.hpp"
 #include "database/Migration.hpp"
-#include "utils/Log.hpp"
 
 #include <algorithm>
-#include <fstream>
 #include <functional>
-#include <iostream>
 #include <optional>
 #include <sstream>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <SQLiteCpp/SQLiteCpp.h>
@@ -26,10 +22,10 @@ template<typename... Tables>
 struct SqliteDatabase : public Database {
   inline static std::string const Tag = "SqliteDatabase";
 
-  SqliteDatabase(std::string dbName)
+  explicit SqliteDatabase(std::string const &dbName)
     : mDb(dbName, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
     // Initialize MigracaoModel locally
-    query_string(this->template create_ddl(MigracaoModel{}),
+    query_string(this->create_ddl(MigracaoModel{}),
                  [](auto...) { return false; });
 
     for_each<Tables...>([&]<typename Table>() {
@@ -37,7 +33,7 @@ struct SqliteDatabase : public Database {
         typename Table::Keys{};
         typename Table::Refers{};
 
-        query_string(this->template create_ddl(Table{}),
+        query_string(this->create_ddl(Table{}),
                      [](auto...) { return false; });
       } catch (std::runtime_error &e) {
         throw std::runtime_error(
@@ -132,7 +128,7 @@ struct SqliteDatabase : public Database {
     query_string(fmt::format("SELECT * FROM {};", MigracaoModel::get_name()),
                  [&](std::vector<std::string> const &columns,
                      std::vector<Data> const &values) {
-                   for (int i = 0; i < (int) columns.size(); i++) {
+                   for (int i = 0; i < static_cast<int>(columns.size()); i++) {
                      if (columns[i] == "version") {
                        migracaoModel["version"] = values[0].get_int().value();
                      }
@@ -182,7 +178,7 @@ private:
           [&](bool arg) { query.bind(i + 1, arg); },
           [&](int64_t arg) { query.bind(i + 1, arg); },
           [&](double arg) { query.bind(i + 1, arg); },
-          [&](std::string arg) { query.bind(i + 1, arg); }
+          [&](std::string const &arg) { query.bind(i + 1, arg); }
         });
     }
   }

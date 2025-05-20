@@ -40,24 +40,24 @@ private:
   std::unique_ptr<EstoqueController> mEstoqueController;
   std::set<int> selecaoSet;
 
-  void do_menu() {
+  void do_menu() const {
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int> >{}
       .title("Farmacia Pague+")
       .before([&]() {
         fmt::print("{}", "Escolha uma opção:\n");
 
-        if (selecaoSet.count(
+        if (selecaoSet.contains(
           static_cast<int>(SelecaoSistema::Administracao))) {
           fmt::print("\t{} - Administracao\n",
                      static_cast<int>(SelecaoSistema::Administracao));
         }
 
-        if (selecaoSet.count(static_cast<int>(SelecaoSistema::Produtos))) {
+        if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Produtos))) {
           fmt::print("\t{} - Produtos\n",
                      static_cast<int>(SelecaoSistema::Produtos));
         }
 
-        if (selecaoSet.count(static_cast<int>(SelecaoSistema::Estoque))) {
+        if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Estoque))) {
           fmt::print("\t{} - Estoque\n",
                      static_cast<int>(SelecaoSistema::Estoque));
         }
@@ -65,7 +65,7 @@ private:
       .on_success([&](Input input) {
         auto opcao = input.get_int("opcao");
 
-        if (!opcao.has_value() or selecaoSet.count(*opcao) == 0) {
+        if (!opcao.has_value() or selecaoSet.contains(*opcao) == 0) {
           return;
         }
 

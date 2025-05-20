@@ -1,6 +1,8 @@
 #pragma once
 
 #include <functional>
+#include <optional>
+#include <mutex>
 
 template<typename T>
 struct MutableState;
@@ -9,6 +11,8 @@ template<typename T>
 struct State {
   State(MutableState<T> &state) : mState{state} {
   }
+
+  virtual ~State() = default;
 
   virtual void observe(std::function<void(T const &)> callback) {
     mState.mCallback = callback;
@@ -22,7 +26,7 @@ template<typename T>
 struct VolatileState : public State<T> {
   friend class State<T>;
 
-  MutableState() : State<T>(*this) {
+  VolatileState() : State<T>(*this) {
   }
 
   void observe(std::function<void(T const &)> callback) override {

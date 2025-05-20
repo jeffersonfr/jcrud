@@ -1,13 +1,9 @@
 #pragma once
 
-#include "ui/Input.hpp"
-
 #include <algorithm>
 #include <functional>
-#include <iostream>
 #include <sstream>
 #include <string>
-#include <unordered_map>
 
 #include <fmt/format.h>
 
@@ -36,7 +32,7 @@ namespace jui {
         [&](nullptr_t arg) { o << "null"; },
         [&](bool arg) { o << (arg ? "true" : "false"); },
         [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
-        [&](std::string arg) { o << arg; }
+        [&](std::string const &arg) { o << arg; }
       });
 
       return o.str();
@@ -47,22 +43,22 @@ namespace jui {
   struct Table {
     using value_type = std::ranges::range_value_t<T>;
 
-    Table(T items) : mItems{std::move(items)} {
+    explicit Table(T items) : mItems{std::move(items)} {
     }
 
-    Table &title(std::string title) {
+    Table &title(std::string const &title) {
       mTitle = title;
 
       return *this;
     }
 
-    Table &head(std::function<std::vector<Col>()> callback) {
+    Table &head(std::function<std::vector<Col>()> const &callback) {
       mHead = callback;
 
       return *this;
     }
 
-    Table &data(std::function<Row(value_type const &)> callback) {
+    Table &data(std::function<Row(value_type const &)> const &callback) {
       mData = callback;
 
       return *this;
@@ -99,7 +95,7 @@ namespace jui {
 
         std::string row = "|";
 
-        for (int i = 0; i < (int) cols.size(); i++) {
+        for (int i = 0; i < static_cast<int>(cols.size()); i++) {
           row += jmixin::String(cols[i]).upper_case().ellipses(headItems[i].size).center(headItems[i].size) + '|';
         }
 

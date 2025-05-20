@@ -5,14 +5,11 @@
 #include "model/preco/PrecoRepository.hpp"
 #include "model/produto/ProdutoRepository.hpp"
 
-#include <expected>
 #include <optional>
 #include <ranges>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include "jinject/jinject.h"
 
 struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
   ProdutoInteractor(
@@ -35,7 +32,7 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
         .value();
     });
 
-    auto it = std::ranges::unique(items, [](auto a, auto b) {
+    auto it = std::ranges::unique(items, [](auto &a, auto &b) {
       return a.template get<ProdutoModel>("id") ==
              b.template get<ProdutoModel>("id");
     });
@@ -72,7 +69,7 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
             auto e = mPrecoRepository->save(item.get<PrecoModel>());
 
             if (!e.has_value()) {
-              throw e.error();
+              throw std::move(e.error());
             }
           }
         });
@@ -86,7 +83,7 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
     return update(item);
   }
 
-  std::optional<std::string> remove_produto(ProdutoInteractorModel produtoInteractor) {
+  std::optional<std::string> remove_produto(ProdutoInteractorModel const &produtoInteractor) {
     auto produto{std::move(produtoInteractor.get<ProdutoModel>())};
 
     produto["excluido"] = true;
