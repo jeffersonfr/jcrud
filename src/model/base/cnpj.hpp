@@ -3,8 +3,7 @@
 #include <optional>
 #include <string>
 
-class Cnpj {
-public:
+struct Cnpj {
   static std::optional<Cnpj> from(std::optional<std::string> value) {
     return value
       .and_then([](std::string const &value) -> std::optional<Cnpj> {

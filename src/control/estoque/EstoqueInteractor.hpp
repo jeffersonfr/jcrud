@@ -3,18 +3,25 @@
 #include "control/estoque/EstoqueInteractorModel.hpp"
 #include "model/estoque/EstoqueRepository.hpp"
 #include "model/historicoEstoque/HistoricoEstoqueRepository.hpp"
+#include "control/estoque/EstoqueInteractorRepository.hpp"
 #include "model/base/cnpj.hpp"
 
 #include <optional>
 #include <string>
 #include <utility>
 
-struct EstoqueInteractor : public Repository<EstoqueInteractorModel> {
+struct EstoqueInteractor {
   EstoqueInteractor(
+    std::unique_ptr<EstoqueInteractorRepository> estoqueInteractorRepository,
     std::unique_ptr<EstoqueRepository> estoqueRepository,
     std::unique_ptr<HistoricoEstoqueRepository> historicoEstoqueRepository)
-    : mEstoqueRepository{std::move(estoqueRepository)},
+    : mEstoqueInteractorRepository{std::move(estoqueInteractorRepository)},
+      mEstoqueRepository{std::move(estoqueRepository)},
       mHistoricoEstoqueRepository{std::move(historicoEstoqueRepository)} {
+  }
+
+  std::vector<EstoqueInteractorModel> load_all() {
+    return mEstoqueInteractorRepository->load_all();
   }
 
   std::optional<std::string> save_compra(EstoqueModel const &item, Cnpj cnpj) {
@@ -97,6 +104,7 @@ struct EstoqueInteractor : public Repository<EstoqueInteractorModel> {
   }
 
 private:
+  std::unique_ptr<EstoqueInteractorRepository> mEstoqueInteractorRepository;
   std::unique_ptr<EstoqueRepository> mEstoqueRepository;
   std::unique_ptr<HistoricoEstoqueRepository> mHistoricoEstoqueRepository;
 };

@@ -11,14 +11,26 @@
 #include <utility>
 #include <vector>
 
-struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
+#include "ProdutoInteractorRepository.hpp"
+
+struct ProdutoInteractor {
   ProdutoInteractor(
+    std::unique_ptr<ProdutoInteractorRepository> produtoInteractorRepository,
     std::unique_ptr<CategoriaProdutoRepository> categoriaProdutoRepository,
     std::unique_ptr<ProdutoRepository> produtoRepository,
     std::unique_ptr<PrecoRepository> precoRepository)
-    : mCategoriaProdutoRepository{std::move(categoriaProdutoRepository)},
+    : mProdutoInteractorRepository{std::move(produtoInteractorRepository)},
+      mCategoriaProdutoRepository{std::move(categoriaProdutoRepository)},
       mProdutoRepository{std::move(produtoRepository)},
       mPrecoRepository{std::move(precoRepository)} {
+  }
+
+  std::vector<ProdutoInteractorModel> load_all() {
+    return mProdutoInteractorRepository->load_all();
+  }
+
+  std::optional<std::string> update(ProdutoInteractorModel const &produto) const {
+    return mProdutoInteractorRepository->update(produto);
   }
 
   std::vector<CategoriaProdutoModel> load_all_categorias() {
@@ -26,7 +38,8 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
   }
 
   std::vector<ProdutoInteractorModel> load_all_produtos() {
-    auto items = load_all() | std::ranges::views::filter([](auto const &item) {
+    auto items = mProdutoInteractorRepository->load_all() |
+      std::ranges::views::filter([](auto const &item) {
       return !item.template get<ProdutoModel>("excluido")
         .get_bool()
         .value();
@@ -92,6 +105,7 @@ struct ProdutoInteractor : public Repository<ProdutoInteractorModel> {
   }
 
 private:
+  std::unique_ptr<ProdutoInteractorRepository> mProdutoInteractorRepository;
   std::unique_ptr<CategoriaProdutoRepository> mCategoriaProdutoRepository;
   std::unique_ptr<ProdutoRepository> mProdutoRepository;
   std::unique_ptr<PrecoRepository> mPrecoRepository;

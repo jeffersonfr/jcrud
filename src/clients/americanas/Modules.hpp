@@ -185,30 +185,43 @@ private:
   }
 
   static void load_controls() {
-    UNIQUE(LoginInteractor) { return new LoginInteractor{}; };
-
-    UNIQUE(LoginController) {
-      return new LoginController{inject<std::unique_ptr<LoginInteractor> >()};
+    // repository
+    UNIQUE(ProdutoInteractorRepository) {
+      return new ProdutoInteractorRepository{};
     };
 
+    UNIQUE(EstoqueInteractorRepository) {
+      return new EstoqueInteractorRepository{};
+    };
+
+    // interactor
     UNIQUE(AdminInteractor) {
       return new AdminInteractor{get{}, get{}, get{}};
     };
 
-    UNIQUE(AdminController) { return new AdminController{get{}, get{}}; };
+    UNIQUE(LoginInteractor) {
+      return new LoginInteractor{inject<std::unique_ptr<LoginInteractorRepository>>()};
+    };
 
     UNIQUE(ProdutoInteractor) {
-      return new ProdutoInteractor{get{}, get{}, get{}};
+      return new ProdutoInteractor{get{}, get{}, get{}, get{}};
     };
+
+    UNIQUE(EstoqueInteractor) {
+      return new EstoqueInteractor{get{}, get{}, get{}};
+    };
+
+    // controller
+    UNIQUE(LoginController) {
+      return new LoginController{inject<std::unique_ptr<LoginInteractor> >()};
+    };
+
+    UNIQUE(AdminController) { return new AdminController{get{}, get{}}; };
 
     UNIQUE(ProdutoController) {
       return new ProdutoController{
         inject<std::unique_ptr<ProdutoInteractor> >()
       };
-    };
-
-    UNIQUE(EstoqueInteractor) {
-      return new EstoqueInteractor{get{}, get{}};
     };
 
     UNIQUE(EstoqueController) {
@@ -217,6 +230,7 @@ private:
       };
     };
 
+    // system
     UNIQUE(Sistema) {
       return new Sistema{get{}, get{}, get{}};
     };

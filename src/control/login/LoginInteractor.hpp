@@ -1,6 +1,7 @@
 #pragma once
 
 #include "control/login/LoginInteractorModel.hpp"
+#include "control/login//LoginInteractorRepository.hpp"
 #include "model/filial/FilialRepository.hpp"
 
 #include <optional>
@@ -11,6 +12,11 @@
 #include "jinject/jinject.h"
 
 struct LoginInteractor : public Repository<LoginInteractorModel> {
+  LoginInteractor(
+    std::unique_ptr<LoginInteractorRepository> loginInteractorRepository)
+    : mLoginInteractorRepository{std::move(loginInteractorRepository)} {
+  }
+
   std::optional<UsuarioModel> login(std::string const &nome,
                                     std::string const &senha) {
     auto items =
@@ -42,4 +48,7 @@ struct LoginInteractor : public Repository<LoginInteractorModel> {
 
     return {items.begin(), items.end()};
   }
+
+private:
+  std::unique_ptr<LoginInteractorRepository> mLoginInteractorRepository;
 };

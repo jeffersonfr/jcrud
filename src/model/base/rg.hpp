@@ -4,8 +4,7 @@
 #include <optional>
 #include <string>
 
-class Rg {
-public:
+struct Rg {
   static std::optional<Rg> from(std::optional<std::string> value) {
     return value
       .and_then([](std::string const &value) -> std::optional<Rg> {
