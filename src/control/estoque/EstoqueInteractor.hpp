@@ -96,11 +96,11 @@ struct EstoqueInteractor {
   std::optional<EstoqueModel> load_estoque_by_id(Id id) {
     auto items = mEstoqueRepository->load_by<"id">(id.value());
 
-    for (auto const &item: items) {
-      return {item};
+    if (items.empty()) {
+      return {};
     }
 
-    return {};
+    return items[0];
   }
 
 private:
