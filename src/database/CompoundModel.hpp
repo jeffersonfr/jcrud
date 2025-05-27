@@ -49,3 +49,34 @@ private:
 template<typename... Models>
 struct fmt::formatter<CompoundModel<Models...> > : fmt::ostream_formatter {
 };
+
+namespace jinject {
+  template<typename ...Models>
+  struct introspection<CompoundModel<Models...> > {
+    static std::string to_string() {
+      std::string compoundModels;
+
+      for_each<1, Models...>(compoundModels);
+
+      return fmt::format("CompoundModel<{}>", compoundModels);
+    }
+
+  private:
+    template<std::size_t Index>
+    static void for_each(std::string &compoundModels) {
+    }
+
+    template<std::size_t Index, typename Arg, typename ...Args>
+    static void for_each(std::string &compoundModels) {
+      if (Index > 1) {
+        compoundModels = compoundModels + ", ";
+      }
+
+      compoundModels = compoundModels + Arg::get_name();
+
+      if (sizeof...(Models) > 0) {
+        for_each<Index + 1, Args...>(compoundModels);
+      }
+    }
+  };
+} // namespace jinject

@@ -28,9 +28,7 @@ struct LoginController {
     Form<Item<"nome", "Nome do usuario", TypeItem::Text>,
         Item<"senha", "Senha do usuario", TypeItem::Text> >{}
       .before([&]() {
-        system("clear");
-
-        fmt::print("Login\n\n");
+        fmt::print("\x1b[H\x1b[2JLogin\n\n");
       })
       .on_success([&](Input input) {
         auto nome = input.get_text("nome").value_or("");

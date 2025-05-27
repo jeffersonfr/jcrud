@@ -105,12 +105,9 @@ namespace jui {
       struct sigaction new_action, old_action;
 
       if (mTitle.has_value()) {
-        std::unique_ptr<DecorateTitleStrategy> decorateTitleStrategy =
-          jinject::get{};
+        std::unique_ptr<DecorateTitleStrategy> decorateTitleStrategy = jinject::get{};
 
-        system("clear");
-
-        fmt::print("{}\n\n", decorateTitleStrategy->createFancyTitle(*mTitle));
+        fmt::print("\x1b[H\x1b[2J{}\n\n", decorateTitleStrategy->createFancyTitle(*mTitle));
       }
 
       mBefore();

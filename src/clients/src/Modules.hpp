@@ -20,6 +20,7 @@
 #include "model/produto/ProdutoRepository.hpp"
 #include "model/tipoLog/TipoLogRepository.hpp"
 #include "model/usuario/UsuarioRepository.hpp"
+#include "model/tipoNegocio/TipoNegocioRepository.hpp"
 #include "clients/src/Sistema.hpp"
 #include "strategy/decorateTitle/DecorateTitleStrategy.hpp"
 #include "database/SqliteDatabase.hpp"
@@ -184,6 +185,10 @@ private:
 
   static void load_controls() {
     // repository
+    UNIQUE(LoginInteractorRepository) {
+      return new LoginInteractorRepository{};
+    };
+
     UNIQUE(ProdutoInteractorRepository) {
       return new ProdutoInteractorRepository{};
     };
