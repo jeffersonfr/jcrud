@@ -1,10 +1,6 @@
-//
-// Created by jeff on 5/19/25.
-//
-
 #pragma once
 
-#define __MSG inline static char const *
+#define __MSG inline static std::string
 
 class ErrorMsg {
 

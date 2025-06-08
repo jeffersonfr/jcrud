@@ -174,7 +174,7 @@ private:
 
       value.get_value(
         overloaded{
-          [&](nullptr_t arg) { query.bind(i + 1, nullptr); },
+          [&](std::nullptr_t arg) { query.bind(i + 1, nullptr); },
           [&](bool arg) { query.bind(i + 1, arg); },
           [&](int64_t arg) { query.bind(i + 1, arg); },
           [&](double arg) { query.bind(i + 1, arg); },

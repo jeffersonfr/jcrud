@@ -55,7 +55,7 @@ struct Database {
 
     value.get_value(
       overloaded{
-        [&](nullptr_t arg) { hasValue = false; }, [](auto arg) {
+        [&](std::nullptr_t arg) { hasValue = false; }, [](auto arg) {
         }
       });
 
@@ -104,7 +104,7 @@ struct Database {
       }
 
       value.get_value(overloaded{
-        [&](nullptr_t arg) {
+        [&](std::nullptr_t arg) {
           if (!Field::is_nullable() and Field::get_default().has_value()) {
             return;
           }
@@ -194,7 +194,7 @@ struct Database {
       o << Field::get_name() << " = ";
 
       value.get_value(overloaded{
-        [&](nullptr_t arg) {
+        [&](std::nullptr_t arg) {
           if (!Field::is_nullable() and
               Field::get_type() != FieldType::Serial) {
             throw std::runtime_error(
@@ -288,7 +288,7 @@ private:
       auto const &value = model[Field::get_name()];
 
       value.get_value(overloaded{
-        [&](nullptr_t arg) {
+        [&](std::nullptr_t arg) {
           out << "(" << Field::get_name() << " IS NULL)";
         },
         [&](bool arg) {

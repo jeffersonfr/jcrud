@@ -3,8 +3,7 @@
 #include <optional>
 #include <string>
 
-class Id {
-public:
+struct Id {
   static std::optional<Id> from(std::optional<int64_t> value) {
     return value
       .and_then([](auto value) -> std::optional<Id> {

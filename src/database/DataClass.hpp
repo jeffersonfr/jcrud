@@ -202,7 +202,7 @@ private:
 using NoForeign = Foreign<>;
 
 struct Data {
-  using MyData = std::variant<nullptr_t, bool, int64_t, double, std::string>;
+  using MyData = std::variant<std::nullptr_t, bool, int64_t, double, std::string>;
 
   Data() = default;
 
@@ -231,7 +231,7 @@ struct Data {
     std::visit(std::forward<F>(callback), mData);
   }
 
-  bool is_null() const { return std::get_if<nullptr_t>(&mData) != nullptr; }
+  bool is_null() const { return std::get_if<std::nullptr_t>(&mData) != nullptr; }
 
   std::optional<bool> get_bool() const {
     return get_int().and_then(
@@ -276,7 +276,7 @@ private:
 
 std::ostream &operator<<(std::ostream &out, Data const &value) {
   value.get_value(overloaded{
-    [&](nullptr_t arg) {
+    [&](std::nullptr_t arg) {
     },
     [&](bool arg) { out << (arg ? "true" : "false"); },
     [&](int64_t arg) { out << std::to_string(arg); },
@@ -386,7 +386,7 @@ struct DataClass {
 
       this->operator[](Field::get_name())
         .get_value(overloaded{
-          [&](nullptr_t arg) { o << "null"; },
+          [&](std::nullptr_t arg) { o << "null"; },
           [&](bool arg) { o << (arg ? "true" : "false"); },
           [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
           [&](std::string arg) { o << std::quoted(arg); }

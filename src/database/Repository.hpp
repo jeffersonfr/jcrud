@@ -269,7 +269,7 @@ private:
     }
 
     value.get_value(overloaded{
-      [&](nullptr_t arg) { out << "(" << Field.to_string() << " IS NULL)"; },
+      [&](std::nullptr_t arg) { out << "(" << Field.to_string() << " IS NULL)"; },
       [&](bool arg) {
         out << "(" << Field.to_string() << " = " << (arg ? "true" : "false")
           << ")";
