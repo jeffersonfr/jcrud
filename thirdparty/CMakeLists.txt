@@ -1,5 +1,13 @@
 include(FetchContent)
 
+find_package(Boost REQUIRED
+  COMPONENTS
+    date_time
+    filesystem
+    iostreams
+    thread
+)
+
 # jmixin
 FetchContent_Declare(
   jmixin
@@ -49,3 +57,23 @@ if(expected_POPULATED)
   message("SOURCE_DIR: ${expected_SOURCE_DIR}")
   message("BINARY_DIR: ${expected_BINARY_DIR}")
 endif()
+
+add_library(thirdparty INTERFACE)
+
+target_link_libraries(thirdparty
+  INTERFACE
+    jmixin
+    jinject
+    fmt
+    SQLiteCpp
+    sqlite3
+    expected
+    crypt
+    Boost::date_time
+    Boost::filesystem
+    Boost::iostreams
+    Boost::thread
+    ftxui::screen
+    ftxui::dom
+    ftxui::component
+)

@@ -100,7 +100,7 @@ private:
 
 
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
-        .title("Farmacia Pague+")
+        .title("Farmacia Pague+ - " + Ambiente::version)
         .before([&]() {
           fmt::print("{}", "Escolha uma opção:\n");
 

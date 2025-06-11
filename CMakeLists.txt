@@ -26,5 +26,6 @@ add_compile_definitions(BomPreco=2)
 add_compile_definitions(HiperMercado=3)
 add_compile_definitions(JCRUD_CLIENT=${JCRUD_CLIENT})
 
+add_subdirectory(info)
 add_subdirectory(thirdparty)
 add_subdirectory(src)

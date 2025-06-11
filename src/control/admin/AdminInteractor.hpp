@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "control/ErrorMsg.hpp"
 #include "jinject/jinject.h"
 #include "model/base/id.hpp"
 
@@ -56,7 +57,7 @@ struct AdminInteractor {
         std::string senhaNovaEncriptada = crypt(senhaNova.c_str(), "aa");
 
         if (senhaAtualEncriptada != value["senha"]) {
-          return "Erro ao atualizar a senha.";
+          return ErrorMsg::ATUALIZACAO_SENHA_INVALIDA;
         }
 
         value["senha"] = senhaNovaEncriptada;

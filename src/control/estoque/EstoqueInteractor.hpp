@@ -55,6 +55,12 @@ struct EstoqueInteractor {
   std::optional<std::string> store_venda(Id estoque, int quantidadeVenda, Cnpj cnpj) {
     return load_estoque_by_id(estoque)
       .and_then([&](EstoqueModel item) -> std::optional<std::string> {
+        auto quantidadeAtual = item["quantidade"].get_int().value();
+
+        if (quantidadeAtual < quantidadeVenda) {
+          return ErrorMsg::QUANTIDADE_INVALIDA;
+        }
+
         HistoricoEstoqueModel historicoEstoque;
 
         historicoEstoque["produto_id"] = item["produto_id"];
@@ -66,11 +72,7 @@ struct EstoqueInteractor {
 
         try {
           mEstoqueRepository->get_database()->transaction([&](Database &db) {
-            auto quantidadeAtual = item["quantidade"].get_int().value();
-
-            if (quantidadeAtual < quantidadeVenda) {
-              throw std::runtime_error("Quantidade superior ao limite disponivel");
-            } else if (quantidadeAtual == quantidadeVenda) {
+            if (quantidadeAtual == quantidadeVenda) {
               mEstoqueRepository->remove(item);
             } else {
               item["quantidade"] = quantidadeAtual - quantidadeVenda;
@@ -89,7 +91,7 @@ struct EstoqueInteractor {
         return {};
       })
       .or_else([]() -> std::optional<std::string> {
-        return "Estoque id invalido.";
+        return ErrorMsg::ID_ESTOQUE_INVALIDO;
       });
   }
 

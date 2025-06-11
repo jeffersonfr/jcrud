@@ -5,6 +5,7 @@
 #include "control/estoque/EstoqueController.hpp"
 #include "ui/Form.hpp"
 #include "utils/Log.hpp"
+#include "Ambiente.hpp"
 
 #include <fmt/format.h>
 
@@ -42,7 +43,7 @@ private:
 
   void do_menu() const {
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int> >{}
-      .title("Farmacia Pague+")
+      .title("Farmacia Pague+ - " + Ambiente::version)
       .before([&]() {
         fmt::print("{}", "Escolha uma opção:\n");
 

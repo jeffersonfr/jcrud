@@ -167,7 +167,7 @@ struct EstoqueController {
         auto cnpj = Cnpj::from(input.get_text("cnpj"));
 
         if (!estoqueId) {
-          logt(TipoLog::Sistema, Tag, "Id do estoque invalido.");
+          logt(TipoLog::Sistema, Tag, ErrorMsg::ID_ESTOQUE_INVALIDO);
 
           return;
         }
