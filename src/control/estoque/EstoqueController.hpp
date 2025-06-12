@@ -24,7 +24,7 @@
 #include "control/ErrorMsg.hpp"
 #include "jinject/jinject.h"
 
-enum class SelecaoEstoque { Exibir = 1, Comprar, Vender };
+enum class SelecaoEstoque { Exibir = 1, Comprar, Vender, Sair };
 
 using namespace jui;
 

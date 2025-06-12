@@ -22,56 +22,17 @@ struct Rg {
     return mValue;
   }
 
-  std::optional<std::string> localtion() {
-    char codigo = mValue[8];
-
-    if (codigo == '0') {
-      return "Rio Grande do Sul";
-    }
-
-    if (codigo == '1') {
-      return "Distrito Federal, Goiás, Mato Grosso, Mato Grosso do Sul e Tocantins";
-    }
-
-    if (codigo == '2') {
-      return "Amazonas, Pará, Roraima, Amapá, Acre e Rondônia";
-    }
-
-    if (codigo == '3') {
-      return "Ceará, Maranhão e Piauí";
-    }
-
-    if (codigo == '4') {
-      return "Paraíba, Pernambuco, Alagoas e Rio Grande do Norte";
-    }
-
-    if (codigo == '5') {
-      return "Bahia e Sergipe";
-    }
-
-    if (codigo == '6') {
-      return "Minas Gerais";
-    }
-
-    if (codigo == '7') {
-      return "Rio de Janeiro e Espírito Santo";
-    }
-
-    if (codigo == '8') {
-      return "São Paulo";
-    }
-
-    if (codigo == '9') {
-      return "Paraná e Santa Catarina";
-    }
-
-    return {};
+  std::string get_location() {
+    return mLocation;
   }
 
 private:
-  std::string mValue;
+  std::string mValue, mLocation;
 
-  explicit Rg(std::string value) : mValue{std::move(value)} {
+  explicit Rg(std::string value)
+    : mValue{std::move(value)}
+  {
+    mLocation = process_location().value_or("desconhecido");
   }
 
   [[nodiscard]] bool is_valid() const {
@@ -128,6 +89,52 @@ private:
     }
 
     return true;
+  }
+
+  std::optional<std::string> process_location() {
+    char codigo = mValue[8];
+
+    if (codigo == '0') {
+      return "Rio Grande do Sul";
+    }
+
+    if (codigo == '1') {
+      return "Distrito Federal, Goiás, Mato Grosso, Mato Grosso do Sul e Tocantins";
+    }
+
+    if (codigo == '2') {
+      return "Amazonas, Pará, Roraima, Amapá, Acre e Rondônia";
+    }
+
+    if (codigo == '3') {
+      return "Ceará, Maranhão e Piauí";
+    }
+
+    if (codigo == '4') {
+      return "Paraíba, Pernambuco, Alagoas e Rio Grande do Norte";
+    }
+
+    if (codigo == '5') {
+      return "Bahia e Sergipe";
+    }
+
+    if (codigo == '6') {
+      return "Minas Gerais";
+    }
+
+    if (codigo == '7') {
+      return "Rio de Janeiro e Espírito Santo";
+    }
+
+    if (codigo == '8') {
+      return "São Paulo";
+    }
+
+    if (codigo == '9') {
+      return "Paraná e Santa Catarina";
+    }
+
+    return {};
   }
 
 };

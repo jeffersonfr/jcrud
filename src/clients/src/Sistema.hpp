@@ -16,7 +16,7 @@
 #include "ftxui/component/component_options.hpp"
 #include "ftxui/component/screen_interactive.hpp"
 
-enum class SelecaoSistema { Administracao = 1, Produtos, Estoque };
+enum class SelecaoSistema { Administracao = 1, Produtos, Estoque, Sair };
 
 struct Sistema {
   inline static std::string const Tag = "Sistema";
@@ -72,6 +72,8 @@ private:
           }
         }
 
+        selecaoSet.insert(static_cast<int>(SelecaoSistema::Sair));
+
         logd(TipoLog::Sistema, Tag, "logado: {}", usuarioModel);
       }
     });
@@ -85,6 +87,7 @@ private:
         "Administracao",
         "Produtos",
         "Estoque",
+        "Sair",
     };
     int selected = 0;
 
@@ -96,8 +99,6 @@ private:
 
     screen.Loop(menu);
     */
-
-
 
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
         .title("Farmacia Pague+ - " + Ambiente::version)
@@ -119,7 +120,12 @@ private:
             fmt::print("\t{} - Estoque\n",
                        static_cast<int>(SelecaoSistema::Estoque));
           }
-        })
+
+          if (selecaoSet.count(static_cast<int>(SelecaoSistema::Sair))) {
+            fmt::print("\t{} - Sair\n",
+                       static_cast<int>(SelecaoSistema::Sair));
+          }
+})
         .on_success([&](Input input) {
           auto opcao = input.get_int("opcao");
 
@@ -133,6 +139,8 @@ private:
             mProdutoController->execute();
           } else if (opcao == SelecaoSistema::Estoque) {
             mEstoqueController->execute();
+          } else if (opcao == SelecaoSistema::Sair) {
+            std::exit(0);
           }
         })
         .on_failed(opcao_invalida)

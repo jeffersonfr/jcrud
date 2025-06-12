@@ -9,7 +9,7 @@
 
 #include <fmt/format.h>
 
-enum class SelecaoSistema { Administracao = 1, Produtos, Estoque };
+enum class SelecaoSistema { Administracao = 1, Produtos, Estoque, Sair };
 
 struct Sistema {
   inline static std::string const Tag = "Sistema";
@@ -29,6 +29,7 @@ struct Sistema {
     selecaoSet.insert(static_cast<int>(SelecaoSistema::Administracao));
     selecaoSet.insert(static_cast<int>(SelecaoSistema::Produtos));
     selecaoSet.insert(static_cast<int>(SelecaoSistema::Estoque));
+    selecaoSet.insert(static_cast<int>(SelecaoSistema::Sair));
 
     do {
       do_menu();
@@ -62,7 +63,12 @@ private:
           fmt::print("\t{} - Estoque\n",
                      static_cast<int>(SelecaoSistema::Estoque));
         }
-      })
+
+        if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Sair))) {
+          fmt::print("\t{} - Sair\n",
+                     static_cast<int>(SelecaoSistema::Sair));
+        }
+})
       .on_success([&](Input input) {
         auto opcao = input.get_int("opcao");
 
@@ -76,6 +82,8 @@ private:
           mProdutoController->execute();
         } else if (opcao == SelecaoSistema::Estoque) {
           mEstoqueController->execute();
+        } else if (opcao == SelecaoSistema::Sair) {
+          std::exit(0);
         }
       })
       .on_failed(opcao_invalida)
