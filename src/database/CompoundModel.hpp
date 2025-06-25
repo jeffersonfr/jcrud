@@ -74,9 +74,7 @@ namespace jinject {
 
       compoundModels = compoundModels + Arg::get_name();
 
-      if (sizeof...(Models) > 0) {
-        for_each<Index + 1, Args...>(compoundModels);
-      }
+      for_each<Index + 1, Args...>(compoundModels);
     }
   };
 } // namespace jinject
