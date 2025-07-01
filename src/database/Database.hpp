@@ -315,15 +315,9 @@ struct InsertValue {
   }
 
   ~InsertValue() {
-    if (mWithoutTransaction) {
-      for (auto const &item: mInsertions) {
+    for (auto item: mInsertions) {
+      mDb.transaction([=](Database &db) {
         item();
-      }
-    } else {
-      mDb.transaction([&](Database &db) {
-        for (auto const &item: mInsertions) {
-          item();
-        }
       });
     }
   }
@@ -333,13 +327,7 @@ struct InsertValue {
 
     ((model[Fields.to_string()] = params), ...);
 
-    mInsertions.emplace_back([=, this]() { mDb.insert(model); });
-
-    return *this;
-  }
-
-  InsertValue &without_transaction() {
-    mWithoutTransaction = true;
+    mInsertions.emplace_back([=, &mDb = mDb]() { mDb.insert(model); });
 
     return *this;
   }
@@ -347,7 +335,6 @@ struct InsertValue {
 private:
   Database &mDb;
   std::vector<std::function<void()> > mInsertions;
-  bool mWithoutTransaction{};
 };
 
 template<typename Model, StringLiteral... Fields>

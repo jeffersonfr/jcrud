@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <atomic>
 
 #include <SQLiteCpp/SQLiteCpp.h>
 
@@ -45,11 +46,29 @@ struct SqliteDatabase : public Database {
   virtual ~SqliteDatabase() = default;
 
   void transaction(std::function<void(Database &)> callback) override {
+    std::lock_guard<std::recursive_mutex> lk(mTransactionMutex);
+
+    if (mTransactionLock.exchange(true, std::memory_order_acquire)) {
+      mTransactionCallbacks.push_back(std::move(callback));
+
+      return;
+    }
+
     SQLite::Transaction transaction(mDb);
 
     callback(*this);
 
+    std::ranges::for_each(
+      mTransactionCallbacks,
+      [this](auto const &item) {
+        item(*this);
+      });
+
     transaction.commit();
+
+    mTransactionCallbacks.clear();
+
+    mTransactionLock.store(false, std::memory_order_release);
   }
 
   int64_t query_string(std::string const &sql,
@@ -166,6 +185,9 @@ struct SqliteDatabase : public Database {
 
 private:
   std::vector<Migration> mMigrations;
+  std::vector<std::function<void(Database &)>> mTransactionCallbacks;
+  std::recursive_mutex mTransactionMutex;
+  std::atomic<bool> mTransactionLock{false};
   SQLite::Database mDb;
 
   void fillValues(SQLite::Statement &query, std::vector<Data> const &values) {

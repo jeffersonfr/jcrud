@@ -94,8 +94,7 @@ struct AdminInteractor {
           cargos,
           [&](auto const &item) {
             insert<CargoUsuarioModel, "cargo_id", "usuario_id">(db)
-              .values(item["id"].get_int().value(), usuarioId.value())
-              .without_transaction();
+              .values(item["id"].get_int().value(), usuarioId.value());
           });
       });
     } catch (std::runtime_error &e) {
