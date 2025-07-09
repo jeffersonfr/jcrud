@@ -3,15 +3,13 @@
 #include "model/cargo/CargoRepository.hpp"
 #include "model/usuario/UsuarioRepository.hpp"
 #include "model/cargoUsuario/CargoUsuarioRepository.hpp"
+#include "control/ErrorMsg.hpp"
+#include "model/base/id.hpp"
 
 #include <optional>
 #include <ranges>
 #include <utility>
 #include <vector>
-
-#include "control/ErrorMsg.hpp"
-#include "jinject/jinject.h"
-#include "model/base/id.hpp"
 
 struct AdminInteractor {
   AdminInteractor(std::unique_ptr<UsuarioRepository> usuarioRepository,

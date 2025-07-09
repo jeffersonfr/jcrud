@@ -3,6 +3,7 @@
 #include "control/admin/AdminController.hpp"
 #include "control/produto/ProdutoController.hpp"
 #include "control/estoque/EstoqueController.hpp"
+#include "api/Routes.hpp"
 #include "ui/Form.hpp"
 #include "utils/Log.hpp"
 #include "Ambiente.hpp"
@@ -25,6 +26,10 @@ struct Sistema {
 
   void execute() {
     using namespace jui;
+
+    std::unique_ptr<Routes> routes = jinject::get{};
+
+    routes->run();
 
     selecaoSet.insert(static_cast<int>(SelecaoSistema::Administracao));
     selecaoSet.insert(static_cast<int>(SelecaoSistema::Produtos));

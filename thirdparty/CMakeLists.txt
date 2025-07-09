@@ -37,18 +37,34 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SQLiteCpp)
 
+# CrowCpp
+# dependencies:
+#  - sudo apt-get install libasio-dev
+#  - cmake-build-debug/_deps/crowcpp-src/include/crow/settings.h:
+#    >> comment the line '#define CROW_ENABLE_LOGGING'
+set(ASIO_INCLUDE_DIR "/usr/include")
+
+set(CROW_ENABLE_SSL ON)
+set(CROW_ENABLE_LOGGING OFF)
+FetchContent_Declare(
+        CrowCpp
+        GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
+        GIT_TAG master
+)
+FetchContent_MakeAvailable(CrowCpp)
+
 # FTXUI
 FetchContent_Declare(
-  FTXUI
-  GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI.git
-  GIT_TAG main
+        FTXUI
+        GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI.git
+        GIT_TAG main
 )
 FetchContent_MakeAvailable(FTXUI)
 
 # expected
 FetchContent_Declare(
-  expected
-  GIT_REPOSITORY https://github.com/TartanLlama/expected.git
+        expected
+        GIT_REPOSITORY https://github.com/TartanLlama/expected.git
 )
 FetchContent_MakeAvailable(expected)
 
@@ -58,6 +74,7 @@ if(expected_POPULATED)
   message("BINARY_DIR: ${expected_BINARY_DIR}")
 endif()
 
+# create a target to use in src/
 add_library(thirdparty INTERFACE)
 
 target_link_libraries(thirdparty
@@ -73,6 +90,7 @@ target_link_libraries(thirdparty
     Boost::filesystem
     Boost::iostreams
     Boost::thread
+    Crow::Crow
     ftxui::screen
     ftxui::dom
     ftxui::component

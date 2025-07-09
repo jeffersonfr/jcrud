@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.30)
 
 project(jcrud
   LANGUAGES CXX
@@ -28,4 +28,5 @@ add_compile_definitions(JCRUD_CLIENT=${JCRUD_CLIENT})
 
 add_subdirectory(info)
 add_subdirectory(thirdparty)
+add_subdirectory(config)
 add_subdirectory(src)

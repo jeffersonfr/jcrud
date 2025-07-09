@@ -103,13 +103,13 @@ namespace jui {
   };
 
   template<typename T>
-    requires (std::is_enum_v<T>)
+    requires (std::is_scoped_enum_v<T>)
   bool operator ==(std::optional<int32_t> const &a, T b) {
     return a.has_value() and *a == static_cast<int32_t>(b);
   }
 
   template<typename T>
-    requires (std::is_enum_v<T>)
+    requires (std::is_scoped_enum_v<T>)
   bool operator ==(std::optional<int64_t> const &a, T b) {
     return a.has_value() and *a == static_cast<int32_t>(b);
   }

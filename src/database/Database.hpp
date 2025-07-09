@@ -341,3 +341,69 @@ template<typename Model, StringLiteral... Fields>
 auto insert(Database &db) {
   return InsertValue<Model, Fields...>{db};
 }
+
+template<typename Model, StringLiteral... Fields>
+struct UpdateValue {
+  explicit UpdateValue(Database &db) : mDb{db} {
+  }
+
+  ~UpdateValue() {
+    for (auto item: mUpdates) {
+      mDb.transaction([=](Database &db) {
+        item();
+      });
+    }
+  }
+
+  UpdateValue &values(auto... params) {
+    Model model;
+
+    ((model[Fields.to_string()] = params), ...);
+
+    mUpdates.emplace_back([=, &mDb = mDb]() { mDb.update(model); });
+
+    return *this;
+  }
+
+private:
+  Database &mDb;
+  std::vector<std::function<void()> > mUpdates;
+};
+
+template<typename Model, StringLiteral... Fields>
+auto update(Database &db) {
+  return UpdateValue<Model, Fields...>{db};
+}
+
+template<typename Model, StringLiteral... Fields>
+struct RemoveValue {
+  explicit RemoveValue(Database &db) : mDb{db} {
+  }
+
+  ~RemoveValue() {
+    for (auto item: mUpdates) {
+      mDb.transaction([=](Database &db) {
+        item();
+      });
+    }
+  }
+
+  RemoveValue &values(auto... params) {
+    Model model;
+
+    ((model[Fields.to_string()] = params), ...);
+
+    mUpdates.emplace_back([=, &mDb = mDb]() { mDb.remove(model); });
+
+    return *this;
+  }
+
+private:
+  Database &mDb;
+  std::vector<std::function<void()> > mUpdates;
+};
+
+template<typename Model, StringLiteral... Fields>
+auto remove(Database &db) {
+  return RemoveValue<Model, Fields...>{db};
+}
