@@ -3,7 +3,7 @@
 #include "control/estoque/EstoqueInteractor.hpp"
 #include "model/estoque/EstoqueRepository.hpp"
 #include "model/produto/ProdutoRepository.hpp"
-#include "model/base/cnpj.hpp"
+#include "model/base/Cnpj.hpp"
 #include "ui/Form.hpp"
 #include "ui/Table.hpp"
 #include "utils/Log.hpp"

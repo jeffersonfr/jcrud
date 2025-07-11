@@ -19,7 +19,7 @@
 
 #include "control/ErrorMsg.hpp"
 #include "jinject/jinject.h"
-#include "model/base/id.hpp"
+#include "model/base/Id.hpp"
 
 enum class SelecaoAdmin {
   BuscarUsuario = 1,

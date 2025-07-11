@@ -4,7 +4,7 @@
 #include "model/usuario/UsuarioRepository.hpp"
 #include "model/cargoUsuario/CargoUsuarioRepository.hpp"
 #include "control/ErrorMsg.hpp"
-#include "model/base/id.hpp"
+#include "model/base/Id.hpp"
 
 #include <optional>
 #include <ranges>

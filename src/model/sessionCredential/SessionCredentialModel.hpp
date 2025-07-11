@@ -2,9 +2,7 @@
 
 #include "database/DataClass.hpp"
 
-using SessionCredentialModel = DataClass<"session_credential", Primary<"id">, NoForeign,
+using SessionCredentialModel = DataClass<"session_credential", Primary<"id">, Foreign<Refer<UsuarioModel, "usuario_id">>,
   Field<"id", FieldType::Text, false>, // JWT ID
-  Field<"key", FieldType::Text, false>,
-  Field<"token", FieldType::Text>,
-  Field<"refresh_token", FieldType::Text>,
-  Field<"expires", FieldType::Timestamp>>;
+  Field<"key", FieldType::Text, false>, // JWT KEY
+  Field<"usuario_id", FieldType::Int, false>>;

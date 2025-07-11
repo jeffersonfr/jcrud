@@ -1,9 +1,14 @@
 #pragma once
 
 #include "model/sessionCredential/SessionCredentialRepository.hpp"
+#include "api/routes/control/session/SessionInteractor.hpp"
 #include "database/SqliteDatabase.hpp"
-#include "api/RoutesV1.hpp"
 
+/*
+ * Encoder e decoder de JWT online:
+ *
+ * https://10015.io/tools/jwt-encoder-decoder
+ */
 void api_module() {
   using namespace jinject;
 
@@ -14,8 +19,9 @@ void api_module() {
 
     db->add_migration(Migration{
         1, [](Database &db) {
-          insert<SessionCredentialModel, "id", "key">(db)
-            .values("48f8f811653246de9abf4940312b5ed2", "cb9aa2901bfd"); // JWT-ID, JWT-KEY
+          insert<SessionCredentialModel, "id", "key", "usuario_id">(db)
+            .values("48f8f811653246de9abf4940312b5ed2", "cb9aa2901bfd", 1)
+            .values("487652f8f81166de9abf4940312b5e32", "cb56732cbb91", 2);
         }
       })
       .build();
@@ -27,7 +33,7 @@ void api_module() {
     return new SessionCredentialRepository{inject<std::shared_ptr<Database>, SessionCredentialModel>()};
   };
 
-  UNIQUE(Routes) {
-    return new RoutesV1{};
+  SINGLE(std::shared_ptr<SessionInteractor>) {
+    return std::shared_ptr<SessionInteractor>{new SessionInteractor{get{}, get{}}};
   };
 }

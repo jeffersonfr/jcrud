@@ -4,7 +4,7 @@
 #include "model/estoque/EstoqueRepository.hpp"
 #include "model/historicoEstoque/HistoricoEstoqueRepository.hpp"
 #include "control/estoque/EstoqueInteractorRepository.hpp"
-#include "model/base/cnpj.hpp"
+#include "model/base/Cnpj.hpp"
 
 #include <optional>
 #include <string>

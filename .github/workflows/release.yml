@@ -24,8 +24,8 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y             libboost-dev             libboost-filesystem-dev             libboost-iostreams-dev             libboost-thread-dev             libfmt-dev             libsqlite3-dev             libcrypto++-dev 
-            # Assuming ftxui, jmixin, jinject, expected, SQLiteCpp are handled by thirdparty/CMakeLists.txt or are header-only
+          sudo apt-get install -y libboost-dev libboost-filesystem-dev libboost-iostreams-dev libboost-thread-dev libfmt-dev libsqlite3-dev libcrypto++-dev libasio-dev
+          # Assuming ftxui, jmixin, jinject, expected, SQLiteCpp are handled by thirdparty/CMakeLists.txt or are header-only
 
       - name: Configure CMake
         run: cmake -B ${{ env.BUILD_DIR }} -S . -DCMAKE_BUILD_TYPE=Release

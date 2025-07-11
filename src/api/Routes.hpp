@@ -3,38 +3,47 @@
 #include "crow.h"
 
 #include <thread>
+#include <tuple>
 
+template<typename... Args>
 struct Routes {
-    virtual ~Routes() {
-        mApp.stop();
-        mThread.join();
-    }
+  explicit Routes(Args... args)
+    : mRoutesRefs{std::move(std::make_tuple<Args...>(std::move(args)...))} {
+  }
 
-    void run() {
-        mThread = std::thread{
-            [&] {
-                init_routes();
+  virtual ~Routes() {
+    mApp.stop();
+    mThread.join();
+  }
 
-                mApp
-                    .port(3000)
-                    .multithreaded()
-                    .run();
-            }
-        };
+  void start() {
+    mThread = std::thread{
+      [&] {
+        blackhole(mApp);
 
-        mApp.wait_for_server_start();
-    }
+        std::apply([&](auto &... args) {
+          (args.init(mApp), ...);
+        }, mRoutesRefs);
 
-protected:
-    crow::SimpleApp mApp;
+        mApp
+            .port(3000)
+            .multithreaded()
+            .run();
+      }
+    };
 
-    explicit Routes(std::uint32_t version)
-        : mVersion{version} {
-    }
-
-    virtual void init_routes() = 0;
+    mApp.wait_for_server_start();
+  }
 
 private:
-    std::thread mThread;
-    std::uint32_t mVersion;
+  crow::SimpleApp mApp;
+  std::thread mThread;
+  std::tuple<Args...> mRoutesRefs;
+
+  void blackhole(crow::SimpleApp &app) {
+    CROW_CATCHALL_ROUTE(app)
+    ([this]() {
+      return crow::response(crow::status::FORBIDDEN);
+    });
+  }
 };

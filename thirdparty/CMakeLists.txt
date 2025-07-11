@@ -46,6 +46,7 @@ set(ASIO_INCLUDE_DIR "/usr/include")
 
 set(CROW_ENABLE_SSL ON)
 set(CROW_ENABLE_LOGGING OFF)
+
 FetchContent_Declare(
         CrowCpp
         GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
@@ -60,6 +61,15 @@ FetchContent_Declare(
         GIT_TAG main
 )
 FetchContent_MakeAvailable(FTXUI)
+
+# jwt-cpp
+set(JWT_BUILD_EXAMPLES OFF)
+FetchContent_Declare(
+        JwtCpp
+        GIT_REPOSITORY https://github.com/Thalhammer/jwt-cpp.git
+        GIT_TAG master
+)
+FetchContent_MakeAvailable(JwtCpp)
 
 # expected
 FetchContent_Declare(
@@ -94,4 +104,5 @@ target_link_libraries(thirdparty
     ftxui::screen
     ftxui::dom
     ftxui::component
+    jwt-cpp
 )

@@ -25,15 +25,16 @@ struct Modules final {
     log_module();
 
     login_module();
-    admin_module();
-    produto_module();
-    estoque_module();
-    categoriaproduto_module();
-    preco_module();
-    filial_module();
     usuario_module();
     cargo_module();
     cargousuario_module();
+    admin_module();
+
+    categoriaproduto_module();
+    produto_module();
+    estoque_module();
+    preco_module();
+    filial_module();
     tiponegocio_module();
     historicoestoque_module();
 

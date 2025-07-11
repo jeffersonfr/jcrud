@@ -6,6 +6,7 @@
 #include "ui/Form.hpp"
 #include "utils/Log.hpp"
 #include "api/Routes.hpp"
+#include "api/routes/v1/BasicRoutes.hpp"
 
 #include <fmt/format.h>
 
@@ -33,9 +34,11 @@ struct Sistema {
   void execute() {
     using namespace jui;
 
-    std::unique_ptr<Routes> routes = jinject::get{};
+    auto routes = std::make_unique<Routes<
+      v1::BasicRoutes
+    >>(v1::BasicRoutes{});
 
-    routes->run();
+    routes->start();
 
     do {
       if (!Ambiente::usuario.has_value()) {
