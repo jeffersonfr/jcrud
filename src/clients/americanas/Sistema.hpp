@@ -11,6 +11,8 @@
 
 #include <fmt/format.h>
 
+#include "api/routes/v1/LoginRoutes.hpp"
+
 enum class SelecaoSistema { Administracao = 1, Produtos, Estoque, Sair };
 
 struct Sistema {
@@ -26,22 +28,26 @@ struct Sistema {
   }
 
   void execute() {
-    using namespace jui;
-
-    auto routes = std::make_unique<Routes<
-      v1::BasicRoutes
-    >>(v1::BasicRoutes{});
+    auto routes = create_routes(
+      v1::LoginRoutes{}, v1::BasicRoutes{});
 
     routes->start();
 
-    selecaoSet.insert(static_cast<int>(SelecaoSistema::Administracao));
-    selecaoSet.insert(static_cast<int>(SelecaoSistema::Produtos));
-    selecaoSet.insert(static_cast<int>(SelecaoSistema::Estoque));
-    selecaoSet.insert(static_cast<int>(SelecaoSistema::Sair));
+    selecaoSet = std::set{
+      static_cast<int>(SelecaoSistema::Administracao),
+      static_cast<int>(SelecaoSistema::Produtos),
+      static_cast<int>(SelecaoSistema::Estoque),
+      static_cast<int>(SelecaoSistema::Sair)
+    };
 
     do {
       do_menu();
     } while (true);
+  }
+
+  template<typename... Args>
+  std::unique_ptr<Routes<Args...> > create_routes(Args &&... args) {
+    return std::make_unique<Routes<Args...> >(std::move(args)...);
   }
 
 private:
@@ -52,50 +58,50 @@ private:
 
   void do_menu() const {
     Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int> >{}
-      .title("Farmacia Pague+ - " + Ambiente::version)
-      .before([&]() {
-        fmt::print("{}", "Escolha uma opção:\n");
+        .title("Farmacia Pague+ - " + Ambiente::version)
+        .before([&]() {
+          fmt::print("{}", "Escolha uma opção:\n");
 
-        if (selecaoSet.contains(
-          static_cast<int>(SelecaoSistema::Administracao))) {
-          fmt::print("\t{} - Administracao\n",
-                     static_cast<int>(SelecaoSistema::Administracao));
-        }
+          if (selecaoSet.contains(
+            static_cast<int>(SelecaoSistema::Administracao))) {
+            fmt::print("\t{} - Administracao\n",
+                       static_cast<int>(SelecaoSistema::Administracao));
+          }
 
-        if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Produtos))) {
-          fmt::print("\t{} - Produtos\n",
-                     static_cast<int>(SelecaoSistema::Produtos));
-        }
+          if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Produtos))) {
+            fmt::print("\t{} - Produtos\n",
+                       static_cast<int>(SelecaoSistema::Produtos));
+          }
 
-        if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Estoque))) {
-          fmt::print("\t{} - Estoque\n",
-                     static_cast<int>(SelecaoSistema::Estoque));
-        }
+          if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Estoque))) {
+            fmt::print("\t{} - Estoque\n",
+                       static_cast<int>(SelecaoSistema::Estoque));
+          }
 
-        if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Sair))) {
-          fmt::print("\t{} - Sair\n",
-                     static_cast<int>(SelecaoSistema::Sair));
-        }
-})
-      .on_success([&](Input input) {
-        auto opcao = input.get_int("opcao");
+          if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Sair))) {
+            fmt::print("\t{} - Sair\n",
+                       static_cast<int>(SelecaoSistema::Sair));
+          }
+        })
+        .on_success([&](Input input) {
+          auto opcao = input.get_int("opcao");
 
-        if (!opcao.has_value() or selecaoSet.contains(*opcao) == 0) {
-          return;
-        }
+          if (!opcao.has_value() or selecaoSet.contains(*opcao) == 0) {
+            return;
+          }
 
-        if (opcao == SelecaoSistema::Administracao) {
-          mAdminController->execute();
-        } else if (opcao == SelecaoSistema::Produtos) {
-          mProdutoController->execute();
-        } else if (opcao == SelecaoSistema::Estoque) {
-          mEstoqueController->execute();
-        } else if (opcao == SelecaoSistema::Sair) {
-          std::exit(0);
-        }
-      })
-      .on_failed(opcao_invalida)
-      .interruptable()
-      .show();
+          if (opcao == SelecaoSistema::Administracao) {
+            mAdminController->execute();
+          } else if (opcao == SelecaoSistema::Produtos) {
+            mProdutoController->execute();
+          } else if (opcao == SelecaoSistema::Estoque) {
+            mEstoqueController->execute();
+          } else if (opcao == SelecaoSistema::Sair) {
+            std::exit(0);
+          }
+        })
+        .on_failed(opcao_invalida)
+        .interruptable()
+        .show();
   }
 };

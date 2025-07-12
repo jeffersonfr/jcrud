@@ -7,7 +7,7 @@
 
 template<typename... Args>
 struct Routes {
-  explicit Routes(Args... args)
+  explicit Routes(Args &&... args)
     : mRoutesRefs{std::move(std::make_tuple<Args...>(std::move(args)...))} {
   }
 

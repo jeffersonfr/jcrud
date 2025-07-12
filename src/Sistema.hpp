@@ -34,9 +34,10 @@ struct Sistema {
   void execute() {
     using namespace jui;
 
-    auto routes = std::make_unique<Routes<
-      v1::BasicRoutes
-    >>(v1::BasicRoutes{});
+    auto routesPtr = new Routes{
+      v1::LoginRoutes{}, v1::BasicRoutes{}
+    };
+    auto routes = std::unique_ptr{routesPtr};
 
     routes->start();
 
@@ -68,16 +69,20 @@ private:
       if (Ambiente::cargos.has_value()) {
         for (auto const &cargo : Ambiente::cargos.value()) {
           if (cargo["id"].get_int() == Cargo::Administrador) {
-            selecaoSet.insert(static_cast<int>(SelecaoSistema::Administracao));
-            selecaoSet.insert(static_cast<int>(SelecaoSistema::Produtos));
-            selecaoSet.insert(static_cast<int>(SelecaoSistema::Estoque));
+            selecaoSet = std::set {
+              static_cast<int>(SelecaoSistema::Administracao),
+              static_cast<int>(SelecaoSistema::Produtos),
+              static_cast<int>(SelecaoSistema::Estoque),
+              static_cast<int>(SelecaoSistema::Sair)
+            };
           } else if (cargo["id"].get_int() == Cargo::Operador) {
-            selecaoSet.insert(static_cast<int>(SelecaoSistema::Produtos));
-            selecaoSet.insert(static_cast<int>(SelecaoSistema::Estoque));
+            selecaoSet = std::set {
+              static_cast<int>(SelecaoSistema::Produtos),
+              static_cast<int>(SelecaoSistema::Estoque),
+              static_cast<int>(SelecaoSistema::Sair)
+            };
           }
         }
-
-        selecaoSet.insert(static_cast<int>(SelecaoSistema::Sair));
 
         logd(TipoLog::Sistema, Tag, "logado: {}", usuarioModel);
       }
