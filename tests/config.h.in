@@ -1,6 +1,0 @@
-#pragma once
-
-#define GIT_COMMIT_HASH "@COMMIT_HASH@"
-#define GIT_SHORT_COMMIT_HASH "@SHORT_COMMIT_HASH@"
-#define GIT_BRANCH "@GIT_BRANCH@"
-#define GIT_TAG "@GIT_TAG@"

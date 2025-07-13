@@ -35,6 +35,10 @@ struct Routes {
     mApp.wait_for_server_start();
   }
 
+  crow::SimpleApp & get_app() {
+    return mApp;
+  }
+
 private:
   crow::SimpleApp mApp;
   std::thread mThread;
@@ -47,3 +51,8 @@ private:
     });
   }
 };
+
+template<typename... Args>
+std::unique_ptr<Routes<Args...> > create_routes(Args &&... args) {
+  return std::make_unique<Routes<Args...> >(std::move(args)...);
+}

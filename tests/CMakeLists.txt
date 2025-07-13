@@ -14,12 +14,22 @@ FetchContent_MakeAvailable(googletest)
 
 macro(module_test)
     set(id ${ARGV0}_test)
-
     add_executable(${id} ${id}.cpp)
     add_test(${id} ${id} COMMAND $<TARGET_FILE:${id}>)
     target_link_libraries(${id}
             PRIVATE
+                info
+                thirdparty
                 gtest_main
+    )
+    target_include_directories(${id}
+            PRIVATE
+                ${PROJECT_SOURCE_DIR}/src
+    )
+    target_include_directories(${PROJECT_NAME}
+            PRIVATE
+                .
+                ${CMAKE_BINARY_DIR}
     )
     unset(id)
 endmacro()

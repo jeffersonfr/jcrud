@@ -16,12 +16,13 @@
 #include <unordered_map>
 #include <utility>
 #include <mutex>
+#include <ranges>
 
 struct SessionInteractor final {
   SessionInteractor(std::unique_ptr<SessionCredentialRepository> sessionCredentialRepository,
-                    std::unique_ptr<UsuarioRepository> usuarioRepository)
-    : mSessionCredentialRepository(std::move(sessionCredentialRepository)),
-      mUsuarioRepository(std::move(usuarioRepository)) {
+                    std::unique_ptr<CargoUsuarioRepository> cargoUsuarioRepository)
+    : mSessionCredentialRepository{std::move(sessionCredentialRepository)},
+      mCargoUsuarioRepository(std::move(cargoUsuarioRepository)) {
   }
 
   std::expected<std::pair<std::string, Session>, std::string> create_session(Token const &token) {
@@ -62,8 +63,8 @@ struct SessionInteractor final {
       }
 
       const auto expires = std::chrono::system_clock::from_time_t(std::stoi(exp));
-
-      auto session = Session{jti, key, refreshToken, expires};
+      auto usuarioId = items[0]["usuario_id"].get_int().value();
+      auto session = Session{load_cargos(usuarioId), jti, key, refreshToken, expires};
 
       mSessions.insert({sessionToken, session});
 
@@ -85,40 +86,29 @@ struct SessionInteractor final {
     }
   }
 
-  std::expected<Session, std::string> refresh_session(Token const &token) {
+  std::expected<std::pair<std::string, Session>, std::string> refresh_session(Token const &token) {
     try {
-      /*
-      auto decodedToken = jwt::decode(token.token());
-      auto payload = decodedToken.get_payload_json();
+      std::lock_guard lock(mMutex);
 
-      std::cout << "## PAYLOAD:iss: " << payload["iss"] << "\n";
-      std::cout << "## PAYLOAD:iat: " << payload["sub"] << "\n";
-      std::cout << "## PAYLOAD:jti: " << payload["jti"] << "\n";
+      auto session = mSessions.find(token.token())->second;
 
-      std::string id = payload["jti"].to_str();
-      auto items = mSessionCredentialRepository->load_by<"id">(id);
+      auto credentials = mSessionCredentialRepository->first_by<"id">(session.id());
 
-      if (items.empty()) {
+      if (!credentials) {
         return std::unexpected{"Invalid credentials"};
       }
 
-      auto key = items[0]["key"].get_text().value();
-      auto verify = jwt::verify().allow_algorithm(jwt::algorithm::hs256{key});
-
-      verify.verify(decodedToken);
-
-      boost::uuids::uuid uuid = boost::uuids::random_generator{}();
-      std::string sessionToken = boost::uuids::to_string(uuid);
+      std::string sessionToken = generate_random_token(512);
       std::string refreshToken = generate_random_token(16);
 
-      std::lock_guard lock(mMutex);
+      auto usuarioId = credentials.value()["usuario_id"].get_int().value();
+      auto newSession = Session{load_cargos(usuarioId), session.id(), session.key(), refreshToken, session.expires()};
 
-      auto session = Session{id, key, refreshToken, std::chrono::seconds{3600}};
+      destroy_session(token.token());
 
-      mSessions.insert({sessionToken, session});
+      mSessions.insert({sessionToken, newSession});
 
-      return std::pair{sessionToken, session};
-      */
+      return std::pair{sessionToken, newSession};
     } catch (std::exception const &e) {
       return std::unexpected{"Invalid credentials"};
     }
@@ -176,6 +166,7 @@ struct SessionInteractor final {
 
 private:
   std::unique_ptr<SessionCredentialRepository> mSessionCredentialRepository;
+  std::unique_ptr<CargoUsuarioRepository> mCargoUsuarioRepository;
   std::unique_ptr<UsuarioRepository> mUsuarioRepository;
   std::unordered_map<std::string, Session> mSessions;
   std::recursive_mutex mMutex;
@@ -195,5 +186,14 @@ private:
     }
 
     return token;
+  }
+
+  std::set<Cargo> load_cargos(int64_t usuarioId) {
+    auto items = mCargoUsuarioRepository->load_by<"usuario_id">(usuarioId)
+      | std::views::transform([&](auto const &item) {
+        return static_cast<Cargo>(item["cargo_id"].get_int().value());
+      });
+
+    return {items.begin(), items.end()};
   }
 };

@@ -1,0 +1,13 @@
+diff --git a/include/crow/settings.h b/include/crow/settings.h
+index 64b17ae45..0b706ea9c 100644
+--- a/include/crow/settings.h
++++ b/include/crow/settings.h
+@@ -6,7 +6,7 @@
+ //#define CROW_ENABLE_DEBUG
+ 
+ /* #ifdef - enables logging */
+-#define CROW_ENABLE_LOGGING
++#undef CROW_ENABLE_LOGGING
+ 
+ /* #ifdef - enforces section 5.2 and 6.1 of RFC6455 (only accepting masked messages from clients) */
+ //#define CROW_ENFORCE_WS_SPEC

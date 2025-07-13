@@ -122,7 +122,7 @@ struct Repository {
                                    std::vector<Data> const &values) {
       Model item;
 
-      for (int i = 0; i < columns.size(); i++) {
+      for (int i = 0; i < (int)columns.size(); i++) {
         std::string const &column = columns[i];
 
         item[column] = values[i];
@@ -163,7 +163,7 @@ struct Repository {
                                    std::vector<Data> const &values) {
       Model item;
 
-      for (int i = 0; i < columns.size(); i++) {
+      for (int i = 0; i < (int)columns.size(); i++) {
         std::string const &column = columns[i];
 
         item[column] = values[i];

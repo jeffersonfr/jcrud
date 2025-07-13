@@ -53,20 +53,11 @@ namespace v1 {
     void refresh(crow::SimpleApp &app) {
       CROW_ROUTE(app, BaseUrl"/refresh")
           .methods(crow::HTTPMethod::POST)
-          ([&](crow::request const &req) {
+          (validate_refresh_token([&](crow::request const &req) {
             std::shared_ptr<SessionInteractor> sessionInteractor = jinject::get{};
 
             auto token = Token::from(req.get_header_value("Authorization"));
-
-            if (!token) {
-              return unauthorized_response("invalid_token", "Invalid token");
-            }
-
-            auto result = sessionInteractor->create_session(*token);
-
-            if (!result) {
-              return unauthorized_response("invalid_token", result.error());
-            }
+            auto result = sessionInteractor->refresh_session(*token);
 
             auto [sessionToken, session] = result.value();
 
@@ -75,7 +66,7 @@ namespace v1 {
                                     {"sessiontoken", sessionToken},
                                     {"refreshToken", session.refresh_token()}
                                   });
-          });
+          }));
     }
 
     void logout(crow::SimpleApp &app) {

@@ -8,7 +8,6 @@
 #include "utils/Log.hpp"
 
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
 #include <optional>
 #include <string>

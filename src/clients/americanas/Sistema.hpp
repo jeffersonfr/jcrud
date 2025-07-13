@@ -45,11 +45,6 @@ struct Sistema {
     } while (true);
   }
 
-  template<typename... Args>
-  std::unique_ptr<Routes<Args...> > create_routes(Args &&... args) {
-    return std::make_unique<Routes<Args...> >(std::move(args)...);
-  }
-
 private:
   std::unique_ptr<AdminController> mAdminController;
   std::unique_ptr<ProdutoController> mProdutoController;

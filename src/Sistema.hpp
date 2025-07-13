@@ -34,10 +34,8 @@ struct Sistema {
   void execute() {
     using namespace jui;
 
-    auto routesPtr = new Routes{
-      v1::LoginRoutes{}, v1::BasicRoutes{}
-    };
-    auto routes = std::unique_ptr{routesPtr};
+    auto routes = create_routes(
+      v1::LoginRoutes{}, v1::BasicRoutes{});
 
     routes->start();
 
