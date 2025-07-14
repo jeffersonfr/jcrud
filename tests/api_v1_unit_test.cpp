@@ -186,10 +186,11 @@ TEST_F(CrudSuite, ValidAuthorizationLogin) {
   Environment::set_refresh_token(refreshToken);
 }
 
-TEST_F(CrudSuite, InvalidRefreshAuthorization) {
+TEST_F(CrudSuite, InvalidAuthorizationRefresh) {
   crow::request req;
   crow::response res;
 
+  req.method = crow::HTTPMethod::POST;
   req.url = "/api/v1/refresh";
   req.add_header("Authorization", std::format("Bearer 1234567890"));
 
@@ -203,26 +204,34 @@ TEST_F(CrudSuite, InvalidRefreshAuthorization) {
   ASSERT_EQ(code, crow::UNAUTHORIZED);
 }
 
-TEST_F(CrudSuite, ValidRefreshAuthorization) {
+TEST_F(CrudSuite, ValidAuthorizationRefresh) {
   crow::request req;
   crow::response res;
 
-  req.url = "/api/v1/refresh";
   req.method = crow::HTTPMethod::POST;
+  req.url = "/api/v1/refresh";
   req.add_header("Authorization", std::format("Bearer {}", Environment::get_session_token()));
   req.body = crow::json::wvalue{{"refreshToken", Environment::get_refresh_token()}}.dump();
 
   get_app().handle_full(req, res);
 
   int code = res.code;
-  std::string msg = res.body;
+  crow::json::rvalue msg = crow::json::load(res.body);
 
-  std::cout << ">>> code '" << code << "' => msg [" << msg << "]\n";
+  // std::cout << ">>> code '" << code << "' => msg [" << msg << "]\n";
+
+  std::string sessionToken = static_cast<std::string>(msg["sessionToken"]);
+  std::string refreshToken = static_cast<std::string>(msg["refreshToken"]);
 
   ASSERT_EQ(code, crow::ACCEPTED);
+  ASSERT_EQ(sessionToken.empty(), false);
+  ASSERT_EQ(refreshToken.empty(), false);
+
+  Environment::set_session_token(sessionToken);
+  Environment::set_refresh_token(refreshToken);
 }
 
-TEST_F(CrudSuite, InvalidLogout) {
+TEST_F(CrudSuite, InvalidAuthorizationLogout) {
   crow::request req;
   crow::response res;
 
@@ -239,7 +248,7 @@ TEST_F(CrudSuite, InvalidLogout) {
   ASSERT_EQ(code, crow::UNAUTHORIZED);
 }
 
-TEST_F(CrudSuite, ValidLogout) {
+TEST_F(CrudSuite, ValidAuthorizationLogout) {
   crow::request req;
   crow::response res;
 

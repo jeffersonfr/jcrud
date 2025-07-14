@@ -50,46 +50,6 @@ namespace v1 {
         return std::invoke(callback, req, std::forward<Args>(args)...);
       };
     }
-    template<typename Callback>
-
-    auto validate_refresh_token(Callback &&callback, std::set<Cargo> &&cargos = {}) {
-      return [callback, this] <typename... Args>(crow::request const &req, Args &&... args) -> crow::response {
-        std::shared_ptr<SessionInteractor> sessionInteractor = jinject::get{};
-
-        auto token = Token::from(req.get_header_value("Authorization"));
-
-        if (!token) {
-          return unauthorized_response("invalid_token", ApiErrorMsg::INVALID_CREDENTIALS);
-        }
-
-        auto result = sessionInteractor->get_session(token->token());
-
-        if (!result) {
-          return unauthorized_response("invalid_token", result.error());
-        }
-
-        auto &session = *result;
-
-        if (!session.valid()) {
-          return unauthorized_response("invalid_token", ApiErrorMsg::TOKEN_EXPIRED);
-        }
-
-        // INFO:: validate user roles
-
-        auto body = req.get_body_params();
-        auto refreshToken = body.get("refreshToken");
-
-        if (!refreshToken) {
-          return unauthorized_response("invalid_token", ApiErrorMsg::INVALID_CREDENTIALS);
-        }
-
-        if (session.refresh_token() != refreshToken) {
-          return unauthorized_response("invalid_token", ApiErrorMsg::INVALID_CREDENTIALS);
-        }
-
-        return std::invoke(callback, req, std::forward<Args>(args)...);
-      };
-    }
   };
 }
 
