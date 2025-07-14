@@ -4,6 +4,7 @@
 #include "model/sessionCredential/SessionCredentialRepository.hpp"
 #include "model/usuario/UsuarioRepository.hpp"
 #include "api/Session.hpp"
+#include "api/routes/control/ApiErrorMsg.hpp"
 
 #include <jwt-cpp/jwt.h>
 #include <boost/uuid/uuid.hpp>
@@ -36,7 +37,7 @@ struct SessionInteractor final {
       auto items = mSessionCredentialRepository->load_by<"id">(jti);
 
       if (items.empty()) {
-        return std::unexpected{"Invalid credentials"};
+        return std::unexpected{ApiErrorMsg::INVALID_CREDENTIALS};
       }
 
       auto key = items[0]["key"].get_text().value();
@@ -69,8 +70,10 @@ struct SessionInteractor final {
       mSessions.insert({sessionToken, session});
 
       return std::pair{sessionToken, session};
+    } catch (std::runtime_error const &e) {
+      return std::unexpected{e.what()};
     } catch (std::exception const &e) {
-      return std::unexpected{"Invalid credentials"};
+      return std::unexpected{ApiErrorMsg::INVALID_CREDENTIALS};
     }
   }
 
@@ -86,7 +89,8 @@ struct SessionInteractor final {
     }
   }
 
-  std::expected<std::pair<std::string, Session>, std::string> refresh_session(Token const &token) {
+  std::expected<std::pair<std::string, Session>, std::string> refresh_session(
+    Token const &token, std::string const &oldRefreshToken) {
     try {
       std::lock_guard lock(mMutex);
 
@@ -95,7 +99,7 @@ struct SessionInteractor final {
       auto credentials = mSessionCredentialRepository->first_by<"id">(session.id());
 
       if (!credentials) {
-        return std::unexpected{"Invalid credentials"};
+        return std::unexpected{ApiErrorMsg::INVALID_CREDENTIALS};
       }
 
       std::string sessionToken = generate_random_token(512);
@@ -109,8 +113,10 @@ struct SessionInteractor final {
       mSessions.insert({sessionToken, newSession});
 
       return std::pair{sessionToken, newSession};
+    } catch (std::runtime_error const &e) {
+      return std::unexpected{e.what()};
     } catch (std::exception const &e) {
-      return std::unexpected{"Invalid credentials"};
+      return std::unexpected{ApiErrorMsg::INVALID_CREDENTIALS};
     }
   }
 
@@ -120,13 +126,13 @@ struct SessionInteractor final {
     auto session = mSessions.find(token);
 
     if (session == mSessions.end()) {
-      return std::unexpected{"forbidden"};
+      return std::unexpected{ApiErrorMsg::FORBIDDEN_ACCESS};
     }
 
     if (!session->second.valid()) {
       destroy_session(token);
 
-      return std::unexpected{"forbidden"};
+      return std::unexpected{ApiErrorMsg::FORBIDDEN_ACCESS};
     }
 
     return session->second;
@@ -138,17 +144,17 @@ struct SessionInteractor final {
     auto session = mSessions.find(token);
 
     if (session == mSessions.end()) {
-      return std::unexpected{"forbidden"};
+      return std::unexpected{ApiErrorMsg::FORBIDDEN_ACCESS};
     }
 
     if (session->second.id() != updateSession.id()) {
-      return std::unexpected{"forbidden"};
+      return std::unexpected{ApiErrorMsg::FORBIDDEN_ACCESS};
     }
 
     if (!session->second.valid()) {
       destroy_session(token);
 
-      return std::unexpected{"forbidden"};
+      return std::unexpected{ApiErrorMsg::FORBIDDEN_ACCESS};
     }
 
     destroy_session(token);
@@ -190,9 +196,9 @@ private:
 
   std::set<Cargo> load_cargos(int64_t usuarioId) {
     auto items = mCargoUsuarioRepository->load_by<"usuario_id">(usuarioId)
-      | std::views::transform([&](auto const &item) {
-        return static_cast<Cargo>(item["cargo_id"].get_int().value());
-      });
+                 | std::views::transform([&](auto const &item) {
+                   return static_cast<Cargo>(item["cargo_id"].get_int().value());
+                 });
 
     return {items.begin(), items.end()};
   }

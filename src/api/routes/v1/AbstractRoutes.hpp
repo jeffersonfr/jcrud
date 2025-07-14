@@ -1,8 +1,8 @@
 #pragma once
 
 #include "api/Routes.hpp"
-#include "api/Mapping.hpp"
 #include "api/routes/control/session/SessionInteractor.hpp"
+#include "api/routes/control/ApiErrorMsg.hpp"
 #include "model/base/Token.hpp"
 
 #define BaseUrl "/api/v1"
@@ -28,7 +28,7 @@ namespace v1 {
         auto token = Token::from(req.get_header_value("Authorization"));
 
         if (!token) {
-          return unauthorized_response("invalid_token", "Invalid token");
+          return unauthorized_response("invalid_token", ApiErrorMsg::INVALID_CREDENTIALS);
         }
 
         auto result = sessionInteractor->get_session(token->token());
@@ -40,11 +40,11 @@ namespace v1 {
         auto &session = *result;
 
         if (!session.valid()) {
-          return unauthorized_response("invalid_token", "Token expired");
+          return unauthorized_response("invalid_token", ApiErrorMsg::TOKEN_EXPIRED);
         }
 
         if (!session.validate_cargos(cargos)) {
-          return unauthorized_response("invalid_token", "Invalid access");
+          return unauthorized_response("invalid_token", ApiErrorMsg::FORBIDDEN_ACCESS);
         }
 
         return std::invoke(callback, req, std::forward<Args>(args)...);
@@ -59,7 +59,7 @@ namespace v1 {
         auto token = Token::from(req.get_header_value("Authorization"));
 
         if (!token) {
-          return unauthorized_response("invalid_token", "Invalid token");
+          return unauthorized_response("invalid_token", ApiErrorMsg::INVALID_CREDENTIALS);
         }
 
         auto result = sessionInteractor->get_session(token->token());
@@ -71,7 +71,7 @@ namespace v1 {
         auto &session = *result;
 
         if (!session.valid()) {
-          return unauthorized_response("invalid_token", "Token expired");
+          return unauthorized_response("invalid_token", ApiErrorMsg::TOKEN_EXPIRED);
         }
 
         // INFO:: validate user roles
@@ -80,11 +80,11 @@ namespace v1 {
         auto refreshToken = body.get("refreshToken");
 
         if (!refreshToken) {
-          return unauthorized_response("invalid_token", "Invalid parameters");
+          return unauthorized_response("invalid_token", ApiErrorMsg::INVALID_CREDENTIALS);
         }
 
         if (session.refresh_token() != refreshToken) {
-          return unauthorized_response("invalid_token", "Invalid parameters");
+          return unauthorized_response("invalid_token", ApiErrorMsg::INVALID_CREDENTIALS);
         }
 
         return std::invoke(callback, req, std::forward<Args>(args)...);

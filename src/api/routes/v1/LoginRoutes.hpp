@@ -1,7 +1,6 @@
 #pragma once
 
 #include "api/Routes.hpp"
-#include "api/Mapping.hpp"
 #include "api/routes/control/session/SessionInteractor.hpp"
 #include "model/base/Token.hpp"
 
@@ -30,7 +29,7 @@ namespace v1 {
             auto token = Token::from(req.get_header_value("Authorization"));
 
             if (!token) {
-              return unauthorized_response("invalid_token", "Invalid token");
+              return unauthorized_response("invalid_token", ApiErrorMsg::NO_CREDENTIALS);
             }
 
             auto result = sessionInteractor->create_session(*token);
@@ -43,13 +42,12 @@ namespace v1 {
 
             return crow::response(crow::status::ACCEPTED,
                                   crow::json::wvalue{
-                                    {"sessiontoken", sessionToken},
+                                    {"sessionToken", sessionToken},
                                     {"refreshToken", session.refresh_token()}
                                   });
           });
     }
 
-    // TODO:: implement refresh token
     void refresh(crow::SimpleApp &app) {
       CROW_ROUTE(app, BaseUrl"/refresh")
           .methods(crow::HTTPMethod::POST)
@@ -63,7 +61,7 @@ namespace v1 {
 
             return crow::response(crow::status::ACCEPTED,
                                   crow::json::wvalue{
-                                    {"sessiontoken", sessionToken},
+                                    {"sessionToken", sessionToken},
                                     {"refreshToken", session.refresh_token()}
                                   });
           }));

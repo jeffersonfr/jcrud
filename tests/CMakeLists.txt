@@ -36,4 +36,4 @@ endmacro()
 
 enable_testing()
 
-module_test(unit)
+module_test(api_v1_unit)
