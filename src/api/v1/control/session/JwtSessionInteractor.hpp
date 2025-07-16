@@ -3,8 +3,8 @@
 #include "model/base/Token.hpp"
 #include "model/sessionCredential/SessionCredentialRepository.hpp"
 #include "model/usuario/UsuarioRepository.hpp"
-#include "api/Session.hpp"
-#include "api/routes/control/ApiErrorMsg.hpp"
+#include "api/v1/JwtSession.hpp"
+#include "api/v1/ApiErrorMsg.hpp"
 
 #include <jwt-cpp/jwt.h>
 #include <boost/uuid/uuid.hpp>
@@ -19,14 +19,14 @@
 #include <mutex>
 #include <ranges>
 
-struct SessionInteractor final {
-  SessionInteractor(std::unique_ptr<SessionCredentialRepository> sessionCredentialRepository,
+struct JwtSessionInteractor final {
+  JwtSessionInteractor(std::unique_ptr<SessionCredentialRepository> sessionCredentialRepository,
                     std::unique_ptr<CargoUsuarioRepository> cargoUsuarioRepository)
     : mSessionCredentialRepository{std::move(sessionCredentialRepository)},
       mCargoUsuarioRepository(std::move(cargoUsuarioRepository)) {
   }
 
-  std::expected<std::pair<std::string, Session>, std::string> create_session(Token const &token) {
+  std::expected<std::pair<std::string, JwtSession>, std::string> create_session(Token const &token) {
     try {
       auto decodedToken = jwt::decode(token.token());
       auto payload = decodedToken.get_payload_json();
@@ -65,7 +65,7 @@ struct SessionInteractor final {
 
       const auto expires = std::chrono::system_clock::from_time_t(std::stoi(exp));
       auto usuarioId = items[0]["usuario_id"].get_int().value();
-      auto session = Session{load_cargos(usuarioId), jti, key, refreshToken, expires};
+      auto session = JwtSession{load_cargos(usuarioId), jti, key, refreshToken, expires};
 
       mSessions.insert({sessionToken, session});
 
@@ -89,7 +89,7 @@ struct SessionInteractor final {
     }
   }
 
-  std::expected<std::pair<std::string, Session>, std::string> refresh_session(
+  std::expected<std::pair<std::string, JwtSession>, std::string> refresh_session(
     Token const &token, std::string const &oldRefreshToken) {
     try {
       std::lock_guard lock(mMutex);
@@ -106,7 +106,7 @@ struct SessionInteractor final {
       std::string refreshToken = generate_random_token(16);
 
       auto usuarioId = credentials.value()["usuario_id"].get_int().value();
-      auto newSession = Session{load_cargos(usuarioId), session.id(), session.key(), refreshToken, session.expires()};
+      auto newSession = JwtSession{load_cargos(usuarioId), session.id(), session.key(), refreshToken, session.expires()};
 
       destroy_session(token.token());
 
@@ -120,7 +120,7 @@ struct SessionInteractor final {
     }
   }
 
-  std::expected<Session, std::string> get_session(std::string const &token) {
+  std::expected<JwtSession, std::string> get_session(std::string const &token) {
     std::lock_guard lock(mMutex);
 
     auto session = mSessions.find(token);
@@ -138,7 +138,7 @@ struct SessionInteractor final {
     return session->second;
   }
 
-  std::expected<Session, std::string> update_session(std::string const &token, Session const &updateSession) {
+  std::expected<JwtSession, std::string> update_session(std::string const &token, JwtSession const &updateSession) {
     std::lock_guard lock(mMutex);
 
     auto session = mSessions.find(token);
@@ -174,7 +174,7 @@ private:
   std::unique_ptr<SessionCredentialRepository> mSessionCredentialRepository;
   std::unique_ptr<CargoUsuarioRepository> mCargoUsuarioRepository;
   std::unique_ptr<UsuarioRepository> mUsuarioRepository;
-  std::unordered_map<std::string, Session> mSessions;
+  std::unordered_map<std::string, JwtSession> mSessions;
   std::recursive_mutex mMutex;
 
   std::string generate_random_token(std::size_t length) {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "api/Routes.hpp"
-#include "api/routes/control/session/SessionInteractor.hpp"
-#include "api/routes/control/ApiErrorMsg.hpp"
+#include "api/v1/control/session/JwtSessionInteractor.hpp"
+#include "api/v1/ApiErrorMsg.hpp"
 #include "model/base/Token.hpp"
 
 #define BaseUrl "/api/v1"
@@ -24,7 +24,7 @@ namespace v1 {
     template<typename Callback>
     auto validate_request(Callback &&callback, std::set<Cargo> const &cargos = {}) {
       return [callback, cargos, this] <typename... Args>(crow::request const &req, Args &&... args) -> crow::response {
-        std::shared_ptr<SessionInteractor> sessionInteractor = jinject::get{};
+        std::shared_ptr<JwtSessionInteractor> sessionInteractor = jinject::get{};
         auto token = Token::from(req.get_header_value("Authorization"));
 
         if (!token) {

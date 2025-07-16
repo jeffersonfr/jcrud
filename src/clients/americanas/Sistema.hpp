@@ -4,14 +4,13 @@
 #include "control/produto/ProdutoController.hpp"
 #include "control/estoque/EstoqueController.hpp"
 #include "api/Routes.hpp"
-#include "api/routes/v1/BasicRoutes.hpp"
+#include "api/v1/routes/BasicRoutes.hpp"
+#include "api/v1/routes/LoginRoutes.hpp"
 #include "ui/Form.hpp"
 #include "utils/Log.hpp"
 #include "Ambiente.hpp"
 
 #include <fmt/format.h>
-
-#include "api/routes/v1/LoginRoutes.hpp"
 
 enum class SelecaoSistema { Administracao = 1, Produtos, Estoque, Sair };
 

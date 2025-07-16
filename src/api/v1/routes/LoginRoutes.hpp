@@ -1,7 +1,7 @@
 #pragma once
 
 #include "api/Routes.hpp"
-#include "api/routes/control/session/SessionInteractor.hpp"
+#include "api/v1/control/session/JwtSessionInteractor.hpp"
 #include "model/base/Token.hpp"
 
 #define BaseUrl "/api/v1"
@@ -24,7 +24,7 @@ namespace v1 {
       CROW_ROUTE(app, BaseUrl"/login")
           .methods(crow::HTTPMethod::GET)
           ([&](crow::request const &req) {
-            std::shared_ptr<SessionInteractor> sessionInteractor = jinject::get{};
+            std::shared_ptr<JwtSessionInteractor> sessionInteractor = jinject::get{};
 
             auto token = Token::from(req.get_header_value("Authorization"));
 
@@ -48,24 +48,11 @@ namespace v1 {
           });
     }
 
-
-
-
-    template<typename Callback>
-    auto validate_refresh_token(Callback &&callback, std::set<Cargo> &&cargos = {}) {
-      return [callback, this] <typename... Args>(crow::request const &req, Args &&... args) -> crow::response {
-
-        return std::invoke(callback, req, std::forward<Args>(args)...);
-      };
-    }
-
-
-
     void refresh(crow::SimpleApp &app) {
       CROW_ROUTE(app, BaseUrl"/refresh")
           .methods(crow::HTTPMethod::POST)
           ([&](crow::request const &req) {
-            std::shared_ptr<SessionInteractor> sessionInteractor = jinject::get{};
+            std::shared_ptr<JwtSessionInteractor> sessionInteractor = jinject::get{};
 
             auto token = Token::from(req.get_header_value("Authorization"));
 
@@ -113,7 +100,7 @@ namespace v1 {
       CROW_ROUTE(app, BaseUrl"/logout")
           .methods(crow::HTTPMethod::GET)
           (validate_request([&](crow::request const &req) {
-            std::shared_ptr<SessionInteractor> sessionInteractor = jinject::get{};
+            std::shared_ptr<JwtSessionInteractor> sessionInteractor = jinject::get{};
 
             auto token = Token::from(req.get_header_value("Authorization"));
 

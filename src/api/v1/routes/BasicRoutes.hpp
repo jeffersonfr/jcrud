@@ -3,7 +3,7 @@
 #include "AbstractRoutes.hpp"
 #include "api/Routes.hpp"
 #include "api/Mapping.hpp"
-#include "api/routes/control/session/SessionInteractor.hpp"
+#include "api/v1/control/session/JwtSessionInteractor.hpp"
 #include "model/base/Token.hpp"
 
 #define BaseUrl "/api/v1"

@@ -145,6 +145,36 @@ TEST_F(CrudSuite, ExpiredAuthorizationLogin) {
   ASSERT_EQ(msg, R"(Bearer realm="jcrud", error="invalid_token", error_description="token expired")");
 }
 
+TEST_F(CrudSuite, NoSignAuthorizationLogin) {
+  std::unique_ptr<SessionCredentialRepository> sessionCredentialRepository = jinject::get{};
+
+  auto session= sessionCredentialRepository->load_all() | std::ranges::views::take(1);
+  auto sessionCredential = session.front();
+
+  auto jti = sessionCredential["id"].get_text().value();
+  auto key = sessionCredential["key"].get_text().value();
+
+  auto token = jwt::create()
+    .set_algorithm("none")
+    .set_issuer("jcrud")
+    .set_subject("auth0")
+    .set_expires_in(std::chrono::seconds(30))
+    .set_payload_claim("jti", picojson::value(jti))
+    .sign(jwt::algorithm::none{});
+
+  crow::request req;
+  crow::response res;
+
+  req.url = "/api/v1/login";
+  req.add_header("Authorization", std::format("Bearer {}", token));
+
+  get_app().handle_full(req, res);
+
+  int code = res.code;
+
+  ASSERT_EQ(code, crow::UNAUTHORIZED);
+}
+
 TEST_F(CrudSuite, ValidAuthorizationLogin) {
   std::unique_ptr<SessionCredentialRepository> sessionCredentialRepository = jinject::get{};
 
@@ -184,6 +214,44 @@ TEST_F(CrudSuite, ValidAuthorizationLogin) {
 
   Environment::set_session_token(sessionToken);
   Environment::set_refresh_token(refreshToken);
+}
+
+TEST_F(CrudSuite, SecondValidationAuthorizationLogin) {
+  std::unique_ptr<SessionCredentialRepository> sessionCredentialRepository = jinject::get{};
+
+  auto session= sessionCredentialRepository->load_all() | std::ranges::views::take(1);
+  auto sessionCredential = session.front();
+
+  auto jti = sessionCredential["id"].get_text().value();
+  auto key = sessionCredential["key"].get_text().value();
+
+  auto token = jwt::create()
+    .set_issuer("jcrud")
+    .set_subject("auth0")
+    .set_expires_in(std::chrono::seconds(30))
+    .set_payload_claim("jti", picojson::value(jti))
+    .set_type("JWS")
+    .sign(jwt::algorithm::hs256{key});
+
+  crow::request req;
+  crow::response res;
+
+  req.url = "/api/v1/login";
+  req.add_header("Authorization", std::format("Bearer {}", token));
+
+  get_app().handle_full(req, res);
+
+  int code = res.code;
+  crow::json::rvalue msg = crow::json::load(res.body);
+
+  // std::cout << ">>> code '" << code << "' => msg [" << msg << "]\n";
+
+  std::string sessionToken = static_cast<std::string>(msg["sessionToken"]);
+  std::string refreshToken = static_cast<std::string>(msg["refreshToken"]);
+
+  ASSERT_EQ(code, crow::ACCEPTED);
+  ASSERT_EQ(sessionToken, Environment::get_session_token());
+  ASSERT_EQ(refreshToken, Environment::get_refresh_token());
 }
 
 TEST_F(CrudSuite, InvalidAuthorizationRefresh) {
@@ -229,6 +297,24 @@ TEST_F(CrudSuite, ValidAuthorizationRefresh) {
 
   Environment::set_session_token(sessionToken);
   Environment::set_refresh_token(refreshToken);
+}
+
+TEST_F(CrudSuite, ListProdutos) {
+  crow::request req;
+  crow::response res;
+
+  req.url = "/api/v1/produtos";
+  req.add_header("Authorization", std::format("Bearer {}", Environment::get_session_token()));
+
+  get_app().handle_full(req, res);
+
+  int code = res.code;
+  crow::json::rvalue msg = crow::json::load(res.body);
+
+  // std::cout << ">>> code '" << code << "' => msg [" << msg << "]\n";
+
+  ASSERT_EQ(code, crow::OK);
+  ASSERT_NE(msg["produtos"].size(), 0);
 }
 
 TEST_F(CrudSuite, InvalidAuthorizationLogout) {

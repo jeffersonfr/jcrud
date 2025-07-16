@@ -1,7 +1,7 @@
 #pragma once
 
 #include "model/sessionCredential/SessionCredentialRepository.hpp"
-#include "api/routes/control/session/SessionInteractor.hpp"
+#include "api/v1/control/session/JwtSessionInteractor.hpp"
 #include "database/SqliteDatabase.hpp"
 
 /*
@@ -33,7 +33,7 @@ void api_module() {
     return new SessionCredentialRepository{inject<std::shared_ptr<Database>, SessionCredentialModel>()};
   };
 
-  SINGLE(std::shared_ptr<SessionInteractor>) {
-    return std::shared_ptr<SessionInteractor>{new SessionInteractor{get{}, get{}}};
+  SINGLE(std::shared_ptr<JwtSessionInteractor>) {
+    return std::make_shared<JwtSessionInteractor>(get{}, get{});
   };
 }
