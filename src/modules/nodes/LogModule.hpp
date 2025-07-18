@@ -22,8 +22,9 @@ void log_module() {
                 .values("Error")
                 .values("Fatal");
 
-            insert<TipoLogModel, "descricao">(db).values("Sistema").values(
-              "Modelo");
+            insert<TipoLogModel, "descricao">(db)
+              .values("Sistema")
+              .values("Modelo");
           }
         })
         .build();

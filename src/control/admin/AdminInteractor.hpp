@@ -47,7 +47,7 @@ struct AdminInteractor {
     return mUsuarioRepository->update(item);
   }
 
-  std::optional<std::string> update_usuario_password(Id usuarioId, std::string const &senhaAtual,
+  std::optional<std::string> update_password_usuario(Id usuarioId, std::string const &senhaAtual,
                                                      std::string const &senhaNova) {
     return load_usuario_by_id(usuarioId)
       .and_then([&](UsuarioModel value) -> std::optional<std::string> {

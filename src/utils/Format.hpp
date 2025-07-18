@@ -13,30 +13,11 @@ inline std::string format_currency(Data const &value) {
 }
 
 template<typename Clock>
-std::string format_timestamp(std::chrono::time_point<Clock> tp) {
-  /*
-  std::time_t time = secs.count();
-  char timeString[std::size("yyyy-mm-dd hh:mm:ss.000")];
-  std::strftime(std::data(timeString), std::size(timeString), "%F %T.000",
+std::string format_timestamp(std::chrono::time_point<Clock> timePoint) {
+  char buffer[32];
+  std::time_t time = std::chrono::system_clock::to_time_t(timePoint);
+  std::strftime(std::data(buffer), std::size(buffer), "%F %T.000",
   std::gmtime(&time));
 
-  return timeString;
-  */
-
-  /*
-  std::chrono::time_point<std::chrono::utc_clock> epoch;
-
-  std::cout << std::format("The time of the Unix epoch was {0:%F}T{0:%R%z}.",
-  epoch) << '\n';
-  */
-
-  /*
-  std::ostringstream o;
-
-  o << fmt::format("{0:%0d}{0:%0m}{0:%0y}.", tp);
-
-  return o.str();
-  */
-
-  return "";
+  return buffer;
 }

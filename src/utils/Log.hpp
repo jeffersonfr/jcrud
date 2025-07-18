@@ -46,6 +46,7 @@ struct Log {
     model["localizacao"] = jmixin::String(model["localizacao"].get_text().value()).replace("\\\"", "'");
     model["tag"] = jmixin::String(model["tag"].get_text().value()).replace("\\\"", "'");
     model["descricao"] = jmixin::String(model["descricao"].get_text().value()).replace("\\\"", "'");
+    model["last"] = format_timestamp(std::chrono::system_clock::now());;
 
     auto e = mRepository->save(model);
 

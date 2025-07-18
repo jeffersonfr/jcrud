@@ -52,7 +52,7 @@ struct EstoqueInteractor {
     return {};
   }
 
-  std::optional<std::string> store_venda(Id estoque, int quantidadeVenda, Cnpj cnpj) {
+  std::optional<std::string> save_venda(Id estoque, int quantidadeVenda, Cnpj cnpj) {
     return load_estoque_by_id(estoque)
       .and_then([&](EstoqueModel item) -> std::optional<std::string> {
         auto quantidadeAtual = item["quantidade"].get_int().value();

@@ -23,17 +23,21 @@ struct Repository {
 
   std::shared_ptr<Database> get_database() { return mDb; }
 
-  template<StringLiteral Query>
+  template<StringLiteral Extras, std::size_t Limit = 100>
   std::vector<Model> select(auto... values) const {
     std::vector<Model> items;
     std::ostringstream o;
 
     o << "SELECT * from " << Model::get_name() << " "
-      << fmt::vformat(Query.to_string(), fmt::make_format_args(values...));
+      << fmt::vformat(Extras.to_string(), fmt::make_format_args(values...));
 
     mDb->query_string(o.str(), [&](std::vector<std::string> const &columns,
                                    std::vector<Data> const &values) {
       Model item;
+
+      if (items.size() >= Limit) {
+        return false;
+      }
 
       for (int i = 0; i < static_cast<int>(columns.size()); i++) {
         std::string const &column = columns[i];

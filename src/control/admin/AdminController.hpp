@@ -168,7 +168,7 @@ struct AdminController {
           return;
         }
 
-        logopt(TipoLog::Sistema, Tag, mAdminInteractor->update_usuario_password(*usuarioId,
+        logopt(TipoLog::Sistema, Tag, mAdminInteractor->update_password_usuario(*usuarioId,
           senhaAtual, senhaNova));
       })
       .on_failed(opcao_invalida)

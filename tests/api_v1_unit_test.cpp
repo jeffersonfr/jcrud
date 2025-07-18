@@ -53,7 +53,9 @@ struct CrudSuite : public ::testing::Test {
   }
 
 private:
-  std::unique_ptr<Routes<v1::LoginRoutes, v1::BasicRoutes>> mRoutes;
+  using RoutesType = decltype(my_create_routes());
+
+  RoutesType mRoutes;
 };
 
 TEST_F(CrudSuite, NoAuthorizationHeaderLogin) {

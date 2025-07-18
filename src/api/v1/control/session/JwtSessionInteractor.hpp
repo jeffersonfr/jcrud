@@ -50,7 +50,6 @@ struct JwtSessionInteractor final {
 
       std::lock_guard lock(mMutex);
 
-      // TODO:: criar uma thread para chamar clear_invalid_sessions() a cada intervalo de tempo para limpar sessoes invalidas
       for (auto &it: mSessions) {
         if (it.second.id() == jti) {
           if (it.second.valid()) {
@@ -95,6 +94,10 @@ struct JwtSessionInteractor final {
       std::lock_guard lock(mMutex);
 
       auto session = mSessions.find(token.token())->second;
+
+      if (session.refresh_token() != oldRefreshToken) {
+        return std::unexpected{ApiErrorMsg::INVALID_CREDENTIALS};
+      }
 
       auto credentials = mSessionCredentialRepository->first_by<"id">(session.id());
 

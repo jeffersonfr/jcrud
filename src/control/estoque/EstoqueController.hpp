@@ -178,7 +178,7 @@ struct EstoqueController {
           return;
         }
 
-        logopt(TipoLog::Sistema, Tag, mEstoqueInteractor->store_venda(*estoqueId,
+        logopt(TipoLog::Sistema, Tag, mEstoqueInteractor->save_venda(*estoqueId,
           quantidade, *cnpj));
       })
       .on_failed(opcao_invalida)
