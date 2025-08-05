@@ -51,7 +51,7 @@ FetchContent_Declare(
     CrowCpp
     GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
     GIT_TAG master
-    PATCH_COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/crowcpp-logging.patch
+    PATCH_COMMAND git apply --stat --quiet ${CMAKE_CURRENT_SOURCE_DIR}/patches/crowcpp-logging.patch
 )
 FetchContent_MakeAvailable(CrowCpp)
 
