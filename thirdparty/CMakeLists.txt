@@ -51,9 +51,12 @@ FetchContent_Declare(
     CrowCpp
     GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
     GIT_TAG master
-    PATCH_COMMAND git apply --stat --quiet ${CMAKE_CURRENT_SOURCE_DIR}/patches/crowcpp-logging.patch
 )
 FetchContent_MakeAvailable(CrowCpp)
+
+execute_process(
+    COMMAND /bin/sh -c "cd ${crowcpp_SOURCE_DIR} && git apply --quiet ${CMAKE_CURRENT_SOURCE_DIR}/patches/crowcpp-logging.patch"
+)
 
 # FTXUI
 FetchContent_Declare(
