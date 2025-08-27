@@ -1,6 +1,6 @@
 #pragma once
 
-#include "database/Repository.hpp"
+#include "jdb/database/Repository.hpp"
 #include "model/usuario/UsuarioModel.hpp"
 
-using UsuarioRepository = Repository<UsuarioModel>;
+using UsuarioRepository = jdb::Repository<UsuarioModel>;

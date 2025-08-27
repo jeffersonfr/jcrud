@@ -11,7 +11,7 @@
 
 #include "jinject/jinject.h"
 
-struct LoginInteractor : public Repository<LoginInteractorModel> {
+struct LoginInteractor : public jdb::Repository<LoginInteractorModel> {
   LoginInteractor(
     std::unique_ptr<LoginInteractorRepository> loginInteractorRepository)
     : mLoginInteractorRepository{std::move(loginInteractorRepository)} {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "database/DataClass.hpp"
+#include "jdb/database/DataClass.hpp"
 
-using SessionCredentialModel = DataClass<"session_credential", Primary<"id">, Foreign<Refer<UsuarioModel, "usuario_id">>,
-  Field<"id", FieldType::Text, false>, // JWT ID
-  Field<"key", FieldType::Text, false>, // JWT KEY
-  Field<"usuario_id", FieldType::Int, false>>;
+using SessionCredentialModel = jdb::DataClass<"session_credential", jdb::Primary<"id">, jdb::Foreign<jdb::Refer<UsuarioModel, "usuario_id">>,
+  jdb::Field<"id", jdb::FieldType::Text, false>, // JWT ID
+  jdb::Field<"key", jdb::FieldType::Text, false>, // JWT KEY
+  jdb::Field<"usuario_id", jdb::FieldType::Int, false>>;

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "database/DataClass.hpp"
+#include "jdb/database/DataClass.hpp"
 
 enum class Cargo {
   Administrador = 1,
   Operador = 2
 };
 
-using CargoModel = DataClass<"cargo", Primary<"id">, NoForeign,
-  Field<"id", FieldType::Serial, false>,
-  Field<"descricao", FieldType::Text>>;
+using CargoModel = jdb::DataClass<"cargo", jdb::Primary<"id">, jdb::NoForeign,
+  jdb::Field<"id", jdb::FieldType::Serial, false>,
+  jdb::Field<"descricao", jdb::FieldType::Text>>;

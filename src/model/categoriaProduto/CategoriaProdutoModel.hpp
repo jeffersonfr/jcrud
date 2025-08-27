@@ -1,7 +1,7 @@
 #pragma once
 
-#include "database/DataClass.hpp"
+#include "jdb/database/DataClass.hpp"
 
-using CategoriaProdutoModel = DataClass<"categoria_produto", Primary<"id">, NoForeign,
-  Field<"id", FieldType::Serial, false>,
-  Field<"descricao", FieldType::Text>>;
+using CategoriaProdutoModel = jdb::DataClass<"categoria_produto", jdb::Primary<"id">, jdb::NoForeign,
+  jdb::Field<"id", jdb::FieldType::Serial, false>,
+  jdb::Field<"descricao", jdb::FieldType::Text>>;

@@ -21,7 +21,7 @@
 static bool cancelled = false;
 
 namespace jui {
-  template<StringLiteral Name, StringLiteral Description, TypeItem Type,
+  template<jmixin::StringLiteral Name, jmixin::StringLiteral Description, TypeItem Type,
     bool Nullable = false>
   struct Item {
     static constexpr std::string get_name() { return Name.to_string(); }
@@ -164,7 +164,7 @@ namespace jui {
     std::optional<std::string> mTitle;
     bool mInterruptable = false;
 
-    template<StringLiteral Name, StringLiteral Description, TypeItem Type,
+    template<jmixin::StringLiteral Name, jmixin::StringLiteral Description, TypeItem Type,
       bool Nullable>
     void execute(Item<Name, Description, Type, Nullable> item) {
       if (!mInterruptable) {

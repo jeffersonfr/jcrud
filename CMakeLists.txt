@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.28)
 
 project(jcrud
-  LANGUAGES CXX
-  VERSION 1.0
+        LANGUAGES CXX
+        VERSION 1.0
 )
 
 set(CMAKE_CXX_STANDARD 23)
@@ -10,15 +10,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type")
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-  Release
-  Debug
+        Release
+        Debug
 )
 
 set(JCRUD_CLIENT "Americanas" CACHE STRING "Cliente do sistema")
 set_property(CACHE JCRUD_CLIENT PROPERTY STRINGS
-  Americanas
-  BomPreco
-  HiperMercado
+        Americanas
+        BomPreco
+        HiperMercado
 )
 
 add_compile_definitions(Americanas=1)

@@ -1,41 +1,42 @@
 include(FetchContent)
 
 find_package(Boost REQUIRED
-    COMPONENTS
-        date_time
-        filesystem
-        iostreams
-        thread
+        COMPONENTS
+            date_time
+            filesystem
+            iostreams
+            thread
 )
 
 # jmixin
 FetchContent_Declare(
-    jmixin
-    GIT_REPOSITORY https://github.com/jeffersonfr/jmixin.git
+        jmixin
+        GIT_REPOSITORY https://github.com/jeffersonfr/jmixin.git
 )
 FetchContent_MakeAvailable(jmixin)
 
 # jinject
 FetchContent_Declare(
-    jinject
-    GIT_REPOSITORY https://github.com/jeffersonfr/jinject.git
-    GIT_TAG main
+        jinject
+        GIT_REPOSITORY https://github.com/jeffersonfr/jinject.git
+        GIT_TAG main
 )
 FetchContent_MakeAvailable(jinject)
 
+# jdb
+FetchContent_Declare(
+        jdb
+        GIT_REPOSITORY https://github.com/jeffersonfr/jdb.git
+        GIT_TAG main
+)
+FetchContent_MakeAvailable(jdb)
+
 # fmt
 FetchContent_Declare(
-    fmt
-    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
 )
 FetchContent_MakeAvailable(fmt)
-
-# SQLiteCpp
-FetchContent_Declare(
-    SQLiteCpp
-    GIT_REPOSITORY https://github.com/SRombauts/SQLiteCpp.git
-)
-FetchContent_MakeAvailable(SQLiteCpp)
 
 # CrowCpp
 # dependencies:
@@ -48,65 +49,63 @@ set(CROW_ENABLE_SSL ON)
 set(CROW_ENABLE_LOGGING OFF)
 
 FetchContent_Declare(
-    CrowCpp
-    GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
-    GIT_TAG master
+        CrowCpp
+        GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
+        GIT_TAG master
 )
 FetchContent_MakeAvailable(CrowCpp)
 
 execute_process(
-    COMMAND /bin/sh -c "cd ${crowcpp_SOURCE_DIR} && git apply --quiet ${CMAKE_CURRENT_SOURCE_DIR}/patches/crowcpp-logging.patch"
+        COMMAND /bin/sh -c "cd ${crowcpp_SOURCE_DIR} && git apply --quiet ${CMAKE_CURRENT_SOURCE_DIR}/patches/crowcpp-logging.patch"
 )
 
 # FTXUI
 FetchContent_Declare(
-    FTXUI
-    GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI.git
-    GIT_TAG main
+        FTXUI
+        GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI.git
+        GIT_TAG main
 )
 FetchContent_MakeAvailable(FTXUI)
 
 # jwt-cpp
 set(JWT_BUILD_EXAMPLES OFF)
 FetchContent_Declare(
-    JwtCpp
-    GIT_REPOSITORY https://github.com/Thalhammer/jwt-cpp.git
-    GIT_TAG master
+        JwtCpp
+        GIT_REPOSITORY https://github.com/Thalhammer/jwt-cpp.git
+        GIT_TAG master
 )
 FetchContent_MakeAvailable(JwtCpp)
 
 # expected
 FetchContent_Declare(
-    expected
-    GIT_REPOSITORY https://github.com/TartanLlama/expected.git
+        expected
+        GIT_REPOSITORY https://github.com/TartanLlama/expected.git
 )
 FetchContent_MakeAvailable(expected)
 
 FetchContent_GetProperties(expected)
 if (expected_POPULATED)
-    message("SOURCE_DIR: ${expected_SOURCE_DIR}")
-    message("BINARY_DIR: ${expected_BINARY_DIR}")
+        message("SOURCE_DIR: ${expected_SOURCE_DIR}")
+        message("BINARY_DIR: ${expected_BINARY_DIR}")
 endif ()
 
 # create a target to use in src/
 add_library(thirdparty INTERFACE)
 
 target_link_libraries(thirdparty
-    INTERFACE
-        jmixin
-        jinject
-        fmt
-        SQLiteCpp
-        sqlite3
-        expected
-        crypt
-        Boost::date_time
-        Boost::filesystem
-        Boost::iostreams
-        Boost::thread
-        Crow::Crow
-        ftxui::screen
-        ftxui::dom
-        ftxui::component
-        jwt-cpp
+        INTERFACE
+            jmixin
+            jinject
+            fmt
+            expected
+            crypt
+            Boost::date_time
+            Boost::filesystem
+            Boost::iostreams
+            Boost::thread
+            Crow::Crow
+            ftxui::screen
+            ftxui::dom
+            ftxui::component
+            jwt-cpp
 )

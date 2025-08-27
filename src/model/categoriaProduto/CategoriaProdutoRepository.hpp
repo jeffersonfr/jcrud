@@ -1,6 +1,6 @@
 #pragma once
 
-#include "database/Repository.hpp"
+#include "jdb/database/Repository.hpp"
 #include "model/categoriaProduto/CategoriaProdutoModel.hpp"
 
-using CategoriaProdutoRepository = Repository<CategoriaProdutoModel>;
+using CategoriaProdutoRepository = jdb::Repository<CategoriaProdutoModel>;

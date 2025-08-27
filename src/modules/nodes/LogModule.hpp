@@ -2,18 +2,18 @@
 
 #include "model/log/LogRepository.hpp"
 #include "model/tipoLog/TipoLogRepository.hpp"
-#include "database/SqliteDatabase.hpp"
+#include "jdb/database/SqliteDatabase.hpp"
 
 void log_module() {
   using namespace jinject;
 
-  using MyDatabase = SqliteDatabase<LevelLogModel, TipoLogModel, LogModel>;
+  using MyDatabase = jdb::SqliteDatabase<LevelLogModel, TipoLogModel, LogModel>;
 
-  SINGLE(std::shared_ptr<Database>, LogModel) {
+  SINGLE(std::shared_ptr<jdb::Database>, LogModel) {
     auto db = std::make_shared<MyDatabase>("log.db");
 
-    db->add_migration(Migration{
-          1, [](Database &db) {
+    db->add_migration(jdb::Migration{
+          1, [](jdb::Database &db) {
             insert<LevelLogModel, "descricao">(db)
                 .values("Trace")
                 .values("Debug")
@@ -33,6 +33,6 @@ void log_module() {
   };
 
   UNIQUE(LogRepository) {
-    return new LogRepository{inject<std::shared_ptr<Database>, LogModel>()};
+    return new LogRepository{inject<std::shared_ptr<jdb::Database>, LogModel>()};
   };
 }

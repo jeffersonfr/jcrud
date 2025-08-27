@@ -1,12 +1,12 @@
 #pragma once
 
-#include "database/DataClass.hpp"
+#include "jdb/database/DataClass.hpp"
 #include "model/tipoNegocio/TipoNegocioModel.hpp"
 #include "model/produto/ProdutoModel.hpp"
 
-using EstoqueModel = DataClass<"estoque", Primary<"id">, Foreign<Refer<ProdutoModel, "produto_id">>,
-  Field<"id", FieldType::Serial, false>,
-  Field<"produto_id", FieldType::Int, false>,
-  Field<"quantidade", FieldType::Int, false>,
-  Field<"lote", FieldType::Text, false>,
-  Field<"validade", FieldType::Timestamp>>;
+using EstoqueModel = jdb::DataClass<"estoque", jdb::Primary<"id">, jdb::Foreign<jdb::Refer<ProdutoModel, "produto_id">>,
+  jdb::Field<"id", jdb::FieldType::Serial, false>,
+  jdb::Field<"produto_id", jdb::FieldType::Int, false>,
+  jdb::Field<"quantidade", jdb::FieldType::Int, false>,
+  jdb::Field<"lote", jdb::FieldType::Text, false>,
+  jdb::Field<"validade", jdb::FieldType::Timestamp>>;

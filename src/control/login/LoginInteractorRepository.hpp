@@ -1,6 +1,6 @@
 #pragma once
 
-#include "database/Repository.hpp"
+#include "jdb/database/Repository.hpp"
 #include "control/login/LoginInteractorRepository.hpp"
 
-using LoginInteractorRepository = Repository<LoginInteractorModel>;
+using LoginInteractorRepository = jdb::Repository<LoginInteractorModel>;

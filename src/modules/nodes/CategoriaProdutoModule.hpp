@@ -7,6 +7,6 @@ void categoriaproduto_module() {
 
   UNIQUE(CategoriaProdutoRepository) {
     return new CategoriaProdutoRepository{
-        inject<std::shared_ptr<Database>>()};
+        inject<std::shared_ptr<jdb::Database>>()};
   };
 }

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "database/DataClass.hpp"
+#include "jdb/database/DataClass.hpp"
 #include "model/tipoNegocio/TipoNegocioModel.hpp"
 
-using HistoricoEstoqueModel = DataClass<"historico_estoque", Primary<"id">, Foreign<Refer<ProdutoModel, "produto_id">, Refer<TipoNegocioModel, "tipo_negocio_id">>,
-  Field<"id", FieldType::Serial, false>,
-  Field<"produto_id", FieldType::Int, false>,
-  Field<"tipo_negocio_id", FieldType::Int, false>,
-  Field<"quantidade", FieldType::Int>,
-  Field<"lote", FieldType::Text, false>,
-  Field<"validade", FieldType::Timestamp>,
-  Field<"cnpj", FieldType::Text>>;
+using HistoricoEstoqueModel = jdb::DataClass<"historico_estoque", jdb::Primary<"id">, jdb::Foreign<jdb::Refer<ProdutoModel, "produto_id">, jdb::Refer<TipoNegocioModel, "tipo_negocio_id">>,
+  jdb::Field<"id", jdb::FieldType::Serial, false>,
+  jdb::Field<"produto_id", jdb::FieldType::Int, false>,
+  jdb::Field<"tipo_negocio_id", jdb::FieldType::Int, false>,
+  jdb::Field<"quantidade", jdb::FieldType::Int>,
+  jdb::Field<"lote", jdb::FieldType::Text, false>,
+  jdb::Field<"validade", jdb::FieldType::Timestamp>,
+  jdb::Field<"cnpj", jdb::FieldType::Text>>;

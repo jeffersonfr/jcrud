@@ -20,7 +20,7 @@ struct AdminInteractor {
       mCargoUsuarioRepository{std::move(cargoUsuarioRepository)} {
   }
 
-  template<StringLiteral... Fields>
+  template<jmixin::StringLiteral... Fields>
   [[nodiscard]] std::vector<UsuarioModel> load_usuario_by(auto... values) const {
     return mUsuarioRepository->load_by<Fields...>(values...);
   }
@@ -83,7 +83,7 @@ struct AdminInteractor {
     std::vector<CargoModel> cargos{items.begin(), items.end()};
 
     try {
-      mCargoUsuarioRepository->get_database()->transaction([&](Database &db) {
+      mCargoUsuarioRepository->get_database()->transaction([&](jdb::Database &db) {
         std::ranges::for_each(
           mCargoUsuarioRepository->load_by<"usuario_id">(usuarioId.value()),
           [&](auto const &item) { mCargoUsuarioRepository->remove(item); });

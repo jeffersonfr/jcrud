@@ -1,9 +1,9 @@
 #pragma once
 
-#include "database/DataClass.hpp"
+#include "jdb/database/DataClass.hpp"
 
-using PrecoModel = DataClass<"preco", Primary<"id">, Foreign<Refer<ProdutoModel, "produto_id">>,
-  Field<"id", FieldType::Serial, false>,
-  Field<"produto_id", FieldType::Int>,
-  Field<"valor", FieldType::Decimal>,
-  Field<"last", FieldType::Timestamp, false, TimestampValue>>;
+using PrecoModel = jdb::DataClass<"preco", jdb::Primary<"id">, jdb::Foreign<jdb::Refer<ProdutoModel, "produto_id">>,
+  jdb::Field<"id", jdb::FieldType::Serial, false>,
+  jdb::Field<"produto_id", jdb::FieldType::Int>,
+  jdb::Field<"valor", jdb::FieldType::Decimal>,
+  jdb::Field<"last", jdb::FieldType::Timestamp, false, jdb::TimestampValue>>;

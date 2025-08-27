@@ -1,6 +1,6 @@
 #pragma once
 
-#include "database/Repository.hpp"
+#include "jdb/database/Repository.hpp"
 #include "model/sessionCredential/SessionCredentialModel.hpp"
 
-using SessionCredentialRepository = Repository<SessionCredentialModel>;
+using SessionCredentialRepository = jdb::Repository<SessionCredentialModel>;

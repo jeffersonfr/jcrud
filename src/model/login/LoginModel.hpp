@@ -1,10 +1,10 @@
 #pragma once
 
-#include "database/DataClass.hpp"
+#include "jdb/database/DataClass.hpp"
 
-using LoginModel = DataClass<
-    "login", Primary<"filial_id", "usuario_id">,
-    Foreign<Refer<FilialModel, "filial_id">, Refer<UsuarioModel, "usuario_id">>,
-    Field<"filial_id", FieldType::Int, false>,
-    Field<"usuario_id", FieldType::Int, false>,
-    Field<"logado", FieldType::Bool>, Field<"last", FieldType::Timestamp, false, TimestampValue>>;
+using LoginModel = jdb::DataClass<
+    "login", jdb::Primary<"filial_id", "usuario_id">,
+    jdb::Foreign<jdb::Refer<FilialModel, "filial_id">, jdb::Refer<UsuarioModel, "usuario_id">>,
+    jdb::Field<"filial_id", jdb::FieldType::Int, false>,
+    jdb::Field<"usuario_id", jdb::FieldType::Int, false>,
+    jdb::Field<"logado", jdb::FieldType::Bool>, jdb::Field<"last", jdb::FieldType::Timestamp, false, jdb::TimestampValue>>;

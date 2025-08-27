@@ -6,6 +6,6 @@ void usuario_module() {
   using namespace jinject;
 
   UNIQUE(UsuarioRepository) {
-    return new UsuarioRepository{inject<std::shared_ptr<Database>>()};
+    return new UsuarioRepository{inject<std::shared_ptr<jdb::Database>>()};
   };
 }

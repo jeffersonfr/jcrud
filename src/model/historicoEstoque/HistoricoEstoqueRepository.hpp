@@ -1,6 +1,6 @@
 #pragma once
 
-#include "database/Repository.hpp"
+#include "jdb/database/Repository.hpp"
 #include "model/historicoEstoque/HistoricoEstoqueModel.hpp"
 
-using HistoricoEstoqueRepository = Repository<HistoricoEstoqueModel>;
+using HistoricoEstoqueRepository = jdb::Repository<HistoricoEstoqueModel>;

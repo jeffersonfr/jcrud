@@ -6,7 +6,7 @@ void login_module() {
   using namespace jinject;
 
   UNIQUE(LoginRepository) {
-    return new LoginRepository{inject<std::shared_ptr<Database>>()};
+    return new LoginRepository{inject<std::shared_ptr<jdb::Database>>()};
   };
 
   UNIQUE(LoginInteractorRepository) {

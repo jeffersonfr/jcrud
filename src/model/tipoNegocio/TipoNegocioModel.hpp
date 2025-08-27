@@ -1,12 +1,12 @@
 #pragma once
 
-#include "database/DataClass.hpp"
+#include "jdb/database/DataClass.hpp"
 
 enum class TipoNegocio {
   Compra = 1,
   Venda = 2
 };
 
-using TipoNegocioModel = DataClass<"tipo_negocio", Primary<"id">, NoForeign,
-  Field<"id", FieldType::Serial, false>,
-  Field<"descricao", FieldType::Text, false>>;
+using TipoNegocioModel = jdb::DataClass<"tipo_negocio", jdb::Primary<"id">, jdb::NoForeign,
+  jdb::Field<"id", jdb::FieldType::Serial, false>,
+  jdb::Field<"descricao", jdb::FieldType::Text, false>>;

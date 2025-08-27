@@ -6,7 +6,7 @@ void estoque_module() {
   using namespace jinject;
 
   UNIQUE(EstoqueRepository) {
-    return new EstoqueRepository{inject<std::shared_ptr<Database>>()};
+    return new EstoqueRepository{inject<std::shared_ptr<jdb::Database>>()};
   };
 
   UNIQUE(EstoqueInteractorRepository) {

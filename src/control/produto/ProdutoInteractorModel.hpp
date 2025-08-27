@@ -1,8 +1,8 @@
 #pragma once
 
-#include "database/CompoundModel.hpp"
 #include "model/categoriaProduto/CategoriaProdutoModel.hpp"
 #include "model/produto/ProdutoModel.hpp"
 #include "model/preco/PrecoModel.hpp"
+#include "jdb/database/CompoundModel.hpp"
 
-using ProdutoInteractorModel = CompoundModel<CategoriaProdutoModel, ProdutoModel, PrecoModel>;
+using ProdutoInteractorModel = jdb::CompoundModel<CategoriaProdutoModel, ProdutoModel, PrecoModel>;

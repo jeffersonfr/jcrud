@@ -4,8 +4,8 @@
 #include "control/login/LoginInteractor.hpp"
 #include "ui/Form.hpp"
 #include "ui/Table.hpp"
-#include "utils/Format.hpp"
 #include "utils/Log.hpp"
+#include "jdb/utils/Format.hpp"
 
 #include <cstdlib>
 #include <iostream>

@@ -3,6 +3,7 @@
 #include "model/levelLog/LevelLogModel.hpp"
 #include "model/log/LogRepository.hpp"
 #include "model/tipoLog/TipoLogModel.hpp"
+#include "jdb/utils/Format.hpp"
 
 #include <source_location>
 #include <string>
@@ -46,7 +47,7 @@ struct Log {
     model["localizacao"] = jmixin::String(model["localizacao"].get_text().value()).replace("\\\"", "'");
     model["tag"] = jmixin::String(model["tag"].get_text().value()).replace("\\\"", "'");
     model["descricao"] = jmixin::String(model["descricao"].get_text().value()).replace("\\\"", "'");
-    model["last"] = format_timestamp(std::chrono::system_clock::now());;
+    model["last"] = jdb::format_timestamp(std::chrono::system_clock::now());;
 
     auto e = mRepository->save(model);
 

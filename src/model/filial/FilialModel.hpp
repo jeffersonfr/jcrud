@@ -1,8 +1,8 @@
 #pragma once
 
-#include "database/DataClass.hpp"
+#include "jdb/database/DataClass.hpp"
 
-using FilialModel = DataClass<"filial", Primary<"id">, NoForeign,
-  Field<"id", FieldType::Serial, false>,
-  Field<"nome", FieldType::Text>,
-  Field<"endereco", FieldType::Text>>;
+using FilialModel = jdb::DataClass<"filial", jdb::Primary<"id">, jdb::NoForeign,
+  jdb::Field<"id", jdb::FieldType::Serial, false>,
+  jdb::Field<"nome", jdb::FieldType::Text>,
+  jdb::Field<"endereco", jdb::FieldType::Text>>;

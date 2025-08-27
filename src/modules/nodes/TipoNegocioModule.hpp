@@ -6,6 +6,6 @@ void tiponegocio_module() {
   using namespace jinject;
 
   UNIQUE(TipoNegocioRepository) {
-    return new TipoNegocioRepository{inject<std::shared_ptr<Database>>()};
+    return new TipoNegocioRepository{inject<std::shared_ptr<jdb::Database>>()};
   };
 }

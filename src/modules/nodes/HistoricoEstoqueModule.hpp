@@ -7,6 +7,6 @@ void historicoestoque_module() {
 
   UNIQUE(HistoricoEstoqueRepository) {
     return new HistoricoEstoqueRepository{
-        inject<std::shared_ptr<Database>>()};
+        inject<std::shared_ptr<jdb::Database>>()};
   };
 }

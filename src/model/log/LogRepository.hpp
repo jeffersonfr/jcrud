@@ -1,6 +1,6 @@
 #pragma once
 
-#include "database/Repository.hpp"
+#include "jdb/database/Repository.hpp"
 #include "model/log/LogModel.hpp"
 
-using LogRepository = Repository<LogModel>;
+using LogRepository = jdb::Repository<LogModel>;

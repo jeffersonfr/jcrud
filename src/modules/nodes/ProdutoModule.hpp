@@ -6,7 +6,7 @@ void produto_module() {
   using namespace jinject;
 
   UNIQUE(ProdutoRepository) {
-    return new ProdutoRepository{inject<std::shared_ptr<Database>>()};
+    return new ProdutoRepository{inject<std::shared_ptr<jdb::Database>>()};
   };
 
   UNIQUE(ProdutoInteractorRepository) {

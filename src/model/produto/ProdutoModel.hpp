@@ -1,11 +1,11 @@
 #pragma once
 
-#include "database/DataClass.hpp"
+#include "jdb/database/DataClass.hpp"
 #include "model/categoriaProduto/CategoriaProdutoModel.hpp"
 
-using ProdutoModel = DataClass<"produto", Primary<"id">, Foreign<Refer<CategoriaProdutoModel, "categoria_id">>,
-  Field<"id", FieldType::Serial, false>,
-  Field<"categoria_id", FieldType::Int>,
-  Field<"nome", FieldType::Text>,
-  Field<"descricao", FieldType::Text>,
-  Field<"excluido", FieldType::Bool, false, DefaultValue<"false">>>;
+using ProdutoModel = jdb::DataClass<"produto", jdb::Primary<"id">, jdb::Foreign<jdb::Refer<CategoriaProdutoModel, "categoria_id">>,
+  jdb::Field<"id", jdb::FieldType::Serial, false>,
+  jdb::Field<"categoria_id", jdb::FieldType::Int>,
+  jdb::Field<"nome", jdb::FieldType::Text>,
+  jdb::Field<"descricao", jdb::FieldType::Text>,
+  jdb::Field<"excluido", jdb::FieldType::Bool, false, jdb::DefaultValue<"false">>>;

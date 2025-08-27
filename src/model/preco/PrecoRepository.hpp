@@ -1,6 +1,6 @@
 #pragma once
 
-#include "database/Repository.hpp"
+#include "jdb/database/Repository.hpp"
 #include "model/preco/PrecoModel.hpp"
 
-using PrecoRepository = Repository<PrecoModel>;
+using PrecoRepository = jdb::Repository<PrecoModel>;

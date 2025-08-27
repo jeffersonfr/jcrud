@@ -25,10 +25,10 @@ namespace jui {
   private:
     std::vector<std::string> mItems;
 
-    std::string to_string(Data const &value) {
+    std::string to_string(jdb::Data const &value) {
       std::ostringstream o;
 
-      value.get_value(overloaded{
+      value.get_value(jdb::overloaded{
         [&](std::nullptr_t arg) { o << "null"; },
         [&](bool arg) { o << (arg ? "true" : "false"); },
         [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },

@@ -1,14 +1,14 @@
 #pragma once
 
-#include "database/DataClass.hpp"
+#include "jdb/database/DataClass.hpp"
 #include "model/levelLog/LevelLogModel.hpp"
 #include "model/tipoLog/TipoLogModel.hpp"
 
-using LogModel = DataClass<"log", Primary<"id">, Foreign<Refer<LevelLogModel, "level_log_id">, Refer<TipoLogModel, "tipo_log_id">>,
-  Field<"id", FieldType::Serial, false>,
-  Field<"level_log_id", FieldType::Int, false>,
-  Field<"tipo_log_id", FieldType::Int, false>,
-  Field<"localizacao", FieldType::Text, false>,
-  Field<"tag", FieldType::Text, false>,
-  Field<"descricao", FieldType::Text, false>,
-  Field<"last", FieldType::Text, false, TimestampValue>>;
+using LogModel = jdb::DataClass<"log", jdb::Primary<"id">, jdb::Foreign<jdb::Refer<LevelLogModel, "level_log_id">, jdb::Refer<TipoLogModel, "tipo_log_id">>,
+  jdb::Field<"id", jdb::FieldType::Serial, false>,
+  jdb::Field<"level_log_id", jdb::FieldType::Int, false>,
+  jdb::Field<"tipo_log_id", jdb::FieldType::Int, false>,
+  jdb::Field<"localizacao", jdb::FieldType::Text, false>,
+  jdb::Field<"tag", jdb::FieldType::Text, false>,
+  jdb::Field<"descricao", jdb::FieldType::Text, false>,
+  jdb::Field<"last", jdb::FieldType::Text, false, jdb::TimestampValue>>;

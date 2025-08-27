@@ -7,6 +7,6 @@ void preco_module() {
   using namespace jinject;
 
   UNIQUE(PrecoRepository) {
-    return new PrecoRepository{inject<std::shared_ptr<Database>>()};
+    return new PrecoRepository{inject<std::shared_ptr<jdb::Database>>()};
   };
 }

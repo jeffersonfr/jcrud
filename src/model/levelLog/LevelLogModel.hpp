@@ -1,6 +1,6 @@
 #pragma once
 
-#include "database/DataClass.hpp"
+#include "jdb/database/DataClass.hpp"
 
 enum class LevelLog {
   Trace = 1,
@@ -11,6 +11,6 @@ enum class LevelLog {
   Fatal = 6
 };
 
-using LevelLogModel = DataClass<"level_log", Primary<"id">, NoForeign,
-  Field<"id", FieldType::Serial, false>,
-  Field<"descricao", FieldType::Text, false>>;
+using LevelLogModel = jdb::DataClass<"level_log", jdb::Primary<"id">, jdb::NoForeign,
+  jdb::Field<"id", jdb::FieldType::Serial, false>,
+  jdb::Field<"descricao", jdb::FieldType::Text, false>>;

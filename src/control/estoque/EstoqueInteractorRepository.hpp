@@ -1,6 +1,6 @@
 #pragma once
 
-#include "database/Repository.hpp"
 #include "control/estoque/EstoqueInteractorRepository.hpp"
+#include "jdb/database/Repository.hpp"
 
-using EstoqueInteractorRepository = Repository<EstoqueInteractorModel>;
+using EstoqueInteractorRepository = jdb::Repository<EstoqueInteractorModel>;

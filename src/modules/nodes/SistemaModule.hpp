@@ -10,7 +10,7 @@
 #include "model/preco/PrecoRepository.hpp"
 #include "model/produto/ProdutoRepository.hpp"
 #include "model/tipoNegocio/TipoNegocioRepository.hpp"
-#include "database/SqliteDatabase.hpp"
+#include "jdb/database/SqliteDatabase.hpp"
 
 #if JCRUD_CLIENT == Americanas
 #include "clients/americanas/Sistema.hpp"
@@ -22,16 +22,16 @@ void sistema_module() {
   using namespace jinject;
 
   using MyDatabase =
-      SqliteDatabase<CategoriaProdutoModel, PrecoModel, ProdutoModel,
+      jdb::SqliteDatabase<CategoriaProdutoModel, PrecoModel, ProdutoModel,
         FilialModel, UsuarioModel, LoginModel, CargoModel,
         CargoUsuarioModel, EstoqueModel, TipoNegocioModel,
         HistoricoEstoqueModel>;
 
-  SINGLE(std::shared_ptr<Database>) {
+  SINGLE(std::shared_ptr<jdb::Database>) {
     auto db = std::make_shared<MyDatabase>("sistema.db");
 
-    db->add_migration(Migration{
-          1, [](Database &db) {
+    db->add_migration(jdb::Migration{
+          1, [](jdb::Database &db) {
             insert<CategoriaProdutoModel, "descricao">(db)
                 .values("Higiene")
                 .values("Limpeza")
