@@ -96,6 +96,8 @@ target_link_libraries(thirdparty
         INTERFACE
             jmixin
             jinject
+            jdb::core
+            jdb::thirdparty
             fmt
             expected
             crypt
