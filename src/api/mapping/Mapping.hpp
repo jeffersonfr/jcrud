@@ -1,5 +1,8 @@
 #pragma once
 
+#include "api/mapping/model/ProdutoMapping.hpp"
+#include "api/mapping/model/CategoriaProdutoMapping.hpp"
+
 struct Mapping {
     // generic implementations
     template<typename Range>
@@ -54,24 +57,14 @@ struct Mapping {
         return itemList;
     }
 
-    // local implementations .. try to use some generic implementation to avoid do this manually
-    static crow::json::wvalue item_to_json(ProdutoModel model) {
-        crow::json::wvalue item;
-
-        item["id"] = *model["id"].get_int();
-        item["categoria_id"] = *model["categoria_id"].get_int();
-        item["nome"] = *model["nome"].get_text();
-        item["descricao"] = *model["descricao"].get_text();
-
-        return item;
+    template<typename Model>
+    static crow::json::wvalue item_to_json(Model const &model) {
+        return to_json(model);
     }
 
-    static crow::json::wvalue item_to_json(CategoriaProdutoModel model) {
-        crow::json::wvalue item;
-
-        item["id"] = *model["id"].get_int();
-        item["descricao"] = *model["descricao"].get_text();
-
-        return item;
+    template<typename Model>
+    static Model item_from_json(crow::json::wvalue const &item) {
+        return from_json<Model>(item);
     }
 };
+
