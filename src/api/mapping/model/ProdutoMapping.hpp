@@ -1,7 +1,6 @@
 #pragma once
 
 #include "model/produto/ProdutoModel.hpp"
-#include "api/mapping/MappingTraits.hpp"
 
 inline std::string to_string(ProdutoModel const &model) {
   return std::format("Produto [id: {}, categoria_id: {}, nome: {}, descricao: {}]",

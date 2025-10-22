@@ -2,7 +2,7 @@
 
 #include "control/admin/AdminController.hpp"
 
-void admin_module() {
+inline void admin_module() {
   using namespace jinject;
 
   UNIQUE(AdminInteractor) {

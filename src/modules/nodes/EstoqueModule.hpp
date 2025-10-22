@@ -2,7 +2,7 @@
 
 #include "control/estoque/EstoqueController.hpp"
 
-void estoque_module() {
+inline void estoque_module() {
   using namespace jinject;
 
   UNIQUE(EstoqueRepository) {

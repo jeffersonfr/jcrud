@@ -3,7 +3,6 @@
 #include "control/produto/ProdutoInteractor.hpp"
 #include "ui/Form.hpp"
 #include "ui/Table.hpp"
-#include "jdb/utils/Format.hpp"
 #include "utils/Log.hpp"
 
 #include <cstdlib>
@@ -94,7 +93,7 @@ struct ProdutoController {
     return result;
   }
 
-  void inserir() {
+  void inserir() const {
     Table{mProdutoInteractor->load_all_categorias()}
       .title("Listagem de categorias")
       .head([]() {
@@ -126,7 +125,7 @@ struct ProdutoController {
       .show();
   }
 
-  void listar() { listar_produtos(mProdutoInteractor->load_all_produtos()); }
+  void listar() const { listar_produtos(mProdutoInteractor->load_all_produtos()); }
 
   void exibir() {
     Form<Item<"id", "Id do produto", TypeItem::Int> >{}
@@ -178,13 +177,13 @@ struct ProdutoController {
               .set("descricao",
                    item.template get<ProdutoModel>("descricao"))
               .set("preco", item.template get<PrecoModel>("valor"))
-              .on_success([&](Input input) {
+              .on_success([&](Input inputValue) {
                 item.template get<ProdutoModel>("nome") =
-                  input.get_text("nome");
+                  inputValue.get_text("nome");
                 item.template get<ProdutoModel>("descricao") =
-                  input.get_text("descricao");
+                  inputValue.get_text("descricao");
                 item.template get<PrecoModel>("valor") =
-                  input.get_decimal("preco");
+                  inputValue.get_decimal("preco");
               })
               .on_failed(opcao_invalida)
               .show();
@@ -202,7 +201,7 @@ struct ProdutoController {
         auto produtoId = input.get_int("id");
 
         mProdutoInteractor->load_produto_by_id(produtoId.value())
-          .and_then([&](auto item) {
+          .and_then([&](auto const &item) {
             logopt(TipoLog::Sistema, Tag, mProdutoInteractor->remove_produto(std::move(item)));
 
             return std::optional{true};
@@ -212,7 +211,7 @@ struct ProdutoController {
       .show();
   }
 
-  void relatorio() {
+  void relatorio() const {
     Table{mProdutoInteractor->load_all_categorias()}
       .title("Listagem de categorias")
       .head([]() {
@@ -229,7 +228,7 @@ struct ProdutoController {
 private:
   std::unique_ptr<ProdutoInteractor> mProdutoInteractor;
 
-  void listar_produtos(std::vector<ProdutoInteractorModel> &&items) {
+  static void listar_produtos(std::vector<ProdutoInteractorModel> &&items) {
     Table{items}
       .title("Listagem de produtos")
       .head([]() {

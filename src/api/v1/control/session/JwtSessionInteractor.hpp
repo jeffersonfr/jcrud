@@ -7,7 +7,6 @@
 #include "api/v1/ApiErrorMsg.hpp"
 
 #include <jwt-cpp/jwt.h>
-#include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
@@ -180,7 +179,7 @@ private:
   std::unordered_map<std::string, JwtSession> mSessions;
   std::recursive_mutex mMutex;
 
-  std::string generate_random_token(std::size_t length) {
+  static std::string generate_random_token(std::size_t length) {
     const std::string CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     std::random_device rd;

@@ -2,7 +2,7 @@
 
 #include "control/produto/ProdutoController.hpp"
 
-void produto_module() {
+inline void produto_module() {
   using namespace jinject;
 
   UNIQUE(ProdutoRepository) {

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "api/mapping/model/ProdutoMapping.hpp"
-#include "api/mapping/model/CategoriaProdutoMapping.hpp"
+#include "api/mapping/MappingTraits.hpp"
 
 struct Mapping {
     // generic implementations
@@ -67,4 +66,3 @@ struct Mapping {
         return from_json<Model>(item);
     }
 };
-

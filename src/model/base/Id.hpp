@@ -1,7 +1,6 @@
 #pragma once
 
 #include <optional>
-#include <string>
 
 struct Id {
   static std::optional<Id> from(std::optional<int64_t> value) {

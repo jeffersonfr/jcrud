@@ -25,19 +25,19 @@ struct ProdutoInteractor {
       mPrecoRepository{std::move(precoRepository)} {
   }
 
-  std::vector<ProdutoInteractorModel> load_all() {
+  [[nodiscard]] std::vector<ProdutoInteractorModel> load_all() const {
     return mProdutoInteractorRepository->load_all();
   }
 
-  std::optional<std::string> update(ProdutoInteractorModel const &produto) const {
+  [[nodiscard]] std::optional<std::string> update(ProdutoInteractorModel const &produto) const {
     return mProdutoInteractorRepository->update(produto);
   }
 
-  std::vector<CategoriaProdutoModel> load_all_categorias() {
+  [[nodiscard]] std::vector<CategoriaProdutoModel> load_all_categorias() const {
     return mCategoriaProdutoRepository->load_all();
   }
 
-  std::vector<ProdutoInteractorModel> load_all_produtos() {
+  [[nodiscard]] std::vector<ProdutoInteractorModel> load_all_produtos() const {
     auto items = mProdutoInteractorRepository->load_all() |
       std::ranges::views::filter([](auto const &item) {
       return !item.template get<ProdutoModel>("excluido")
@@ -53,11 +53,11 @@ struct ProdutoInteractor {
     return {items.begin(), it.begin()};
   }
 
-  std::vector<PrecoModel> load_historico_precos(int64_t produtoId) {
+  [[nodiscard]] std::vector<PrecoModel> load_historico_precos(int64_t produtoId) const {
     return mPrecoRepository->load_by<"produto_id">(produtoId);
   }
 
-  std::optional<ProdutoInteractorModel> load_produto_by_id(int64_t id) {
+  [[nodiscard]] std::optional<ProdutoInteractorModel> load_produto_by_id(int64_t id) const {
     auto produtos = load_all_produtos() |
                     std::ranges::views::filter([&](auto const &produto) {
                       return produto.template get<ProdutoModel>("id") == id;
@@ -70,7 +70,7 @@ struct ProdutoInteractor {
     return {};
   }
 
-  std::optional<std::string> save_produto(ProdutoInteractorModel const &item) {
+  [[nodiscard]] std::optional<std::string> save_produto(ProdutoInteractorModel const &item) const {
     if (item.get<ProdutoModel>("id").is_null()) {
       try {
         mProdutoRepository->get_database()->transaction([&](jdb::Database &db) {
@@ -96,7 +96,7 @@ struct ProdutoInteractor {
     return update(item);
   }
 
-  std::optional<std::string> remove_produto(ProdutoInteractorModel const &produtoInteractor) {
+  [[nodiscard]] std::optional<std::string> remove_produto(ProdutoInteractorModel const &produtoInteractor) const {
     auto produto{std::move(produtoInteractor.get<ProdutoModel>())};
 
     produto["excluido"] = true;

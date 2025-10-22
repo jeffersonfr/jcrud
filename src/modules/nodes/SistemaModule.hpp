@@ -18,7 +18,7 @@
 #include "Sistema.hpp"
 #endif
 
-void sistema_module() {
+inline void sistema_module() {
   using namespace jinject;
 
   using MyDatabase =

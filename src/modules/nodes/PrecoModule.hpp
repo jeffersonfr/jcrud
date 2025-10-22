@@ -3,7 +3,7 @@
 #include "model/levelLog/LevelLogRepository.hpp"
 #include "model/preco/PrecoRepository.hpp"
 
-void preco_module() {
+inline void preco_module() {
   using namespace jinject;
 
   UNIQUE(PrecoRepository) {

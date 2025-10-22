@@ -3,10 +3,13 @@
 #include "Ambiente.hpp"
 #include "control/admin/AdminController.hpp"
 #include "control/produto/ProdutoController.hpp"
-#include "ui/Form.hpp"
-#include "utils/Log.hpp"
+#include "control/estoque/EstoqueController.hpp"
+#include "control/login/LoginController.hpp"
 #include "api/Routes.hpp"
-#include "api/routes/v1/BasicRoutes.hpp"
+#include "api/v1/routes/BasicRoutes.hpp"
+#include "api/v1/routes/LoginRoutes.hpp"
+#include "utils/Log.hpp"
+#include "ui/Form.hpp"
 
 #include <fmt/format.h>
 
@@ -87,7 +90,7 @@ private:
     });
   }
 
-  void do_menu() {
+  void do_menu() const {
     /*
     auto screen = ftxui::ScreenInteractive::TerminalOutput();
 
@@ -113,23 +116,23 @@ private:
         .before([&]() {
           fmt::print("{}", "Escolha uma opção:\n");
 
-          if (selecaoSet.count(
+          if (selecaoSet.contains(
                   static_cast<int>(SelecaoSistema::Administracao))) {
             fmt::print("\t{} - Administracao\n",
                        static_cast<int>(SelecaoSistema::Administracao));
           }
 
-          if (selecaoSet.count(static_cast<int>(SelecaoSistema::Produtos))) {
+          if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Produtos))) {
             fmt::print("\t{} - Produtos\n",
                        static_cast<int>(SelecaoSistema::Produtos));
           }
 
-          if (selecaoSet.count(static_cast<int>(SelecaoSistema::Estoque))) {
+          if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Estoque))) {
             fmt::print("\t{} - Estoque\n",
                        static_cast<int>(SelecaoSistema::Estoque));
           }
 
-          if (selecaoSet.count(static_cast<int>(SelecaoSistema::Sair))) {
+          if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Sair))) {
             fmt::print("\t{} - Sair\n",
                        static_cast<int>(SelecaoSistema::Sair));
           }
@@ -137,7 +140,7 @@ private:
         .on_success([&](Input input) {
           auto opcao = input.get_int("opcao");
 
-          if (!opcao.has_value() or selecaoSet.count(*opcao) == 0) {
+          if (!opcao.has_value() or selecaoSet.contains(*opcao) == 0) {
             return;
           }
 

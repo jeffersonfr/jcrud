@@ -12,7 +12,7 @@
 #include "jinject/jinject.h"
 
 struct LoginInteractor : public jdb::Repository<LoginInteractorModel> {
-  LoginInteractor(
+  explicit LoginInteractor(
     std::unique_ptr<LoginInteractorRepository> loginInteractorRepository)
     : mLoginInteractorRepository{std::move(loginInteractorRepository)} {
   }
@@ -34,7 +34,7 @@ struct LoginInteractor : public jdb::Repository<LoginInteractorModel> {
       }) | std::ranges::views::take(1);
 
     for (auto const &item: items) {
-      return {item.template get<UsuarioModel>()};
+      return {item.get<UsuarioModel>()};
     }
 
     return {};

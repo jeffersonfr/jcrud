@@ -2,7 +2,7 @@
 
 #include "model/cargo/CargoRepository.hpp"
 
-void cargo_module() {
+inline void cargo_module() {
   using namespace jinject;
 
   UNIQUE(CargoRepository) {

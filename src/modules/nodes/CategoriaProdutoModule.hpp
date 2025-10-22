@@ -2,7 +2,7 @@
 
 #include "model/categoriaProduto/CategoriaProdutoRepository.hpp"
 
-void categoriaproduto_module() {
+inline void categoriaproduto_module() {
   using namespace jinject;
 
   UNIQUE(CategoriaProdutoRepository) {

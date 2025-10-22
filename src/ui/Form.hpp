@@ -9,8 +9,8 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <csignal>
 
-#include <signal.h>
 #include <unistd.h>
 
 #include <fmt/format.h>
@@ -51,7 +51,7 @@ namespace jui {
       }
     }
 
-    Form &title(std::string title) {
+    Form &title(std::string const &title) {
       mTitle = title;
 
       return *this;
@@ -102,7 +102,7 @@ namespace jui {
     }
 
     void show() {
-      struct sigaction new_action, old_action;
+      struct sigaction new_action{}, old_action{};
 
       if (mTitle.has_value()) {
         std::unique_ptr<DecorateTitleStrategy> decorateTitleStrategy = jinject::get{};
@@ -202,7 +202,7 @@ namespace jui {
     }
 
     template<TypeItem Type>
-    std::optional<std::string> read_value() {
+    static std::optional<std::string> read_value() {
       std::string line;
 
       std::getline(std::cin, line);

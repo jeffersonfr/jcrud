@@ -2,7 +2,7 @@
 
 #include "control/login/LoginController.hpp"
 
-void login_module() {
+inline void login_module() {
   using namespace jinject;
 
   UNIQUE(LoginRepository) {

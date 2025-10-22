@@ -9,7 +9,7 @@
  *
  * https://10015.io/tools/jwt-encoder-decoder
  */
-void api_module() {
+inline void api_module() {
   using namespace jinject;
 
   using MyDatabase = jdb::SqliteDatabase<SessionCredentialModel>;

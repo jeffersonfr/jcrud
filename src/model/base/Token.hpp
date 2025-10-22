@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <optional>
 #include <string>
 
@@ -20,22 +19,22 @@ struct Token {
       });
   }
 
-  std::string const & command() const {
+  [[nodiscard]] std::string const & command() const {
     return mCommand;
   }
 
-  std::string const & token() const {
+  [[nodiscard]] std::string const & token() const {
     return mToken;
   }
 
 private:
   std::string mCommand, mToken;
 
-  explicit Token(std::string value) {
-    parse_token(std::move(value));
+  explicit Token(std::string const &value) {
+    parse_token(value);
   }
 
-  void parse_token(std::string value) {
+  void parse_token(std::string const &value) {
     if (value.empty()) {
       return;
     }

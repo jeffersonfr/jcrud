@@ -39,11 +39,11 @@ private:
     return is_cpf_valid(mValue);
   }
 
-  bool is_cpf_valid(std::string cpf) const {
+  static bool is_cpf_valid(std::string cpf) {
     // Remove todos os caracteres não numéricos
-    cpf.erase(std::remove_if(cpf.begin(), cpf.end(), [](char c) {
+    std::erase_if(cpf, [](char c) {
         return !isdigit(c);
-    }), cpf.end());
+    });
 
     // Verifica se tem 11 dígitos
     if (cpf.length() != 11) {
@@ -91,7 +91,7 @@ private:
     return true;
   }
 
-  std::optional<std::string> process_location() {
+  std::optional<std::string> process_location() const {
     char codigo = mValue[8];
 
     if (codigo == '0') {

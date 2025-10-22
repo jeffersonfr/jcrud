@@ -44,7 +44,7 @@ private:
   std::thread mThread;
   std::tuple<Args...> mRoutesRefs;
 
-  void blackhole(crow::SimpleApp &app) {
+  void blackhole(crow::SimpleApp &app) const {
     CROW_CATCHALL_ROUTE(app)
     ([this]() {
       return crow::response(crow::status::FORBIDDEN);

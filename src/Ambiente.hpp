@@ -1,6 +1,5 @@
 #pragma once
 
-#include "control/login/LoginInteractorModel.hpp"
 #include "config.h"
 
 #include <optional>

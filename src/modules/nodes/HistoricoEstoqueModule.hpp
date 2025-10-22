@@ -2,7 +2,7 @@
 
 #include "model/historicoEstoque/HistoricoEstoqueRepository.hpp"
 
-void historicoestoque_module() {
+inline void historicoestoque_module() {
   using namespace jinject;
 
   UNIQUE(HistoricoEstoqueRepository) {

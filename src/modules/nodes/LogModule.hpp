@@ -4,7 +4,7 @@
 #include "model/tipoLog/TipoLogRepository.hpp"
 #include "jdb/database/SqliteDatabase.hpp"
 
-void log_module() {
+inline void log_module() {
   using namespace jinject;
 
   using MyDatabase = jdb::SqliteDatabase<LevelLogModel, TipoLogModel, LogModel>;

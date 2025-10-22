@@ -2,7 +2,7 @@
 
 #include "model/filial/FilialRepository.hpp"
 
-void filial_module() {
+inline void filial_module() {
   using namespace jinject;
 
   UNIQUE(FilialRepository) {

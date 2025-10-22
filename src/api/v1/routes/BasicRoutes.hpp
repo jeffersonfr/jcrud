@@ -12,7 +12,7 @@ namespace v1 {
   struct BasicRoutes : public AbstractRoutes {
     BasicRoutes() = default;
 
-    BasicRoutes(BasicRoutes &&other)
+    BasicRoutes(BasicRoutes &&other) noexcept
       : mProdutoInteractor{std::move(other.mProdutoInteractor)} {
     }
 

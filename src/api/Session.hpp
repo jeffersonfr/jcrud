@@ -3,7 +3,6 @@
 #include "jdb/database/DataClass.hpp"
 
 #include <string>
-#include <chrono>
 
 struct Session {
   explicit Session(std::set<Cargo> const &cargos)
@@ -23,7 +22,7 @@ private:
   std::set<Cargo> mCargos;
 
   static bool has_any_common_element(std::set<Cargo> const &a, std::set<Cargo> const &b) {
-    return std::any_of(a.cbegin(), a.cend(), [&b](auto const &item) {
+    return std::ranges::any_of(a, [&b](auto const &item) {
       return b.contains(item);
     });
   }

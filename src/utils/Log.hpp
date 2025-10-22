@@ -49,10 +49,8 @@ struct Log {
     model["descricao"] = jmixin::String(model["descricao"].get_text().value()).replace("\\\"", "'");
     model["last"] = jdb::format_timestamp(std::chrono::system_clock::now());;
 
-    auto e = mRepository->save(model);
-
-    if (!e.has_value()) {
-      throw e.error();
+    if (auto e = mRepository->save(model); !e.has_value()) {
+      throw std::move(e.error());
     }
   }
 
@@ -69,8 +67,7 @@ private:
   std::unique_ptr<LogRepository> mRepository;
   LevelLog mLevel = LevelLog::Trace;
 
-  Log() {
-  }
+  Log() = default;
 };
 
 #define logt(...)                                                              \

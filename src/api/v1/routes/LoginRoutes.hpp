@@ -10,7 +10,7 @@ namespace v1 {
   struct LoginRoutes : public AbstractRoutes {
     LoginRoutes() = default;
 
-    LoginRoutes(LoginRoutes &&other) {
+    LoginRoutes(LoginRoutes &&other) noexcept {
     }
 
     void init(crow::SimpleApp &app) {
@@ -20,7 +20,7 @@ namespace v1 {
     }
 
   private:
-    void login(crow::SimpleApp &app) {
+    static void login(crow::SimpleApp &app) {
       CROW_ROUTE(app, BaseUrl"/login")
           .methods(crow::HTTPMethod::GET)
           ([&](crow::request const &req) {
@@ -48,7 +48,7 @@ namespace v1 {
           });
     }
 
-    void refresh(crow::SimpleApp &app) {
+    static void refresh(crow::SimpleApp &app) {
       CROW_ROUTE(app, BaseUrl"/refresh")
           .methods(crow::HTTPMethod::POST)
           ([&](crow::request const &req) {

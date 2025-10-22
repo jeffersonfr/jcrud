@@ -20,11 +20,11 @@ struct EstoqueInteractor {
       mHistoricoEstoqueRepository{std::move(historicoEstoqueRepository)} {
   }
 
-  std::vector<EstoqueInteractorModel> load_all() {
+  std::vector<EstoqueInteractorModel> load_all() const {
     return mEstoqueInteractorRepository->load_all();
   }
 
-  std::optional<std::string> save_compra(EstoqueModel const &item, Cnpj cnpj) {
+  std::optional<std::string> save_compra(EstoqueModel const &item, Cnpj cnpj) const {
     HistoricoEstoqueModel historicoEstoque;
 
     historicoEstoque["produto_id"] = item["produto_id"];
@@ -52,7 +52,7 @@ struct EstoqueInteractor {
     return {};
   }
 
-  std::optional<std::string> save_venda(Id estoque, int quantidadeVenda, Cnpj cnpj) {
+  std::optional<std::string> save_venda(Id estoque, int quantidadeVenda, Cnpj cnpj) const {
     return load_estoque_by_id(estoque)
       .and_then([&](EstoqueModel item) -> std::optional<std::string> {
         auto quantidadeAtual = item["quantidade"].get_int().value();
@@ -73,11 +73,15 @@ struct EstoqueInteractor {
         try {
           mEstoqueRepository->get_database()->transaction([&](jdb::Database &db) {
             if (quantidadeAtual == quantidadeVenda) {
-              mEstoqueRepository->remove(item);
+              if (auto result = mEstoqueRepository->remove(item); result) {
+                throw std::runtime_error{result.value()};
+              }
             } else {
               item["quantidade"] = quantidadeAtual - quantidadeVenda;
 
-              mEstoqueRepository->update(item);
+              if (auto result = mEstoqueRepository->update(item); result) {
+                throw std::runtime_error{result.value()};
+              }
             }
 
             if (auto result = mHistoricoEstoqueRepository->save(historicoEstoque); !result) {
@@ -95,7 +99,7 @@ struct EstoqueInteractor {
       });
   }
 
-  std::optional<EstoqueModel> load_estoque_by_id(Id id) {
+  std::optional<EstoqueModel> load_estoque_by_id(Id id) const {
     auto items = mEstoqueRepository->load_by<"id">(id.value());
 
     if (items.empty()) {

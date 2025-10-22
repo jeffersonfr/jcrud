@@ -14,7 +14,7 @@ namespace jui {
   };
 
   struct Row {
-    Row(auto &&... Items) {
+    explicit Row(auto &&... Items) {
       using namespace std;
 
       (mItems.push_back(to_string(Items)), ...);
@@ -25,7 +25,7 @@ namespace jui {
   private:
     std::vector<std::string> mItems;
 
-    std::string to_string(jdb::Data const &value) {
+    static std::string to_string(jdb::Data const &value) {
       std::ostringstream o;
 
       value.get_value(jdb::overloaded{

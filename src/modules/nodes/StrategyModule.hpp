@@ -6,7 +6,7 @@
 #include "strategy//DecorateTitleStrategy.hpp"
 #endif
 
-void strategy_module() {
+inline void strategy_module() {
   using namespace jinject;
 
 #if JCRUD_CLIENT == Americanas

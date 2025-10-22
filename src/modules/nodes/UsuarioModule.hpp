@@ -2,7 +2,7 @@
 
 #include "model/usuario/UsuarioRepository.hpp"
 
-void usuario_module() {
+inline void usuario_module() {
   using namespace jinject;
 
   UNIQUE(UsuarioRepository) {

@@ -7,7 +7,6 @@
 #include <cstdlib>
 #include <functional>
 #include <optional>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -24,7 +23,7 @@ struct LoginController {
     : mLoginInteractor{std::move(loginInteractor)} {
   }
 
-  bool execute(std::function<void(UsuarioModel, std::vector<CargoModel>)> callback) {
+  bool execute(std::function<void(UsuarioModel, std::vector<CargoModel>)> const &callback) const {
     Form<Item<"nome", "Nome do usuario", TypeItem::Text>,
         Item<"senha", "Senha do usuario", TypeItem::Text> >{}
       .before([&]() {

@@ -8,10 +8,9 @@
 #include "api/Session.hpp"
 
 struct JwtSession : public Session {
-  explicit JwtSession(std::set<Cargo> const &cargos, std::string const &id, std::string const &key,
-                      std::string const &refreshToken,
+  explicit JwtSession(std::set<Cargo> const &cargos, std::string id, std::string key, std::string refreshToken,
                       std::chrono::system_clock::time_point expires)
-    : Session{cargos}, mId{id}, mKey{key}, mRefreshToken{refreshToken}, mExpires{expires} {
+    : Session{cargos}, mId{std::move(id)}, mKey{std::move(key)}, mRefreshToken{std::move(refreshToken)}, mExpires{expires} {
   }
 
   std::string id() const {

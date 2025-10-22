@@ -2,7 +2,7 @@
 
 #include "model/tipoNegocio/TipoNegocioRepository.hpp"
 
-void tiponegocio_module() {
+inline void tiponegocio_module() {
   using namespace jinject;
 
   UNIQUE(TipoNegocioRepository) {

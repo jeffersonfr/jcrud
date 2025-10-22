@@ -2,7 +2,7 @@
 
 #include "model/cargoUsuario/CargoUsuarioRepository.hpp"
 
-void cargousuario_module() {
+inline void cargousuario_module() {
   using namespace jinject;
 
   UNIQUE(CargoUsuarioRepository) {

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <map>
 #include <string>
 
@@ -10,10 +9,10 @@ namespace jui {
   enum class TypeItem { Int, Decimal, Text, Date };
 
   struct Input {
-    Input(std::map<std::string, std::optional<std::string> > &values) : mValues{values} {
+    explicit Input(std::map<std::string, std::optional<std::string> > &values) : mValues{values} {
     }
 
-    std::optional<std::string> get_text(std::string const &key) const {
+    [[nodiscard]] std::optional<std::string> get_text(std::string const &key) const {
       auto it = mValues.find(key);
 
       if (it != mValues.end()) {
@@ -23,7 +22,7 @@ namespace jui {
       return {};
     }
 
-    std::optional<int32_t> get_int(std::string const &key) const {
+    [[nodiscard]] std::optional<int32_t> get_int(std::string const &key) const {
       auto text = get_text(key);
 
       if (!text.has_value()) {
@@ -41,7 +40,7 @@ namespace jui {
       return {};
     }
 
-    std::optional<int64_t> get_long(std::string const &key) const {
+    [[nodiscard]] std::optional<int64_t> get_long(std::string const &key) const {
       auto text = get_text(key);
 
       if (!text.has_value()) {
@@ -59,7 +58,7 @@ namespace jui {
       return {};
     }
 
-    std::optional<double> get_decimal(std::string const &key) const  {
+    [[nodiscard]] std::optional<double> get_decimal(std::string const &key) const  {
       auto text = get_text(key);
 
       if (!text.has_value()) {
@@ -77,7 +76,7 @@ namespace jui {
       return {};
     }
 
-    std::optional<std::chrono::year_month_day> get_date(std::string const &key) const {
+    [[nodiscard]] std::optional<std::chrono::year_month_day> get_date(std::string const &key) const {
       auto text = get_text(key);
 
       if (!text.has_value()) {
@@ -85,7 +84,7 @@ namespace jui {
       }
 
       const std::regex date_regex("[\\d]{8}");
-      auto value = *text;
+      auto const &value = *text;
 
       if (!std::regex_match(value, date_regex)) {
         return {};

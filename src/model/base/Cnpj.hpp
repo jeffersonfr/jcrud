@@ -31,7 +31,7 @@ private:
     return is_cnpj_valid(mValue);
   }
 
-  [[nodiscard]] bool is_cnpj_valid(std::string cnpj) const {
+  [[nodiscard]] static bool is_cnpj_valid(std::string cnpj) {
     // Remove todos os caracteres não numéricos
     cnpj.erase(std::ranges::remove_if(cnpj, [](char c) {
       return !isdigit(c);
