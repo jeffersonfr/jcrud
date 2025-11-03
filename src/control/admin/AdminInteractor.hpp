@@ -78,7 +78,7 @@ struct AdminInteractor {
   std::optional<std::string> update_cargos(Id usuarioId, std::set<int> const &cargoIds) {
     auto items = load_all_cargos() |
                  std::ranges::views::filter([&](auto const &item) {
-                   return cargoIds.contains(item["id"].get_int().value_or(-1));
+                   return cargoIds.contains(static_cast<int>(item["id"].get_int().value_or(-1L)));
                  });
     std::vector<CargoModel> cargos{items.begin(), items.end()};
 

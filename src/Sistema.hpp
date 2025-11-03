@@ -27,14 +27,14 @@ struct Sistema {
           std::unique_ptr<AdminController> adminController,
           std::unique_ptr<ProdutoController> produtoController,
           std::unique_ptr<EstoqueController> estoqueController)
-      : mLoginController{std::move(loginController)},
-        mAdminController{std::move(adminController)},
-        mProdutoController{std::move(produtoController)},
-        mEstoqueController{std::move(estoqueController)} {
+    : mLoginController{std::move(loginController)},
+      mAdminController{std::move(adminController)},
+      mProdutoController{std::move(produtoController)},
+      mEstoqueController{std::move(estoqueController)} {
     Log::instance().level(LevelLog::Trace);
   }
 
-  void execute() {
+  [[noreturn]] void execute() {
     using namespace jui;
 
     auto routes = create_routes(
@@ -56,7 +56,7 @@ private:
   std::unique_ptr<AdminController> mAdminController;
   std::unique_ptr<ProdutoController> mProdutoController;
   std::unique_ptr<EstoqueController> mEstoqueController;
-  std::set<int> selecaoSet;
+  std::set<SelecaoSistema> selecaoSet;
 
   void do_login() {
     Ambiente::usuario = {};
@@ -68,19 +68,19 @@ private:
       Ambiente::cargos = cargoModel;
 
       if (Ambiente::cargos.has_value()) {
-        for (auto const &cargo : Ambiente::cargos.value()) {
+        for (auto const &cargo: Ambiente::cargos.value()) {
           if (cargo["id"].get_int() == Cargo::Administrador) {
-            selecaoSet = std::set {
-              static_cast<int>(SelecaoSistema::Administracao),
-              static_cast<int>(SelecaoSistema::Produtos),
-              static_cast<int>(SelecaoSistema::Estoque),
-              static_cast<int>(SelecaoSistema::Sair)
+            selecaoSet = std::set{
+              SelecaoSistema::Administracao,
+              SelecaoSistema::Produtos,
+              SelecaoSistema::Estoque,
+              SelecaoSistema::Sair
             };
           } else if (cargo["id"].get_int() == Cargo::Operador) {
-            selecaoSet = std::set {
-              static_cast<int>(SelecaoSistema::Produtos),
-              static_cast<int>(SelecaoSistema::Estoque),
-              static_cast<int>(SelecaoSistema::Sair)
+            selecaoSet = std::set{
+              SelecaoSistema::Produtos,
+              SelecaoSistema::Estoque,
+              SelecaoSistema::Sair
             };
           }
         }
@@ -111,36 +111,31 @@ private:
     screen.Loop(menu);
     */
 
-    Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int>>{}
+    Form<Item<"opcao", "Selecione uma opcao do menu", TypeItem::Int> >{}
         .title("Farmacia Pague+ - " + Ambiente::version)
         .before([&]() {
           fmt::print("{}", "Escolha uma opção:\n");
 
-          if (selecaoSet.contains(
-                  static_cast<int>(SelecaoSistema::Administracao))) {
-            fmt::print("\t{} - Administracao\n",
-                       static_cast<int>(SelecaoSistema::Administracao));
+          if (selecaoSet.contains(SelecaoSistema::Administracao)) {
+            fmt::print("\t{} - Administracao\n", static_cast<int>(SelecaoSistema::Administracao));
           }
 
-          if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Produtos))) {
-            fmt::print("\t{} - Produtos\n",
-                       static_cast<int>(SelecaoSistema::Produtos));
+          if (selecaoSet.contains(SelecaoSistema::Produtos)) {
+            fmt::print("\t{} - Produtos\n", static_cast<int>(SelecaoSistema::Produtos));
           }
 
-          if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Estoque))) {
-            fmt::print("\t{} - Estoque\n",
-                       static_cast<int>(SelecaoSistema::Estoque));
+          if (selecaoSet.contains(SelecaoSistema::Estoque)) {
+            fmt::print("\t{} - Estoque\n", static_cast<int>(SelecaoSistema::Estoque));
           }
 
-          if (selecaoSet.contains(static_cast<int>(SelecaoSistema::Sair))) {
-            fmt::print("\t{} - Sair\n",
-                       static_cast<int>(SelecaoSistema::Sair));
+          if (selecaoSet.contains(SelecaoSistema::Sair)) {
+            fmt::print("\t{} - Sair\n", static_cast<int>(SelecaoSistema::Sair));
           }
-})
+        })
         .on_success([&](Input input) {
-          auto opcao = input.get_int("opcao");
+          auto opcao = input.get_int("opcao").transform([](auto value) { return static_cast<SelecaoSistema>(value); });
 
-          if (!opcao.has_value() or selecaoSet.contains(*opcao) == 0) {
+          if (!opcao or selecaoSet.contains(*opcao) == 0) {
             return;
           }
 

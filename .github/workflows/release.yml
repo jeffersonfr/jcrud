@@ -66,18 +66,17 @@ jobs:
     needs: build_and_package
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
-      contents: write # Required to create a release and tags
+      contents: write
     steps:
       - name: Checkout Code (for fetching tags)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetches all history for all tags and branches
+          fetch-depth: 0
 
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ env.PROJECT_NAME }}-artifact-${{ github.sha }}
-          # No path specified, defaults to current directory
 
       - name: Generate Tag Name
         id: generate_tag
@@ -85,17 +84,15 @@ jobs:
           TAG_NAME="release-$(date +'%Y%m%d')-${{ github.run_number }}"
           echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release with Asset
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.generate_tag.outputs.TAG_NAME }}
-          release_name: "Release ${{ steps.generate_tag.outputs.TAG_NAME }}"
+          name: "Release ${{ steps.generate_tag.outputs.TAG_NAME }}"
           body: |
             Automated release for commit ${{ github.sha }}.
             Triggered by: ${{ github.event_name }}
             Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          files: ${{ env.PROJECT_NAME }}-${{ github.sha }}.tar.gz # This is the artifact downloaded in the previous step
-          # draft: false # Set to true if you want to manually publish later
-          # prerelease: false # Set to true if this is a pre-release
+          files: ${{ env.PROJECT_NAME }}-${{ github.sha }}.tar.gz
+          draft: false
+          prerelease: false
