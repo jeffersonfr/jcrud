@@ -184,7 +184,7 @@ private:
 
     std::random_device rd;
     std::mt19937 generator(rd());
-    std::uniform_int_distribution<> distribution(0, CHARACTERS.size() - 1);
+    std::uniform_int_distribution<> distribution(0, CHARACTERS.size() - 1u);
     std::string token;
 
     token.reserve(length);

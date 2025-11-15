@@ -35,7 +35,7 @@ struct EstoqueInteractor {
     historicoEstoque["validade"] = item["validade"];
 
     try {
-      mEstoqueRepository->get_database()->transaction([&](jdb::Database &db) {
+      mEstoqueRepository->get_database()->transaction([&]([[maybe_unused]] jdb::Database &db) {
         if (auto result = mEstoqueRepository->save(item); !result.has_value()) {
           throw std::move(result.error());
         }
@@ -71,7 +71,7 @@ struct EstoqueInteractor {
         historicoEstoque["validade"] = item["validade"];
 
         try {
-          mEstoqueRepository->get_database()->transaction([&](jdb::Database &db) {
+          mEstoqueRepository->get_database()->transaction([&]([[maybe_unused]] jdb::Database &db) {
             if (quantidadeAtual == quantidadeVenda) {
               if (auto result = mEstoqueRepository->remove(item); result) {
                 throw std::runtime_error{result.value()};

@@ -73,7 +73,7 @@ struct ProdutoInteractor {
   [[nodiscard]] std::optional<std::string> save_produto(ProdutoInteractorModel const &item) const {
     if (item.get<ProdutoModel>("id").is_null()) {
       try {
-        mProdutoRepository->get_database()->transaction([&](jdb::Database &db) {
+        mProdutoRepository->get_database()->transaction([&]([[maybe_unused]] jdb::Database &db) {
           auto produto = mProdutoRepository->save(item.get<ProdutoModel>());
 
           if (produto.has_value()) {

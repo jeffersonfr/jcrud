@@ -76,6 +76,18 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(JwtCpp)
 
+# RabbitMq
+# dependencies:
+#  - sudo apt install librabbitmq-dev
+set(JWT_BUILD_EXAMPLES OFF)
+FetchContent_Declare(
+        RabbitMq
+        GIT_REPOSITORY https://github.com/alanxz/rabbitmq-c.git
+        GIT_TAG master
+        GIT_SUBMODULES
+)
+FetchContent_MakeAvailable(RabbitMq)
+
 # expected
 FetchContent_Declare(
         expected
@@ -94,20 +106,21 @@ add_library(thirdparty INTERFACE)
 
 target_link_libraries(thirdparty
         INTERFACE
-            jmixin
-            jinject
-            jdb::core
-            jdb::thirdparty
-            fmt
-            expected
-            crypt
-            Boost::date_time
-            Boost::filesystem
-            Boost::iostreams
-            Boost::thread
-            Crow::Crow
-            ftxui::screen
-            ftxui::dom
-            ftxui::component
-            jwt-cpp
+                jmixin
+                jinject
+                jdb::core
+                jdb::thirdparty
+                fmt
+                expected
+                crypt
+                Boost::date_time
+                Boost::filesystem
+                Boost::iostreams
+                Boost::thread
+                Crow::Crow
+                ftxui::screen
+                ftxui::dom
+                ftxui::component
+                jwt-cpp
+                rabbitmq-static
 )

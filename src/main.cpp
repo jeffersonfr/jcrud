@@ -1,5 +1,6 @@
 #include "modules/Modules.hpp"
 
+
 int main() {
   using namespace jinject;
 
@@ -14,4 +15,6 @@ int main() {
 
     fmt::print("{}\n", e.what());
   }
+
+  return 0;
 }

@@ -29,7 +29,7 @@ namespace jui {
       std::ostringstream o;
 
       value.get_value(jdb::overloaded{
-        [&](std::nullptr_t arg) { o << "null"; },
+        [&]([[maybe_unused]] std::nullptr_t arg) { o << "null"; },
         [&](bool arg) { o << (arg ? "true" : "false"); },
         [&](int64_t arg) { o << arg; }, [&](double arg) { o << arg; },
         [&](std::string const &arg) { o << arg; }

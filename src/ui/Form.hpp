@@ -166,7 +166,7 @@ namespace jui {
 
     template<jmixin::StringLiteral Name, jmixin::StringLiteral Description, TypeItem Type,
       bool Nullable>
-    void execute(Item<Name, Description, Type, Nullable> item) {
+    void execute([[maybe_unused]] Item<Name, Description, Type, Nullable> item) {
       if (!mInterruptable) {
         if (cancelled) {
           return;

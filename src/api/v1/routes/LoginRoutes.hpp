@@ -10,7 +10,7 @@ namespace v1 {
   struct LoginRoutes : public AbstractRoutes {
     LoginRoutes() = default;
 
-    LoginRoutes(LoginRoutes &&other) noexcept {
+    LoginRoutes([[maybe_unused]] LoginRoutes &&other) noexcept {
     }
 
     void init(crow::SimpleApp &app) {

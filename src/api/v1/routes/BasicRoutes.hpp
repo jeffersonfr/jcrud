@@ -27,7 +27,7 @@ namespace v1 {
     void lista_produtos(crow::SimpleApp &app) {
       CROW_ROUTE(app, BaseUrl"/produtos")
           .methods(crow::HTTPMethod::GET)
-          (validate_request([&](crow::request const &req) {
+          (validate_request([&]([[maybe_unused]] crow::request const &req) {
             auto produtoList = mProdutoInteractor->load_all();
 
             auto const &items = std::ranges::unique(
@@ -48,7 +48,7 @@ namespace v1 {
     void lista_categorias(crow::SimpleApp &app) {
       CROW_ROUTE(app, BaseUrl"/categorias")
           .methods(crow::HTTPMethod::GET)
-          (validate_request([&](crow::request const &req) {
+          (validate_request([&]([[maybe_unused]] crow::request const &req) {
             auto categoriasList = mProdutoInteractor->load_all_categorias();
 
             return crow::json::wvalue{
