@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+<script>
+    const source = new EventSource('localhost:18080/events');
+
+    source.onmessage = function(event) {
+        console.log('Dados recebidos:', JSON.parse(event.data));
+    };
+
+    source.onerror = function() {
+        console.error('Erro na conexão SSE');
+        source.close();
+    };
+</script>
+</html>

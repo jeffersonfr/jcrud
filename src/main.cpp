@@ -1,6 +1,5 @@
 #include "modules/Modules.hpp"
 
-
 int main() {
   using namespace jinject;
 
