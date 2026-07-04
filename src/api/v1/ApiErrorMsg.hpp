@@ -2,11 +2,11 @@
 
 #define __MSG inline static std::string
 
-class ApiErrorMsg {
+using namespace jinject;
 
-public:
-  __MSG NO_CREDENTIALS = "no authorization header";
-  __MSG INVALID_CREDENTIALS = "invalid credentials";
-  __MSG FORBIDDEN_ACCESS = "forbidden access";
-  __MSG TOKEN_EXPIRED = "token expired";
+struct ApiErrorMsg {
+  __MSG NO_CREDENTIALS = _T("Sem cabeçalho de autorização");
+  __MSG INVALID_CREDENTIALS = _T("Credenciais inválidas");
+  __MSG FORBIDDEN_ACCESS = _T("Acesso negado");
+  __MSG TOKEN_EXPIRED = _T("Token expirado");
 };

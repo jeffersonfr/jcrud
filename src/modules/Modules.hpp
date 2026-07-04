@@ -6,6 +6,7 @@
 #include "modules/nodes/StrategyModule.hpp"
 #include "modules/nodes/ApiModule.hpp"
 
+#include "modules/nodes/I18nModule.hpp"
 #include "modules/nodes/LoginModule.hpp"
 #include "modules/nodes/AdminModule.hpp"
 #include "modules/nodes/ProdutoModule.hpp"
@@ -24,6 +25,7 @@ struct Modules final {
   static void load_modules() {
     log_module();
 
+    i18n_module();
     login_module();
     usuario_module();
     cargo_module();

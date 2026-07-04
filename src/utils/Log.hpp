@@ -29,7 +29,7 @@ struct Log {
 
   template<typename... Args>
   void msg(std::source_location const &location, LevelLog level, TipoLog type,
-           std::string const &tag, std::string const &msg, Args... args) const {
+           std::string const &tag, std::string_view const &msg, Args... args) const {
     if (static_cast<int>(level) < static_cast<int>(mLevel)) {
       return;
     }
