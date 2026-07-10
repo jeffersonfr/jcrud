@@ -13,8 +13,15 @@ target_include_directories(${PROJECT_NAME}
             .
 )
 
-# add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wconversion -Wnrvo -Wpadded -pedantic)
+set(WARNING_LIST -Wall -Wextra -Wpedantic -Werror -Wconversion -Wpadded -pedantic -Wno-padded -Wno-error=conversion -Wno-error=unused-parameter)
+
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-Wnrvo" COMPILER_HAS_WNRVO)
+if(COMPILER_HAS_WRNVO)
+    list(APPEND WARNING_LIST -Wnrvo -Wno-nrvo)
+endif ()
+
 target_compile_options(${PROJECT_NAME}
         PRIVATE
-        -Wall -Wextra -Wpedantic -Werror -Wconversion -Wnrvo -Wpadded -pedantic -Wno-padded -Wno-nrvo -Wno-error=conversion -Wno-error=unused-parameter
+            ${WARNING_LIST}
 )
