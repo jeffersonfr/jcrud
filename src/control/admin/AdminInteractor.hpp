@@ -11,6 +11,8 @@
 #include <utility>
 #include <vector>
 
+#include <crypt.h>
+
 struct AdminInteractor {
   AdminInteractor(std::unique_ptr<UsuarioRepository> usuarioRepository,
                   std::unique_ptr<CargoRepository> cargoRepository,
