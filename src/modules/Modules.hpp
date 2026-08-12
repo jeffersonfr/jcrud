@@ -25,6 +25,9 @@ struct Modules final {
   static void load_modules() {
     log_module();
 
+    strategy_module();
+    sistema_module();
+
     i18n_module();
     login_module();
     usuario_module();
@@ -39,9 +42,6 @@ struct Modules final {
     filial_module();
     tiponegocio_module();
     historicoestoque_module();
-
-    strategy_module();
-    sistema_module();
     api_module();
   }
 };
